@@ -107,4 +107,8 @@ pytest                            # run tests
 python -m demo_agent.run          # Bangla email attack, unprotected agent
 python -m demo_agent.run --all    # all scenarios + summary
 python -m demo_agent.run --list
+streamlit run dashboard/app.py    # dashboard (skeleton; protected run waits for Phase 2)
 ```
+
+## Docs written so far (drafts, numbers TBD)
+- `docs/business_model.md`, `docs/ethics_impact.md`, `docs/architecture.md`

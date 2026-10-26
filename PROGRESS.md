@@ -55,7 +55,8 @@
 - [ ] Commit
 
 ## Phase 5: Dashboard + demo (by ~16 Nov)
-- [ ] Streamlit side-by-side demo (without vs with AgentShield)
+- [x] Streamlit skeleton: tabs, live demo of the unprotected agent (mock + groq), dashboard tests
+- [ ] Streamlit side-by-side demo: right column "with AgentShield" (needs Phase 2)
 - [ ] Live audit log view
 - [ ] Metrics page with benchmark charts
 - [ ] Works fully with mock LLM (offline-safe)
@@ -65,7 +66,7 @@
 - [x] docs/business_model.md draft (business model, global readiness, NRB, risks); numbers still TBD
 - [ ] User: verify market data, interview 5–10 potential customers for pricing
 - [x] docs/ethics_impact.md draft (KPIs, data use, bias, transparency, oversight, limitations); KPI values TBD
-- [ ] docs/architecture.md (diagram + explanation)
+- [x] docs/architecture.md draft (diagram, component status, model selection); update after Phase 2
 - [ ] docs/results.md (real numbers only)
 - [ ] Clean README with setup steps
 - [ ] Demo video script

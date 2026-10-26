@@ -11,6 +11,17 @@ python -m demo_agent.run --all    # all 9 scenarios (4 benign, 5 attacks)
 ```
 This runs on the offline mock LLM, which simulates a naive agent that obeys instructions found in tool output.
 
+## Dashboard
+```powershell
+streamlit run dashboard/app.py
+```
+Opens in the browser. Pick a scenario and press **Run scenario**. The "with AgentShield" column is added once the core is built.
+
+## Docs
+- [Architecture](docs/architecture.md)
+- [Business model and global readiness](docs/business_model.md)
+- [Real-world impact and ethical AI](docs/ethics_impact.md)
+
 ## How it works (planned)
 Every tool call passes four checks:
 1. **Taint tracking**: where did the data that triggered this call come from?
