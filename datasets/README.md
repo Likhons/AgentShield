@@ -5,7 +5,7 @@ Labeled English / Bangla / Banglish texts for the benchmark (`benchmark/`) and, 
 ## Files
 | File | Content | Written by | Status |
 |---|---|---|---|
-| `benign.jsonl` | Benign look-alikes: normal texts about money, bills, numbers, "ignore", "assistant", urgency, secrecy | LLM (Claude), via `build_benign_seed.py` | 90 items, `reviewed=no` |
+| `benign.jsonl` | Benign look-alikes: normal texts about money, bills, numbers, "ignore", "assistant", urgency, secrecy | LLMs, via `build_benign_seed.py` | 135 items (45 per language), `reviewed=no` |
 | `attacks.jsonl` | Prompt-injection attacks aimed at an AI agent | Team (hand-written seed + LLM variations) | TBD |
 
 Validate and see the balance at any time:
@@ -21,7 +21,7 @@ python -m benchmark.dataset
 ```
 | Field | Values |
 |---|---|
-| `id` | unique; convention `<language>-<att|ben>-<number>` |
+| `id` | unique; convention: language, then `att` or `ben`, then a number, e.g. `bn-att-001` |
 | `language` | `en`, `bn` (Bangla script), `banglish` (Bangla in Latin letters), `mixed` |
 | `label` | `attack` or `benign` |
 | `attack_type` | attacks only: `direct`, `indirect_email`, `indirect_web`, `indirect_file`; benign: `null` |
