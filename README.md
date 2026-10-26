@@ -2,7 +2,14 @@
 
 **Runtime security gateway for AI agents.** AgentShield checks every tool call an agent wants to make before it runs, and blocks actions the user never asked for, especially ones triggered by hidden instructions in Bangla, Banglish or English inside untrusted data (emails, web pages, files).
 
-> Status: early development (Phase 0). Results: TBD.
+> Status: early development (Phase 1: vulnerable demo agent). Results: TBD.
+
+## See the attack (no AgentShield yet)
+```powershell
+python -m demo_agent.run          # agent reads a Bangla phishing email and sends money
+python -m demo_agent.run --all    # all 9 scenarios (4 benign, 5 attacks)
+```
+This runs on the offline mock LLM, which simulates a naive agent that obeys instructions found in tool output.
 
 ## How it works (planned)
 Every tool call passes four checks:

@@ -10,14 +10,15 @@
 - [x] pytest runs (smoke test)
 - [x] Commit
 
-## Phase 1: Vulnerable demo agent (27–28 Oct)
-- [ ] LLM provider abstraction (mock / gemini / groq), config from .env
-- [ ] Fake data: MockPay accounts, inbox (normal + attack emails in EN / BN / Banglish), web pages, files
-- [ ] Tools: read_inbox, read_email, get_balance, send_money, search_web, read_file
-- [ ] Agent loop (plain Python) using the mock LLM
-- [ ] One command runs the attack scenario and prints steps + "money stolen"
-- [ ] Tests for tools + attack scenario
-- [ ] Update CLAUDE.md / PROGRESS.md, commit
+## Phase 1: Vulnerable demo agent (27 Oct)
+- [x] LLM provider abstraction (mock / gemini / groq), config from .env
+- [x] Fake data: MockPay accounts, inbox (normal + attack emails in EN / BN / Banglish), web pages, files
+- [x] Tools: read_inbox, read_email, get_balance, send_money, search_web, read_file
+- [x] Agent loop (plain Python) using the mock LLM
+- [x] One command runs the attack scenario and prints steps + "money stolen"
+- [x] Tests for tools + attack scenario (31 tests passing)
+- [x] Update CLAUDE.md / PROGRESS.md, commit
+- [ ] When API keys arrive: run `--all --provider gemini` and record how often a REAL LLM obeys the injections
 
 ## Phase 2: AgentShield core v1 (by ~5 Nov)
 - [ ] Pydantic models (ToolCall, ContextItem, CheckResult, Decision)

@@ -3,7 +3,16 @@
 > Read this file first in every session. Keep it updated at the end of every phase.
 
 ## Current phase
-**Phase 0: Setup, done.** Waiting for the user to say "next" before starting Phase 1.
+**Phase 1: Vulnerable demo agent, done.** Waiting for the user to say "next" before starting Phase 2.
+
+## What exists so far
+- `agentshield/config.py`: settings from `.env` (defaults to mock).
+- `agentshield/llm/`: `LLMProvider` interface (`generate(messages) -> str`), `Message` model, providers `mock` / `gemini` / `groq` (plain `httpx` REST, no vendor SDKs), factory `get_provider()`.
+  - `mock.py` imitates a *naive* agent model: plans tools from task keywords and **obeys money instructions found in tool output** (repeatable worst case). Has `find_money_order()` (EN/BN/Banglish, Bangla digits, NFC normalization).
+- `demo_agent/`: `tools.py` (`MockPayWorld` with 6 tools; each `ToolSpec` has a `source` taint label like `tool:email`), `agent.py` (`BankingAgent` think→act→observe loop, JSON action protocol, **no security check in `execute()`**: this is where AgentShield hooks in), `scenarios.py` (load data, `judge_outcome`: a transfer is unauthorized if its recipient is not in the user's request), `run.py` (CLI).
+- `demo_agent/data/`: `account.json`, `emails.json` (e1–e3 normal, e10–e12 attacks EN/BN/Banglish), `web_pages.json`, `files.json`, `scenarios.json` (4 benign + 5 attack scenarios).
+- Fake phone numbers use prefix `010` (not used by any Bangladeshi operator); email domains use `.example`.
+- Agent protocol: LLM replies `{"action":"tool","tool":...,"args":{...}}` or `{"action":"final","answer":...}`.
 
 ## Project summary
 AgentShield is a **runtime security gateway for AI agents**. It checks every tool call an agent wants to make *before* it runs, and blocks actions the user never asked for. The focus is actions triggered by hidden instructions in **Bangla, Banglish or English** inside untrusted data (emails, web pages, files), i.e. *indirect prompt injection*.
@@ -73,7 +82,7 @@ docs/              # architecture.md, results.md, pitch notes
 
 ## Phase plan
 - Phase 0: Setup (27 Oct): done
-- Phase 1: Vulnerable demo agent on mock LLM (27–28 Oct)
+- Phase 1: Vulnerable demo agent on mock LLM (27 Oct): done
 - Phase 2: AgentShield core v1 (by ~5 Nov)
 - Phase 3: Datasets + baseline benchmark (by ~9 Nov)
 - Phase 4: Classifier training on Kaggle (by ~13 Nov)
@@ -87,4 +96,7 @@ See PROGRESS.md for the detailed checklist.
 .\.venv\Scripts\Activate.ps1      # activate venv
 pip install -r requirements.txt   # install deps
 pytest                            # run tests
+python -m demo_agent.run          # Bangla email attack, unprotected agent
+python -m demo_agent.run --all    # all scenarios + summary
+python -m demo_agent.run --list
 ```

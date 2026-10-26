@@ -1,0 +1,9 @@
+{
+  "owner": "Nusrat Jahan",
+  "account": "01000000100",
+  "balance": 25000,
+  "contacts": {
+    "Arif (brother)": "01000000101",
+    "Landlord": "01000000102"
+  }
+}
