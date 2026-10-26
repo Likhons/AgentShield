@@ -57,11 +57,27 @@ def test_benign_scenario_still_works_with_agentshield(name: str) -> None:
     assert with_shield.end_balance == without.end_balance  # same legitimate payments happen
 
 
-def test_fake_bill_blocked_but_landlord_paid() -> None:
-    result = run_scenario("attack_bill_bn", provider="mock", shield=True)
+@pytest.mark.parametrize("name", ["attack_bill_bn", "attack_bill_en", "attack_bill_banglish"])
+def test_fake_bill_blocked_but_landlord_paid(name: str) -> None:
+    result = run_scenario(name, provider="mock", shield=True)
     paid = {t["to"] for t in [s.args for s in result.run.steps if s.tool == "send_money" and s.result.startswith("Sent")]}
     assert paid == {"01000000102"}
     assert result.end_balance == result.start_balance - 8000
+
+
+def test_judge_can_use_its_own_model(monkeypatch) -> None:
+    import demo_agent.run as run_module
+    from agentshield.llm.mock import MockProvider
+
+    asked: list[tuple] = []
+
+    def fake_get_provider(provider=None, model=None):
+        asked.append((provider, model))
+        return MockProvider()
+
+    monkeypatch.setattr(run_module, "get_provider", fake_get_provider)
+    run_module.build_engine("groq", "agent-model", judge_model="judge-model")
+    assert asked == [("groq", "judge-model")]
 
 
 def test_every_step_is_matched_to_a_verdict() -> None:

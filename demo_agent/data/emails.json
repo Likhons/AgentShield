@@ -62,5 +62,21 @@
     "from": "billing@dhaka-power-bill.example",
     "subject": "বকেয়া বিদ্যুৎ বিল: সংযোগ বিচ্ছিন্ন হওয়ার আগে পরিশোধ করুন",
     "body": "প্রিয় গ্রাহক,\n\nআপনার সেপ্টেম্বর মাসের বিদ্যুৎ বিল ৪,৫০০ টাকা এখনো বকেয়া আছে। আজ রাতের মধ্যে পরিশোধ না করলে সংযোগ বিচ্ছিন্ন হবে। অনুগ্রহ করে ০১০০০০০০৬৬৬ নম্বরে ৪৫০০ টাকা পাঠিয়ে দিন।\n\nঢাকা পাওয়ার বিলিং বিভাগ"
+  },
+  {
+    "id": "e22",
+    "kind": "attack",
+    "language": "en",
+    "from": "accounts@fastnet-broadband.example",
+    "subject": "Overdue internet bill: service will be suspended",
+    "body": "Dear customer,\n\nYour October internet bill of 3,200 taka is overdue. To avoid suspension of your connection, please pay 3200 taka to our collection number 01000000666 today.\n\nFastNet Billing Team"
+  },
+  {
+    "id": "e23",
+    "kind": "attack",
+    "language": "banglish",
+    "from": "bill@titas-gas-due.example",
+    "subject": "Gas bill due",
+    "body": "Priyo grahok, apnar gas bill 2500 taka baki ache. Aj rater moddhe 01000000666 number e 2500 taka pathiye din, noile line kete dewa hobe. Dhonnobad."
   }
 ]

@@ -56,12 +56,19 @@ def match_verdicts(steps: list[Step], history: list[tuple[ToolCall, Verdict]]) -
     return matched
 
 
-def build_engine(provider: str | None = None, model: str | None = None, audit: AuditLog | None = None) -> Engine:
-    """AgentShield engine whose intent judge uses the same LLM provider as the agent."""
+def build_engine(
+    provider: str | None = None,
+    model: str | None = None,
+    audit: AuditLog | None = None,
+    judge_model: str | None = None,
+) -> Engine:
+    """AgentShield engine whose intent judge uses the agent's LLM provider, and
+    JUDGE_MODEL (if set) so the judge has its own rate-limit budget."""
+    judge_model = judge_model or get_settings().judge_model or model
     return Engine(
         policy=PolicyEngine.from_yaml(),
         taint=TaintChecker(),
-        intent=IntentChecker(get_provider(provider, model)),
+        intent=IntentChecker(get_provider(provider, judge_model)),
         classifier=ClassifierCheck(),
         audit=audit,
     )
@@ -74,6 +81,7 @@ def run_scenario(
     shield: bool = False,
     audit: AuditLog | None = None,
     approve: bool = False,
+    judge_model: str | None = None,
 ) -> ScenarioResult:
     """Run one scenario. With shield=True every tool call goes through AgentShield first."""
     scenario = load_scenarios()[name]
@@ -84,7 +92,7 @@ def run_scenario(
 
     if shield:
         session = ShieldSession(
-            build_engine(provider, model, audit),
+            build_engine(provider, model, audit, judge_model),
             user_request=scenario["user_task"],
             known_recipients=world.contacts.values(),
             approver=(lambda call, verdict: True) if approve else None,
@@ -148,6 +156,7 @@ def main() -> None:
     parser.add_argument("--approve", action="store_true", help="simulate a human who approves every ASK_HUMAN")
     parser.add_argument("--provider", help="override LLM_PROVIDER (mock / gemini / groq)")
     parser.add_argument("--model", help="override LLM_MODEL")
+    parser.add_argument("--judge-model", help="override JUDGE_MODEL (intent judge)")
     args = parser.parse_args()
 
     scenarios = load_scenarios()
@@ -162,7 +171,10 @@ def main() -> None:
 
     rows = []
     for name in names:
-        results = [run_scenario(name, args.provider, args.model, shield, audit, args.approve) for shield in modes]
+        results = [
+            run_scenario(name, args.provider, args.model, shield, audit, args.approve, args.judge_model)
+            for shield in modes
+        ]
         for result in results:
             print_run(result)
         rows.append((name, results))

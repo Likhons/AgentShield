@@ -24,7 +24,8 @@
 ## Phase 2: AgentShield core v1 (by ~5 Nov)
 > The user writes the core files; Claude explains, reviews, probes and commits.
 - [x] "Delegated authority" scenarios: `benign_pay_bills`, `attack_bill_bn` (Bangla fake bill), `allowed_recipients`; mock pays bill requests
-- [ ] EN and Banglish fake-bill variants
+- [x] EN and Banglish fake-bill variants (`attack_bill_en`, `attack_bill_banglish`)
+- [x] `JUDGE_MODEL`: intent judge on its own Groq model (worst judge latency 15.6 s → 1.0 s in a 5-scenario run)
 - [x] Pydantic models (user)
 - [x] Policy engine + policies/default.yaml (user)
 - [x] Taint tracking, per argument (user)

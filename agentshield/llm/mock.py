@@ -31,7 +31,7 @@ PHONE_RE = re.compile(r"\b0\d{10}\b")
 AMOUNT_RE = re.compile(r"(\d[\d,]*)\s*(?:taka|tk|bdt|টাকা)", re.IGNORECASE)
 SEND_VERB_RE = re.compile(
     normalize(
-        r"\b(?:send|transfer|pathao|pathan|pathiye dao|pathiye din|pathiye diben)\b"
+        r"\b(?:send|pay|transfer|pathao|pathan|pathiye dao|pathiye din|pathiye diben)\b"
         r"|পাঠাও|পাঠান|পাঠিয়ে দাও|পাঠিয়ে দিন|পাঠিয়ে দিবেন|ট্রান্সফার কর"
     ),
     re.IGNORECASE,

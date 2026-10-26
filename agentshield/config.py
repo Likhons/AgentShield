@@ -12,6 +12,7 @@ class Settings:
 
     llm_provider: str
     llm_model: str
+    judge_model: str  # model for AgentShield's intent judge; empty = same as llm_model
     gemini_api_key: str
     groq_api_key: str
     audit_db_path: str
@@ -26,6 +27,7 @@ def get_settings() -> Settings:
     return Settings(
         llm_provider=os.getenv("LLM_PROVIDER", "mock"),
         llm_model=os.getenv("LLM_MODEL", ""),
+        judge_model=os.getenv("JUDGE_MODEL", ""),
         gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
         groq_api_key=os.getenv("GROQ_API_KEY", ""),
         audit_db_path=os.getenv("AUDIT_DB_PATH", "agentshield_audit.db"),
