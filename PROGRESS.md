@@ -34,8 +34,9 @@
 - [x] SDK `ShieldSession.wrap()` (user)
 - [x] Demo: `--shield`, `--compare`, `--approve`; dashboard side-by-side + audit tab (Claude)
 - [x] All 6 attack scenarios stopped on mock, all 5 benign scenarios unchanged; fake bill blocked and landlord paid on real qwen (n=1)
-- [x] Unit tests for every check (137 tests passing)
-- [ ] Heuristic injection classifier behind a `predict()` interface (user, in progress)
+- [x] Heuristic injection classifier behind a `predict()` interface (user), wired into the demo engine
+- [x] Unit tests for every check (156 tests passing)
+- [ ] Decide classifier scope (all untrusted items vs. items linked by taint) using Phase 3 over-refusal numbers
 - [ ] FastAPI gateway (basic), optional
 - [ ] Nice to have: policy template keys from rule args; whole-number match in `not_mentioned_by_user`; friendlier ALLOW reason when taint flagged a known contact
 

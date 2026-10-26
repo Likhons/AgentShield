@@ -14,6 +14,7 @@ import sys
 from dataclasses import dataclass, field, replace
 
 from agentshield.audit.log import AuditLog
+from agentshield.checks.classifier import ClassifierCheck
 from agentshield.checks.intent import IntentChecker
 from agentshield.checks.policy import PolicyEngine
 from agentshield.checks.taint import TaintChecker
@@ -61,6 +62,7 @@ def build_engine(provider: str | None = None, model: str | None = None, audit: A
         policy=PolicyEngine.from_yaml(),
         taint=TaintChecker(),
         intent=IntentChecker(get_provider(provider, model)),
+        classifier=ClassifierCheck(),
         audit=audit,
     )
 

@@ -3,7 +3,9 @@
 > Read this file first in every session. Keep it updated at the end of every phase.
 
 ## Current phase
-**Phase 2 (AgentShield core): nearly done** (29 Oct). Working side-by-side demo exists. Only the classifier (step 5) is left: the **user is writing `agentshield/checks/classifier.py`** (heuristic baseline behind a `predict(text)` detector + a `ClassifierCheck` implementing `check(request) -> CheckResult`); then plug it into `Engine(classifier=...)` in `demo_agent/run.py::build_engine`. `agentshield/core/text.py` (NFC + Bangla digit normalization, `detect_language`) is still uncommitted; commit it with the classifier.
+**Phase 2 (AgentShield core): done** (29 Oct), except the optional FastAPI gateway. Working side-by-side demo (CLI + dashboard), 156 tests. Waiting for the user's "next" before Phase 3 (datasets + baseline benchmark).
+
+Open design decision (decide with Phase 3 numbers): the classifier scans ALL untrusted context, so a legit payment to a known contact becomes ASK_HUMAN (score ~0.57) when an unrelated injection email sits in the same inbox. Option A (current): keep, "session under attack → confirm payments". Option B: classifier scores only the items taint linked to the call's arguments. Measure over-refusal in Phase 3 before choosing.
 
 **Division of work in Phase 2:** the user writes the AgentShield core files and their tests; Claude explains each step beforehand (concepts, interfaces, test ideas; Claude does NOT write injection signal/phrase lists for the classifier), saves the user's pasted code verbatim, probes it against demo data and real Groq, reviews, and commits. Claude edits its own Phase 1 files (demo_agent, llm, dashboard).
 
@@ -14,6 +16,7 @@
 - `checks/intent.py`: LLM judge sees only user request + tool call (never email/web/file text); args marked untrusted + truncated; errors → 0.5 fail-safe. Calls `provider.complete(dicts)` (Claude added `LLMProvider.complete()` in `llm/base.py`).
 - `core/engine.py`: weights taint 0.3 / classifier 0.3 / intent 0.4, NOT re-normalized (else legit landlord bill gets blocked); intent only for sensitive tools when taint/classifier flag; final = stricter(score decision, policy forced); crashing check → ask_human; optional audit sink.
 - `audit/log.py`: SQLite, `?` placeholders only, JSON columns, `recent()`, `stats()`, thread lock.
+- `checks/classifier.py`: `HeuristicDetector.predict(text)` (weighted signal categories combined as 1-Π(1-w); money words alone are not a signal) behind a swappable `Detector` protocol; `ClassifierCheck` scans only untrusted items, reports the worst item, caches per item. Uses `core/text.py`. Phase 4 model replaces the detector.
 - `sdk/session.py`: `ShieldSession.wrap(name, func, source)`; block → message, not exception; ASK_HUMAN runs only on explicit True from approver; unknown source → tool:other.
 - Claude: mock judge mode in `llm/mock.py` (keyword rule; offline intent check), `demo_agent/run.py` `--shield/--compare/--approve` + `ScenarioResult`, scenarios `benign_pay_bills` + `attack_bill_bn` (e20 landlord, e21 Bangla fake bill, `allowed_recipients`), dashboard right column + audit tab.
 
