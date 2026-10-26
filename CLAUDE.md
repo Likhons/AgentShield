@@ -3,7 +3,7 @@
 > Read this file first in every session. Keep it updated at the end of every phase.
 
 ## Current phase
-**Phase 1: Vulnerable demo agent, done.** Waiting for the user to say "next" before starting Phase 2.
+**Phase 1: done. Phase 2 (AgentShield core): PAUSED** (28 Oct). The user will write Phase 2 code later themselves, asking Claude for explanations, debugging and review. Meanwhile, work moves to parts that do not depend on Phase 2 code (business model, docs, pitch material). `agentshield/core/text.py` (normalization helper) exists but is uncommitted.
 
 ## What exists so far
 - `agentshield/config.py`: settings from `.env` (defaults to mock).
