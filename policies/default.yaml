@@ -26,8 +26,8 @@ rules:
       not_mentioned_by_user: {argument: to}
     decision: block
     risk: 0.95
-    reason_en: "Blocked: the transfer to {recipient} was triggered by untrusted content, and you never mentioned this number."
-    reason_bn: "আটকানো হয়েছে: {recipient} নম্বরে টাকা পাঠানোর নির্দেশ অবিশ্বস্ত কনটেন্ট থেকে এসেছে, আর আপনি এই নম্বরটি বলেননি।"
+    reason_en: "The transfer to {recipient} was triggered by untrusted content, and you never mentioned this number."
+    reason_bn: "{recipient} নম্বরে টাকা পাঠানোর নির্দেশ অবিশ্বস্ত কনটেন্ট থেকে এসেছে, আর আপনি এই নম্বরটি বলেননি।"
 
   - id: unknown_recipient_not_from_user
     description: Recipient is not a saved contact and the user did not type the number.
