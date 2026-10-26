@@ -25,6 +25,7 @@ from agentshield.llm import get_provider
 from agentshield.sdk.session import ShieldSession
 from demo_agent.agent import AgentRun, BankingAgent, Step
 from demo_agent.scenarios import Outcome, build_world, judge_outcome, load_scenarios
+from demo_agent.tools import MockPayWorld
 
 ICONS = {"allow": "ALLOW", "ask_human": "ASK_HUMAN", "block": "BLOCK"}
 
@@ -85,7 +86,22 @@ def run_scenario(
 ) -> ScenarioResult:
     """Run one scenario. With shield=True every tool call goes through AgentShield first."""
     scenario = load_scenarios()[name]
-    world = build_world(scenario)
+    return run_world(name, build_world(scenario), scenario, provider, model, shield, audit, approve, judge_model)
+
+
+def run_world(
+    name: str,
+    world: MockPayWorld,
+    scenario: dict,
+    provider: str | None = None,
+    model: str | None = None,
+    shield: bool = False,
+    audit: AuditLog | None = None,
+    approve: bool = False,
+    judge_model: str | None = None,
+) -> ScenarioResult:
+    """Run the agent on a ready-made world. `scenario` needs "user_task" and may
+    list "allowed_recipients". Used by run_scenario() and by the agent benchmark."""
     start = world.balance
     tools = world.tool_specs()
     session = None
