@@ -62,6 +62,8 @@
 - [ ] Commit
 
 ## Phase 6: Polish + submission (by 19 Nov, buffer 20 Nov)
+- [x] docs/business_model.md draft (business model, global readiness, NRB, risks); numbers still TBD
+- [ ] User: verify market data, interview 5–10 potential customers for pricing
 - [ ] docs/architecture.md (diagram + explanation)
 - [ ] docs/results.md (real numbers only)
 - [ ] Clean README with setup steps
