@@ -46,6 +46,9 @@
 - [x] Benchmark plumbing: dataset loader/validator, metrics with Wilson CIs, detectors (heuristic, Prompt Guard 2 86m/22m via Groq, cached), text-level runner, tests (Claude)
 - [x] Benign seed: 90 look-alikes, 30 per language (Claude, `reviewed=no`)
 - [x] First run on benign only (27 Oct): FPR heuristic 0/90, Prompt Guard 86m 2/90, 22m 2/90 (all flags on English/Banglish "instructions" sentences). Caveat: benign seed written after reading the heuristic.
+- [x] Benign seed expanded to 135 (45 per language; still `reviewed=no`)
+- [x] External English attacks: 40 NVIDIA agentic indirect-injection items (CC-BY-4.0), deepset left out (language/label problems)
+- [x] Run 2 (27 Oct, `detection_20261026-224448`): on 40 NVIDIA attacks, detection heuristic 0/40, Prompt Guard 86m 1/40, 22m 1/40. Benign FPR: heuristic 1/135, 86m 2/135, 22m 2/135. Sanity check: Prompt Guard 86m flags demo e10 (EN, 0.999) and e11 (BN, 0.998) but not e12 (Banglish, 0.002), n=1 each.
 - [ ] User: review benign.jsonl wording; add independent benign items
 - [ ] User: attacks.jsonl seed (EN / BN / Banglish; blunt + subtle; email / web / file / direct)
 - [ ] Agent-level benchmark runner (attacks embedded in emails, real LLM, with vs without AgentShield)
