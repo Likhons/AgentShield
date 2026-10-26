@@ -1,6 +1,6 @@
 # AgentShield: Business Model and Global Readiness
 
-> Draft, 28 Oct 2026. Every number marked **TBD** must come from a real source or a real measurement before it goes into the pitch. Prices are hypotheses to test, not facts.
+> Draft, 27 Oct 2026. Every number marked **TBD** must come from a real source or a real measurement before it goes into the pitch. Prices are hypotheses to test, not facts.
 
 ## 1. The problem, in one paragraph
 

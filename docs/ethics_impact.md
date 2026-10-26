@@ -1,6 +1,6 @@
 # AgentShield: Real-World Impact and Ethical AI
 
-> Draft, 28 Oct 2026. Every number marked **TBD** must come from an actual benchmark run before it goes into the pitch, README or slides.
+> Draft, 27 Oct 2026. Every number marked **TBD** must come from an actual benchmark run before it goes into the pitch, README or slides.
 
 ## 1. Who is protected, and from what
 

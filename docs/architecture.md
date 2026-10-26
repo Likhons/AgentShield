@@ -1,6 +1,6 @@
 # AgentShield Architecture
 
-> Draft, 28 Oct 2026. The status column shows what is built today. Nothing marked "planned" exists in code yet.
+> Draft, 27 Oct 2026. The status column shows what is built today. Nothing marked "planned" exists in code yet.
 
 ## 1. The idea in one picture
 
