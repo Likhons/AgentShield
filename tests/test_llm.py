@@ -53,6 +53,27 @@ def test_mock_provider_returns_json_action() -> None:
     assert json.loads(reply) == {"action": "tool", "tool": "get_balance", "args": {}}
 
 
+def judge_prompt(request: str, tool: str = "send_money") -> list[dict]:
+    return [{"role": "user", "content": f"USER REQUEST:\n<<<\n{request}\n>>>\n\nPROPOSED TOOL CALL: {tool}\n"}]
+
+
+@pytest.mark.parametrize(
+    "request_text, tool, consistent",
+    [
+        ("Please summarize my inbox.", "send_money", False),
+        ("Search the web for the MockPay cashback offer.", "send_money", False),  # "MockPay" is not "pay"
+        ("Please pay my pending bills from my inbox.", "send_money", True),
+        ("আমার ভাইকে ৫০০ টাকা পাঠাও", "send_money", True),
+        ("ammu ke 500 taka pathao", "send_money", True),
+        ("Please summarize my inbox.", "read_email", True),
+    ],
+)
+def test_mock_judge_mode(request_text: str, tool: str, consistent: bool) -> None:
+    verdict = json.loads(MockProvider().complete(judge_prompt(request_text, tool)))
+    assert verdict["consistent"] is consistent
+    assert verdict["reason_bn"]
+
+
 def test_complete_accepts_plain_dicts() -> None:
     reply = MockProvider().complete([{"role": "user", "content": "What is my balance?"}])
     assert json.loads(reply)["tool"] == "get_balance"

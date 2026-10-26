@@ -4,9 +4,9 @@ Run from the project root:
     streamlit run dashboard/app.py
 
 Tabs:
-  1. Live demo:  run a scenario on the unprotected agent (left). The protected
-                 run (right) is added once AgentShield core (Phase 2) exists.
-  2. Audit log:  placeholder until the audit log exists.
+  1. Live demo:  the same scenario on the unprotected agent (left) and on the
+                 agent protected by AgentShield (right).
+  2. Audit log:  every AgentShield decision, newest first, with KPIs.
   3. Benchmark:  placeholder; shows only measured numbers, never invented ones.
 """
 
@@ -18,38 +18,57 @@ import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # make project imports work
 
+from agentshield.audit.log import AuditLog  # noqa: E402
+from agentshield.config import get_settings  # noqa: E402
 from agentshield.llm import LLMError  # noqa: E402
-from demo_agent.run import run_scenario  # noqa: E402
+from demo_agent.run import ScenarioResult, run_scenario  # noqa: E402
 from demo_agent.scenarios import load_scenarios  # noqa: E402
 
 st.set_page_config(page_title="AgentShield", page_icon="🛡️", layout="wide")
 
+BADGES = {"allow": "✅ ALLOW", "ask_human": "✋ ASK HUMAN", "block": "🛑 BLOCK"}
 
-def show_unprotected_run(name: str, provider: str) -> None:
-    """Run one scenario without protection and draw every step."""
+
+@st.cache_resource
+def audit_log() -> AuditLog:
+    """One shared audit log for the whole dashboard (file path from .env)."""
+    return AuditLog(get_settings().audit_db_path)
+
+
+def run_safely(name: str, provider: str, shield: bool) -> ScenarioResult | None:
     try:
         with st.spinner("Agent is working..."):
-            run, outcome, start, end = run_scenario(name, provider=provider)
+            return run_scenario(name, provider=provider, shield=shield, audit=audit_log() if shield else None)
     except LLMError as exc:
         st.error(f"LLM error: {exc}\n\nTip: switch to the offline mock provider.")
-        return
+        return None
 
-    st.markdown(f"**User:** {run.task}")
-    for step in run.steps:
+
+def show_result(result: ScenarioResult) -> None:
+    """Draw every step of a run, with AgentShield's verdict when there is one."""
+    st.markdown(f"**User:** {result.run.task}")
+    for step, verdict in zip(result.run.steps, result.step_verdicts):
         is_money = step.tool == "send_money"
-        label = f"{'💸' if is_money else '🔧'} Step {step.number}: `{step.tool}`"
-        with st.expander(label, expanded=is_money):
+        badge = f" · {BADGES[verdict.decision.value]}" if verdict else ""
+        label = f"{'💸' if is_money else '🔧'} Step {step.number}: `{step.tool}`{badge}"
+        stopped = verdict is not None and verdict.decision.value != "allow"
+        with st.expander(label, expanded=is_money or stopped):
             st.code(json.dumps(step.args, ensure_ascii=False), language="json")
+            if verdict:
+                st.caption(f"Risk {verdict.risk_score:.2f} · {verdict.total_latency_ms:.0f} ms")
+                st.markdown(f"**কারণ:** {verdict.reason_bn}")
+                st.markdown(f"**Reason:** {verdict.reason_en}")
             st.text(step.result)
 
-    st.markdown(f"**Agent's answer:** {run.final_answer}")
-    st.metric("Balance (BDT)", end, delta=end - start)
-
-    if outcome.stolen:
-        targets = ", ".join(t.to for t in outcome.unauthorized)
-        st.error(f"MONEY STOLEN: {outcome.stolen} BDT sent to {targets}, which the user never asked for.")
+    st.markdown(f"**Agent's answer:** {result.run.final_answer}")
+    st.metric("Balance (BDT)", result.end_balance, delta=result.end_balance - result.start_balance)
+    if result.outcome.stolen:
+        targets = ", ".join(t.to for t in result.outcome.unauthorized)
+        st.error(f"MONEY STOLEN: {result.outcome.stolen} BDT sent to {targets}, which the user never asked for.")
     else:
-        st.success("Safe: no unauthorized transfers.")
+        stopped = sum(1 for _, v in result.history if v.decision.value != "allow")
+        note = f" AgentShield stopped {stopped} action(s)." if stopped else ""
+        st.success(f"Safe: no unauthorized transfers.{note}")
 
 
 def live_demo_tab() -> None:
@@ -79,14 +98,48 @@ def live_demo_tab() -> None:
     col_without, col_with = st.columns(2)
     with col_without:
         st.subheader("❌ Without AgentShield")
-        show_unprotected_run(name, provider)
+        result = run_safely(name, provider, shield=False)
+        if result:
+            show_result(result)
     with col_with:
         st.subheader("🛡️ With AgentShield")
-        st.info("Available after Phase 2 (AgentShield core). The same scenario will run here with every tool call checked.")
+        result = run_safely(name, provider, shield=True)
+        if result:
+            show_result(result)
 
 
 def audit_tab() -> None:
-    st.info("The audit log is part of Phase 2. Every ALLOW / ASK_HUMAN / BLOCK decision will be listed here.")
+    log = audit_log()
+    stats = log.stats()
+    cols = st.columns(5)
+    cols[0].metric("Checked calls", stats["total"])
+    cols[1].metric("Allowed", stats["allow"])
+    cols[2].metric("Asked human", stats["ask_human"])
+    cols[3].metric("Blocked", stats["block"])
+    median = stats["median_latency_ms"]
+    cols[4].metric("Median latency", f"{median:.1f} ms" if median is not None else "–")
+    st.caption(f"LLM judge called for {stats['llm_calls']} of {stats['total']} checks.")
+
+    records = log.recent(limit=100)
+    if not records:
+        st.info("No decisions yet. Run a scenario in the Live demo tab.")
+        return
+    st.dataframe(
+        [
+            {
+                "time (UTC)": r.timestamp.strftime("%H:%M:%S"),
+                "tool": r.tool_name,
+                "decision": BADGES[r.decision.value],
+                "risk": round(r.risk_score, 2),
+                "arguments": json.dumps(r.arguments, ensure_ascii=False),
+                "কারণ": r.reason_bn,
+                "user request": r.user_request,
+            }
+            for r in records
+        ],
+        use_container_width=True,
+        hide_index=True,
+    )
 
 
 def benchmark_tab() -> None:

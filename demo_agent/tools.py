@@ -41,6 +41,7 @@ class MockPayWorld:
     emails: list[dict] = field(default_factory=list)
     web_pages: list[dict] = field(default_factory=list)
     files: dict[str, str] = field(default_factory=dict)
+    contacts: dict[str, str] = field(default_factory=dict)  # name -> saved MockPay number
     transactions: list[Transaction] = field(default_factory=list)
 
     # ---- tools -----------------------------------------------------------

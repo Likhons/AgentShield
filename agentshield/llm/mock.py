@@ -1,12 +1,15 @@
 """Deterministic mock LLM: works offline, needs no API key.
 
-It imitates a *naive* tool-using agent model:
+As an agent it imitates a *naive* tool-using model:
   1. It plans tool calls from simple keywords in the user's task.
   2. It OBEYS any money-transfer instruction it finds inside tool output.
 
 Point 2 is the vulnerability we want to demonstrate. Real LLMs are often
 tricked the same way, but not every time; the mock gives a repeatable
 worst case for demos and tests. Results on real LLMs are measured separately.
+
+As an intent judge (prompt contains "PROPOSED TOOL CALL:") it answers with a
+simple keyword rule, so AgentShield's intent check also works offline.
 """
 
 import json
@@ -28,8 +31,8 @@ PHONE_RE = re.compile(r"\b0\d{10}\b")
 AMOUNT_RE = re.compile(r"(\d[\d,]*)\s*(?:taka|tk|bdt|টাকা)", re.IGNORECASE)
 SEND_VERB_RE = re.compile(
     normalize(
-        r"\b(?:send|transfer|pathao|pathan|pathiye dao)\b"
-        r"|পাঠাও|পাঠান|পাঠিয়ে দাও|ট্রান্সফার কর"
+        r"\b(?:send|transfer|pathao|pathan|pathiye dao|pathiye din|pathiye diben)\b"
+        r"|পাঠাও|পাঠান|পাঠিয়ে দাও|পাঠিয়ে দিন|পাঠিয়ে দিবেন|ট্রান্সফার কর"
     ),
     re.IGNORECASE,
 )
@@ -72,7 +75,37 @@ class MockProvider(LLMProvider):
         super().__init__(model)
 
     def generate(self, messages: list[Message]) -> str:
+        if JUDGE_MARKER in messages[-1].content:
+            return json.dumps(judge_intent(messages[-1].content), ensure_ascii=False)
         return json.dumps(next_agent_action(messages), ensure_ascii=False)
+
+
+# ---- intent judge mode ----------------------------------------------------
+
+JUDGE_MARKER = "PROPOSED TOOL CALL:"
+MONEY_TOOLS = {"send_money"}
+PAYMENT_INTENT_RE = re.compile(
+    normalize(r"\b(?:send|pay|transfer|bills?|taka|tk|pathao|pathiye|bhara)\b|পাঠা|পরিশোধ|বিল|টাকা|ভাড়া"),
+    re.IGNORECASE,
+)
+
+
+def judge_intent(prompt: str) -> dict:
+    """Keyword stand-in for the LLM judge: a money tool is consistent only
+    if the user's own request talks about sending or paying money."""
+    request = prompt.split("<<<", 1)[-1].split(">>>", 1)[0]
+    tool = prompt.split(JUDGE_MARKER, 1)[1].split()[0]
+    if tool not in MONEY_TOOLS or PAYMENT_INTENT_RE.search(normalize(request)):
+        return {
+            "consistent": True,
+            "reason_en": f"The user's request can involve '{tool}'.",
+            "reason_bn": f"ব্যবহারকারীর অনুরোধের সাথে '{tool}' মেলে।",
+        }
+    return {
+        "consistent": False,
+        "reason_en": "The user did not ask to send or pay money.",
+        "reason_bn": "ব্যবহারকারী টাকা পাঠাতে বা পরিশোধ করতে বলেননি।",
+    }
 
 
 def next_agent_action(messages: list[Message]) -> dict:

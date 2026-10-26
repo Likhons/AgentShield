@@ -2,20 +2,21 @@
 
 **Runtime security gateway for AI agents.** AgentShield checks every tool call an agent wants to make before it runs, and blocks actions the user never asked for, especially ones triggered by hidden instructions in Bangla, Banglish or English inside untrusted data (emails, web pages, files).
 
-> Status: early development (Phase 1: vulnerable demo agent). Results: TBD.
+> Status: Phase 2 (core) working; classifier and benchmark in progress. Benchmark results: TBD.
 
-## See the attack (no AgentShield yet)
+## See the attack, then see it stopped
 ```powershell
-python -m demo_agent.run          # agent reads a Bangla phishing email and sends money
-python -m demo_agent.run --all    # all 9 scenarios (4 benign, 5 attacks)
+python -m demo_agent.run                    # agent reads a Bangla phishing email and sends money
+python -m demo_agent.run --shield           # same agent, protected by AgentShield: blocked
+python -m demo_agent.run --compare --all    # all 11 scenarios (5 benign, 6 attacks), side by side
 ```
-This runs on the offline mock LLM, which simulates a naive agent that obeys instructions found in tool output.
+By default this runs on the offline mock LLM, which simulates a naive agent that obeys instructions found in tool output. Add `--provider groq` to use the real model configured in `.env`.
 
 ## Dashboard
 ```powershell
 streamlit run dashboard/app.py
 ```
-Opens in the browser. Pick a scenario and press **Run scenario**. The "with AgentShield" column is added once the core is built.
+Opens in the browser. Pick a scenario and press **Run scenario**: the left column runs the unprotected agent, the right column runs the same agent protected by AgentShield. The **Audit log** tab lists every decision.
 
 ## Docs
 - [Architecture](docs/architecture.md)

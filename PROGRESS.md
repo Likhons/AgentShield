@@ -21,22 +21,23 @@
 - [x] API keys: Gemini free tier unavailable (403) → switched to Groq (qwen3.8-27b), retry on 429/timeout
 - [x] First real-LLM check (n=1): blunt attacks 0/5 on qwen and gpt-oss-120b; realistic Bangla fake bill fooled qwen (4500 BDT), not gpt-oss-120b. See CLAUDE.md "Key early finding".
 
-## Phase 2: AgentShield core v1 (by ~5 Nov): PAUSED
-> Paused on 28 Oct. The user writes this phase later, with Claude helping by explaining, debugging and reviewing.
-- [ ] "Delegated authority" scenarios: pay-bills task, legit known-contact bill + fake bills (EN / BN / Banglish); `allowed_recipients` in scenarios; mock pays bill requests
-- [ ] Pydantic models (ToolCall, ContextItem, CheckResult, Decision)
-- [ ] Taint tracking
-- [ ] Policy engine + policies/default.yaml
-- [ ] Heuristic injection classifier (EN / BN / Banglish) behind an interface
-- [ ] Intent check (mock + real LLM)
-- [ ] Risk scoring + ALLOW / ASK_HUMAN / BLOCK + bilingual reason
-- [ ] Per-check latency measurement
-- [ ] SQLite audit log
-- [ ] SDK wrapper (protect tools in 2 lines)
-- [ ] FastAPI gateway (basic)
-- [ ] Attack scenario BLOCKED, benign tasks still work
-- [ ] Unit tests for every check
-- [ ] Update docs, commit
+## Phase 2: AgentShield core v1 (by ~5 Nov)
+> The user writes the core files; Claude explains, reviews, probes and commits.
+- [x] "Delegated authority" scenarios: `benign_pay_bills`, `attack_bill_bn` (Bangla fake bill), `allowed_recipients`; mock pays bill requests
+- [ ] EN and Banglish fake-bill variants
+- [x] Pydantic models (user)
+- [x] Policy engine + policies/default.yaml (user)
+- [x] Taint tracking, per argument (user)
+- [x] Intent check, real LLM + mock judge mode (user + Claude)
+- [x] Decision engine: risk score, ALLOW / ASK_HUMAN / BLOCK, bilingual reason, per-check latency (user)
+- [x] SQLite audit log with KPI stats (user)
+- [x] SDK `ShieldSession.wrap()` (user)
+- [x] Demo: `--shield`, `--compare`, `--approve`; dashboard side-by-side + audit tab (Claude)
+- [x] All 6 attack scenarios stopped on mock, all 5 benign scenarios unchanged; fake bill blocked and landlord paid on real qwen (n=1)
+- [x] Unit tests for every check (137 tests passing)
+- [ ] Heuristic injection classifier behind a `predict()` interface (user, in progress)
+- [ ] FastAPI gateway (basic), optional
+- [ ] Nice to have: policy template keys from rule args; whole-number match in `not_mentioned_by_user`; friendlier ALLOW reason when taint flagged a known contact
 
 ## Phase 3: Datasets + baseline benchmark (by ~9 Nov)
 - [ ] Hand-written seed set (EN / BN / Banglish; direct, indirect, benign look-alikes)

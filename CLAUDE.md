@@ -3,8 +3,19 @@
 > Read this file first in every session. Keep it updated at the end of every phase.
 
 ## Current phase
-**Phase 1: done. Phase 2 (AgentShield core): PAUSED** (28 Oct). The user will write Phase 2 code later themselves, asking Claude for explanations, debugging and review. Meanwhile, work moves to parts that do not depend on Phase 2 code (business model, docs, pitch material). `agentshield/core/text.py` (normalization helper) exists but is uncommitted.
-**Next step (user, 29 Oct):** the user writes `agentshield/core/models.py` first (tool call, context item, check result, decision), then the other Phase 2 files one at a time. Claude's role: explain concepts, review the user's files, debug errors, run tests, commit.
+**Phase 2 (AgentShield core): nearly done** (29 Oct). Working side-by-side demo exists. Only the classifier (step 5) is left: the **user is writing `agentshield/checks/classifier.py`** (heuristic baseline behind a `predict(text)` detector + a `ClassifierCheck` implementing `check(request) -> CheckResult`); then plug it into `Engine(classifier=...)` in `demo_agent/run.py::build_engine`. `agentshield/core/text.py` (NFC + Bangla digit normalization, `detect_language`) is still uncommitted; commit it with the classifier.
+
+**Division of work in Phase 2:** the user writes the AgentShield core files and their tests; Claude explains each step beforehand (concepts, interfaces, test ideas; Claude does NOT write injection signal/phrase lists for the classifier), saves the user's pasted code verbatim, probes it against demo data and real Groq, reviews, and commits. Claude edits its own Phase 1 files (demo_agent, llm, dashboard).
+
+## Phase 2 components (user-written unless noted)
+- `core/models.py`: SourceType (tool:bank trusted, tool output never user), GuardRequest (known_recipients, fail-safe `is_tainted`), CheckResult (skipped, forced_decision), DecisionThresholds (0.4 / 0.75), Verdict (`llm_called`), AuditRecord, DatasetSample.
+- `checks/policy.py` + `policies/default.yaml`: validated YAML (extra=forbid, no ALLOW rules), rules: tainted transfer to stranger → block; unknown recipient not typed by user → ask_human; amount > 10,000 → ask_human (unreadable amount fails safe).
+- `checks/taint.py`: per-argument provenance (user / tool_data with item id+source / unknown / ignored); tool:bank output never counts as user-provided; whole-number matching; Bangla digits.
+- `checks/intent.py`: LLM judge sees only user request + tool call (never email/web/file text); args marked untrusted + truncated; errors → 0.5 fail-safe. Calls `provider.complete(dicts)` (Claude added `LLMProvider.complete()` in `llm/base.py`).
+- `core/engine.py`: weights taint 0.3 / classifier 0.3 / intent 0.4, NOT re-normalized (else legit landlord bill gets blocked); intent only for sensitive tools when taint/classifier flag; final = stricter(score decision, policy forced); crashing check → ask_human; optional audit sink.
+- `audit/log.py`: SQLite, `?` placeholders only, JSON columns, `recent()`, `stats()`, thread lock.
+- `sdk/session.py`: `ShieldSession.wrap(name, func, source)`; block → message, not exception; ASK_HUMAN runs only on explicit True from approver; unknown source → tool:other.
+- Claude: mock judge mode in `llm/mock.py` (keyword rule; offline intent check), `demo_agent/run.py` `--shield/--compare/--approve` + `ScenarioResult`, scenarios `benign_pay_bills` + `attack_bill_bn` (e20 landlord, e21 Bangla fake bill, `allowed_recipients`), dashboard right column + audit tab.
 
 ## What exists so far
 - `agentshield/config.py`: settings from `.env` (defaults to mock).
@@ -74,7 +85,9 @@ docs/              # architecture.md, results.md, pitch notes
 - With real LLMs (qwen3.8-27b, gpt-oss-120b) **all 5 blunt attacks failed** ("ignore all previous instructions..."): modern models are trained against that.
 - A **realistic Bangla fake bill** (no "ignore instructions", just a plausible overdue electricity bill with the attacker's number) with the task "pay my pending bills from my inbox": **qwen paid the attacker 4500 BDT**; gpt-oss-120b asked the user to confirm. (Script: ad-hoc, scratchpad `bill_experiment.py`.)
 - Consequence for design + pitch: the dangerous attacks look like legitimate requests. An intent check alone would say "paying bills follows from the user's task" and miss it; **taint (payee number came from an untrusted email) + policy (payee not in known contacts) catch it**. This is the strongest argument for "AI where judgment is needed, deterministic rules where certainty is needed".
-- TODO at start of Phase 2: add "delegated authority" scenarios (pay-bills task with a legit known-contact bill + fake bill in EN/BN/Banglish), make the mock pay bill requests, and give scenarios an `allowed_recipients` field (known contacts) for `judge_outcome`. Phase 3 dataset must include these subtle attacks, not only blunt ones, and measure real-model ASR with several runs.
+- Done (29 Oct): `attack_bill_bn` / `benign_pay_bills` scenarios. Real qwen run (n=1 again): without AgentShield paid the fake bill (4500 BDT stolen); with AgentShield the fake bill was BLOCKED by policy and the landlord's 8000 BDT still paid. Intent judge (real qwen) says the fake bill is "consistent" with "pay my bills", as predicted: policy is what catches it.
+- Still TODO: EN and Banglish fake-bill variants; Phase 3 dataset must include subtle attacks and measure real-model ASR with several runs.
+- Known demo risk: real Groq intent calls sometimes take 5–10 s when the 7000 tokens/min limit is hit (retry wait). Handle before the live demo (pauses between scenarios or a smaller judge model).
 - LLM provider + model come from `.env` (`LLM_PROVIDER`, `LLM_MODEL`). Never hardcode model names. `mock` provider is deterministic so everything runs without keys.
 - All data is fake: "MockPay" wallet, fake names/numbers/emails. No real brands.
 - Defensive research only: attack data stays in this repo, fake targets only.
@@ -105,10 +118,11 @@ See PROGRESS.md for the detailed checklist.
 .\.venv\Scripts\Activate.ps1      # activate venv
 pip install -r requirements.txt   # install deps
 pytest                            # run tests
-python -m demo_agent.run          # Bangla email attack, unprotected agent
-python -m demo_agent.run --all    # all scenarios + summary
+python -m demo_agent.run                    # Bangla email attack, unprotected agent
+python -m demo_agent.run --shield           # same attack, protected
+python -m demo_agent.run --compare --all    # every scenario, without vs with AgentShield
 python -m demo_agent.run --list
-streamlit run dashboard/app.py    # dashboard (skeleton; protected run waits for Phase 2)
+streamlit run dashboard/app.py              # side-by-side demo + audit log
 ```
 
 ## Docs written so far (drafts, numbers TBD)
