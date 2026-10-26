@@ -43,6 +43,34 @@ def normalize_id(value: Any) -> str:
     return text
 
 
+# A run of digits that may contain spaces/dashes between digits: "01799 999999", "+880 1711-111111".
+_NUMBER_RUN = re.compile(r"\+?\d(?:[\d\-]|\s(?=\d))*")
+
+
+def _numbers_in(text: str) -> set[str]:
+    """Every whole number in the text: each run as one number, and each of its parts.
+
+    Parts matter because spaces are allowed inside a run: in "to 01711111111 500"
+    the run is "01711111111 500", and both "01711111111" and "500" must be found.
+    """
+    found: set[str] = set()
+    for match in _NUMBER_RUN.finditer(str(text).translate(_BN_DIGITS)):
+        run = match.group()
+        found.add(normalize_id(run))
+        found.update(normalize_id(part) for part in re.split(r"[\s\-]+", run) if part)
+    return found
+
+
+def mentioned_in(value: Any, text: str) -> bool:
+    """True if `value` appears in `text`. Numbers must match whole: 01000000666 is not in 010000006661."""
+    needle = normalize_id(value)
+    if not needle:
+        return False
+    if needle.isdigit():
+        return needle in _numbers_in(text)
+    return needle in normalize_id(text)
+
+
 def parse_amount(value: Any) -> float | None:
     """Read an amount like 5000, "5,000", "৫০০০ টাকা" or "Tk 5000". None if unreadable."""
     if isinstance(value, (int, float)):
@@ -197,8 +225,7 @@ class PolicyEngine:
 
         if when.not_mentioned_by_user is not None:
             value = args.get(when.not_mentioned_by_user.argument)
-            needle = normalize_id(value) if value is not None else ""
-            if needle and needle in normalize_id(request.user_request):
+            if value is not None and mentioned_in(value, request.user_request):
                 return False
 
         return True
@@ -206,12 +233,17 @@ class PolicyEngine:
     @staticmethod
     def _template_values(rule: PolicyRule, request: GuardRequest) -> _SafeDict:
         args = request.tool_call.arguments
-        limit = rule.when.argument_gt.value if rule.when.argument_gt else None
+        when = rule.when
+        # Argument names come from the rule itself, so a tool with e.g. "recipient"/"value" still reads well.
+        amount_arg = when.argument_gt.argument if when.argument_gt else "amount"
+        recipient_ref = when.recipient_unknown or when.not_mentioned_by_user
+        recipient_arg = recipient_ref.argument if recipient_ref else "to"
+
         values = _SafeDict(tool=request.tool_call.tool_name)
-        if "amount" in args:
-            values["amount"] = _format_amount(parse_amount(args["amount"]))
-        if "to" in args:
-            values["recipient"] = str(args["to"])
-        if limit is not None:
-            values["limit"] = _format_amount(limit)
+        if amount_arg in args:
+            values["amount"] = _format_amount(parse_amount(args[amount_arg]))
+        if recipient_arg in args:
+            values["recipient"] = str(args[recipient_arg])
+        if when.argument_gt is not None:
+            values["limit"] = _format_amount(when.argument_gt.value)
         return values

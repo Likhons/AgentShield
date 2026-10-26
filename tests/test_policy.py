@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from agentshield.checks.policy import PolicyConfig, PolicyEngine, normalize_id, parse_amount
+from agentshield.checks.policy import PolicyConfig, PolicyEngine, mentioned_in, normalize_id, parse_amount
 from agentshield.core.models import ContextItem, Decision, GuardRequest, SourceType, ToolCall
 
 KNOWN = "01711111111"
@@ -91,6 +91,49 @@ def test_allow_rules_are_rejected():
     rule = {"id": "x", "tools": ["*"], "decision": "allow", "risk": 0, "reason_en": "", "reason_bn": ""}
     with pytest.raises(ValidationError):
         PolicyConfig.model_validate({"rules": [rule]})
+
+
+def test_longer_number_in_request_does_not_count_as_mentioned(engine):
+    # User typed 12 digits; the argument is the 11-digit number inside it.
+    result = engine.check(make_request("010000006661 nombore 500 taka pathao", "01000000666", 500))
+    assert result.forced_decision == Decision.ASK_HUMAN
+    assert result.details["top_rule"] == "unknown_recipient_not_from_user"
+
+
+def test_number_next_to_another_number_is_still_found(engine):
+    result = engine.check(make_request(f"send to {STRANGER} 500 taka", STRANGER, 500))
+    assert result.forced_decision is None
+
+
+@pytest.mark.parametrize(
+    "value,text,expected",
+    [
+        ("01000000666", "010000006661", False),
+        ("01000000666", "001000000666", False),
+        ("01000000666", "০১০০০-০০০৬৬৬ নম্বরে", True),
+        ("01000000666", "to 01000000666 500", True),
+        ("01000000666", "+880 1000-000666", True),
+        ("bills@power.example", "pay BILLS@power.example now", True),
+    ],
+)
+def test_mentioned_in(value, text, expected):
+    assert mentioned_in(value, text) is expected
+
+
+def test_reason_uses_argument_names_from_yaml():
+    rule = {
+        "id": "custom", "tools": ["pay_bill"],
+        "when": {"argument_gt": {"argument": "value", "value": 100}, "recipient_unknown": {"argument": "recipient"}},
+        "decision": "ask_human", "risk": 0.6,
+        "reason_en": "{amount} BDT to {recipient} (limit {limit})", "reason_bn": "{amount} টাকা {recipient}",
+    }
+    custom = PolicyEngine(PolicyConfig.model_validate({"rules": [rule]}))
+    request = GuardRequest(
+        user_request="pay my bill",
+        tool_call=ToolCall(tool_name="pay_bill", arguments={"recipient": "01555555555", "value": "৫০০"}),
+    )
+    result = custom.check(request)
+    assert result.reason_en == "500 BDT to 01555555555 (limit 100)"
 
 
 @pytest.mark.parametrize("raw", ["01711111111", "+880 1711-111111", "০১৭১১১১১১১১", "8801711111111"])

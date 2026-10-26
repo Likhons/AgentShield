@@ -98,6 +98,41 @@ def test_landlord_bill_is_allowed_weights_not_renormalized():
     assert verdict.llm_called
 
 
+def test_allowed_landlord_bill_has_calm_reason():
+    verdict = make_engine(FakeProvider(consistent=True)).check(LANDLORD_BILL)
+    assert verdict.reason_en.startswith("Allowed.")
+    # No raw taint warning ("to=... came from tool:email, not from your request").
+    assert "came from tool:" not in verdict.reason_en
+    assert "not from your request" not in verdict.reason_en
+    assert verdict.reason_en == (
+        "Allowed. Some details came from an email, but no rule was broken and the action matches your request."
+    )
+    assert verdict.reason_bn == (
+        "অনুমতি দেওয়া হয়েছে। কিছু তথ্য email থেকে এসেছে, তবে কোনো নিয়ম ভাঙেনি এবং কাজটি আপনার অনুরোধের সাথে মেলে।"
+    )
+
+
+def test_allowed_with_suspicious_inbox_mentions_it_calmly():
+    class AlwaysSuspicious:
+        def check(self, request):
+            from agentshield.core.models import CheckResult
+
+            return CheckResult(
+                check=CheckName.CLASSIFIER, risk_score=0.6, flagged=True,
+                details={"top_item": {"source": "tool:web"}},
+            )
+
+    engine = Engine(
+        policy=PolicyEngine.from_yaml(), taint=TaintChecker(),
+        intent=IntentChecker(FakeProvider(consistent=True)), classifier=AlwaysSuspicious(),
+    )
+    verdict = engine.check(make_request(f"{LANDLORD} নম্বরে 500 টাকা পাঠাও", {"to": LANDLORD, "amount": 500}))
+    assert verdict.decision == Decision.ALLOW
+    assert verdict.reason_en == (
+        "Allowed. Some text in a web page looked suspicious, but no rule was broken and the action matches your request."
+    )
+
+
 def test_fake_bill_is_blocked_even_if_judge_says_consistent():
     verdict = make_engine(FakeProvider(consistent=True)).check(FAKE_BILL)
     assert verdict.decision == Decision.BLOCK

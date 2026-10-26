@@ -38,6 +38,14 @@ _HEADERS = {
     Decision.ASK_HUMAN: ("Needs your approval.", "আপনার অনুমতি প্রয়োজন।"),
     Decision.BLOCK: ("Blocked.", "আটকানো হয়েছে।"),
 }
+# How to name a data source in a friendly ALLOW message (English, Bangla).
+_SOURCE_NAMES = {
+    "tool:email": ("an email", "email"),
+    "tool:web": ("a web page", "ওয়েব পেজ"),
+    "tool:file": ("a file", "ফাইল"),
+    "tool:bank": ("your bank data", "ব্যাংকের তথ্য"),
+}
+_OTHER_SOURCE = ("another tool", "অন্য একটি tool")
 
 
 class Checker(Protocol):
@@ -179,9 +187,43 @@ class Engine:
             flagged.insert(0, policy)
         if not flagged:
             return f"{header_en} No risk found.", f"{header_bn} কোনো ঝুঁকি পাওয়া যায়নি।"
+        if decision == Decision.ALLOW:
+            # The action is allowed: explain calmly instead of listing warnings.
+            return Engine._allow_reasons(checks)
         en = " ".join([header_en] + [c.reason_en for c in flagged if c.reason_en])
         bn = " ".join([header_bn] + [c.reason_bn for c in flagged if c.reason_bn])
         return en, bn
+
+    @staticmethod
+    def _allow_reasons(checks: list[CheckResult]) -> tuple[str, str]:
+        """Short positive explanation for an ALLOW that still had flagged checks."""
+        by_name = {c.check: c for c in checks}
+        taint, classifier, intent = by_name[CheckName.TAINT], by_name[CheckName.CLASSIFIER], by_name[CheckName.INTENT]
+
+        def source_names(sources: list[str]) -> tuple[str, str]:
+            names = [_SOURCE_NAMES.get(s, _OTHER_SOURCE) for s in dict.fromkeys(sources)]
+            return " and ".join(n[0] for n in names), " ও ".join(n[1] for n in names)
+
+        if taint.flagged:
+            arguments = taint.details.get("arguments", {})
+            src_en, src_bn = source_names([a["source"] for a in arguments.values() if a.get("source")] or ["?"])
+            first_en = f"Some details came from {src_en}"
+            first_bn = f"কিছু তথ্য {src_bn} থেকে এসেছে"
+        else:
+            top = classifier.details.get("top_item", {}) if classifier.flagged else {}
+            src_en, src_bn = source_names([top.get("source", "?")])
+            first_en = f"Some text in {src_en} looked suspicious"
+            first_bn = f"{src_bn}-এর কিছু লেখা সন্দেহজনক মনে হয়েছে"
+
+        if intent.flagged or intent.skipped:
+            return (
+                f"Allowed. {first_en}, but no rule was broken and the overall risk is low.",
+                f"অনুমতি দেওয়া হয়েছে। {first_bn}, তবে কোনো নিয়ম ভাঙেনি এবং সামগ্রিক ঝুঁকি কম।",
+            )
+        return (
+            f"Allowed. {first_en}, but no rule was broken and the action matches your request.",
+            f"অনুমতি দেওয়া হয়েছে। {first_bn}, তবে কোনো নিয়ম ভাঙেনি এবং কাজটি আপনার অনুরোধের সাথে মেলে।",
+        )
 
     def _write_audit(self, request: GuardRequest, verdict: Verdict) -> None:
         if self.audit is None:

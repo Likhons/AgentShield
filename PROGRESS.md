@@ -39,7 +39,8 @@
 - [x] Unit tests for every check (156 tests passing)
 - [ ] Decide classifier scope (all untrusted items vs. items linked by taint) using Phase 3 over-refusal numbers
 - [ ] FastAPI gateway (basic), optional
-- [ ] Nice to have: policy template keys from rule args; whole-number match in `not_mentioned_by_user`; friendlier ALLOW reason when taint flagged a known contact
+- [x] Policy template keys from rule args; whole-number match in `not_mentioned_by_user` (user)
+- [x] Friendlier ALLOW reason when a check flagged but the action is allowed (user)
 
 ## Phase 3: Datasets + baseline benchmark (by ~9 Nov)
 - [ ] Hand-written seed set (EN / BN / Banglish; direct, indirect, benign look-alikes)
