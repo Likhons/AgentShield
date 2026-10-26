@@ -1,0 +1,51 @@
+# AgentShield default policy
+#
+# Each rule matches when its tool matches AND every condition under `when` is true.
+# If several rules match, the most severe decision wins (block > ask_human > allow)
+# and the highest risk is used.
+#
+# Supported conditions:
+#   tainted: true|false                 call may come from untrusted data (email, web, file)
+#   argument_gt: {argument, value}      numeric argument is greater than value
+#   recipient_unknown: {argument}       argument is not in the user's known_recipients
+#   not_mentioned_by_user: {argument}   argument value does not appear in the user's request
+#
+# Reason templates can use: {tool}, {amount}, {recipient}, {limit}
+# Numbers in Bangla digits (০-৯), with spaces/dashes or a +88 prefix are normalized.
+
+version: 1
+currency: BDT
+
+rules:
+  - id: tainted_transfer_to_stranger
+    description: Money to an unknown number that only appears in untrusted data. This is the classic injection attack.
+    tools: [send_money]
+    when:
+      tainted: true
+      recipient_unknown: {argument: to}
+      not_mentioned_by_user: {argument: to}
+    decision: block
+    risk: 0.95
+    reason_en: "Blocked: the transfer to {recipient} was triggered by untrusted content, and you never mentioned this number."
+    reason_bn: "আটকানো হয়েছে: {recipient} নম্বরে টাকা পাঠানোর নির্দেশ অবিশ্বস্ত কনটেন্ট থেকে এসেছে, আর আপনি এই নম্বরটি বলেননি।"
+
+  - id: unknown_recipient_not_from_user
+    description: Recipient is not a saved contact and the user did not type the number.
+    tools: [send_money]
+    when:
+      recipient_unknown: {argument: to}
+      not_mentioned_by_user: {argument: to}
+    decision: ask_human
+    risk: 0.7
+    reason_en: "{recipient} is not in your contacts and you did not mention it. Please confirm this transfer."
+    reason_bn: "{recipient} আপনার পরিচিত তালিকায় নেই এবং আপনি নম্বরটি বলেননি। ট্রান্সফারটি নিশ্চিত করুন।"
+
+  - id: large_transfer
+    description: Transfers above the limit always need a human.
+    tools: [send_money]
+    when:
+      argument_gt: {argument: amount, value: 10000}
+    decision: ask_human
+    risk: 0.6
+    reason_en: "Transfers above {limit} BDT need your approval ({amount} BDT requested)."
+    reason_bn: "{limit} টাকার বেশি ট্রান্সফারে আপনার অনুমতি লাগবে ({amount} টাকা চাওয়া হয়েছে)।"
