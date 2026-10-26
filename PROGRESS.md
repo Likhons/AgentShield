@@ -43,7 +43,12 @@
 - [x] Friendlier ALLOW reason when a check flagged but the action is allowed (user)
 
 ## Phase 3: Datasets + baseline benchmark (by ~9 Nov)
-- [ ] Hand-written seed set (EN / BN / Banglish; direct, indirect, benign look-alikes)
+- [x] Benchmark plumbing: dataset loader/validator, metrics with Wilson CIs, detectors (heuristic, Prompt Guard 2 86m/22m via Groq, cached), text-level runner, tests (Claude)
+- [x] Benign seed: 90 look-alikes, 30 per language (Claude, `reviewed=no`)
+- [x] First run on benign only (27 Oct): FPR heuristic 0/90, Prompt Guard 86m 2/90, 22m 2/90 (all flags on English/Banglish "instructions" sentences). Caveat: benign seed written after reading the heuristic.
+- [ ] User: review benign.jsonl wording; add independent benign items
+- [ ] User: attacks.jsonl seed (EN / BN / Banglish; blunt + subtle; email / web / file / direct)
+- [ ] Agent-level benchmark runner (attacks embedded in emails, real LLM, with vs without AgentShield)
 - [ ] LLM-assisted variations (user reviews Bangla/Banglish samples)
 - [ ] 300–500 labeled items, balanced
 - [ ] Benchmark runner + metrics (ASR with/without, block rate, FPR, per-language, median latency, benign completion)

@@ -23,3 +23,6 @@ models/
 .idea/
 Thumbs.db
 .DS_Store
+
+# Benchmark score cache (re-creatable; results/ is committed)
+benchmark/cache/
