@@ -63,6 +63,7 @@ Tool call → taint, classifier, intent (LLM, only if needed), policy → score 
 
 ## Environment
 Windows 11, PowerShell, 8 GB RAM, no GPU (no local LLMs/training). Python 3.14.2 venv `.venv` (3.13 installed as fallback). Budget zero: Groq free tier, Kaggle GPU (Phase 4), HF Spaces / Streamlit Cloud. `.env`: `LLM_PROVIDER=groq`, `LLM_MODEL=qwen/qwen3.8-27b`, `JUDGE_MODEL=openai/gpt-oss-120b`. Inline `python -c` with quotes breaks in PowerShell: write scripts to the scratchpad instead.
+GitHub: `origin` = https://github.com/Likhons/AgentShield (private; `main` tracks `origin/main`). Push only when the user asks; before pushing, scan history for keys (gsk_, AIza, AQ.) and keep `.env`, `*.db`, `benchmark/cache/` ignored. If the repo is ever made public, decide first whether `datasets/attacks.jsonl` may be public (see docs/ethics_impact.md, misuse section).
 
 ## Phase plan
 0 Setup ✓ · 1 Vulnerable demo agent ✓ · 2 Core ✓ · **3 Datasets + benchmark (by ~9 Nov)** · 4 Classifier training on Kaggle (by ~13 Nov) · 5 Dashboard + demo (by ~16 Nov) · 6 Polish + submission (by 19 Nov, buffer 20 Nov). Docs drafted: `docs/business_model.md`, `docs/ethics_impact.md`, `docs/architecture.md` (architecture status table is outdated: Phase 2 is now built).
