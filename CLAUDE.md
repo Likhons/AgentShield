@@ -1,140 +1,79 @@
 # AgentShield: context for Claude Code sessions
 
-> Read this file first in every session. Keep it updated at the end of every phase.
+> Read this first. Keep it short and current; details live in PROGRESS.md and the code.
 
-## Current phase
-**Phase 2 (AgentShield core): done** (27 Oct), except the optional FastAPI gateway. Working side-by-side demo (CLI + dashboard), 156 tests. Waiting for the user's "next" before Phase 3 (datasets + baseline benchmark).
+## RESUME HERE (last updated 27 Oct 2026)
+- **Phase:** 3 (datasets + benchmark), in progress, ahead of schedule (deadline ~9 Nov). Phases 0–2 done.
+- **Blocked on the user:** writing `datasets/attacks.jsonl` (Bangla + Banglish attacks; first goal 12 per language: 3 email blunt, 3 email subtle/fake bill, 2 web, 2 file, 2 direct). Format + rules in `datasets/README.md`. When the user says "attack likhsi":
+  1. `python -m benchmark.dataset` (validate)
+  2. `python -m benchmark.run_detection --detectors heuristic,promptguard-86m,promptguard-22m` → answers "do existing guardrails do worse on Bangla/Banglish?"
+  3. `python -m benchmark.run_agent --provider groq --runs 3 --languages bn,banglish` → real attack success without vs with AgentShield (slow: Groq 7000 tokens/min)
+  4. Report real numbers to the user, update PROGRESS.md, commit.
+- **Other open user tasks:** read all 135 items in `datasets/benign.jsonl` (then set `reviewed=yes`); add some own hand-written benign items (removes bias, see below).
+- **Then:** write `docs/results.md` from `benchmark/results/` only; decide classifier scope (see Open decisions); Phase 4.
 
-Open design decision (decide with Phase 3 numbers): the classifier scans ALL untrusted context, so a legit payment to a known contact becomes ASK_HUMAN (score ~0.57) when an unrelated injection email sits in the same inbox. Option A (current): keep, "session under attack → confirm payments". Option B: classifier scores only the items taint linked to the call's arguments. Measure over-refusal in Phase 3 before choosing.
-
-**Division of work in Phase 2:** the user writes the AgentShield core files and their tests; Claude explains each step beforehand (concepts, interfaces, test ideas; Claude does NOT write injection signal/phrase lists for the classifier), saves the user's pasted code verbatim, probes it against demo data and real Groq, reviews, and commits. Claude edits its own Phase 1 files (demo_agent, llm, dashboard).
-
-## Phase 2 components (user-written unless noted)
-- `core/models.py`: SourceType (tool:bank trusted, tool output never user), GuardRequest (known_recipients, fail-safe `is_tainted`), CheckResult (skipped, forced_decision), DecisionThresholds (0.4 / 0.75), Verdict (`llm_called`), AuditRecord, DatasetSample.
-- `checks/policy.py` + `policies/default.yaml`: validated YAML (extra=forbid, no ALLOW rules), rules: tainted transfer to stranger → block; unknown recipient not typed by user → ask_human; amount > 10,000 → ask_human (unreadable amount fails safe).
-- `checks/taint.py`: per-argument provenance (user / tool_data with item id+source / unknown / ignored); tool:bank output never counts as user-provided; whole-number matching; Bangla digits.
-- `checks/intent.py`: LLM judge sees only user request + tool call (never email/web/file text); args marked untrusted + truncated; errors → 0.5 fail-safe. Calls `provider.complete(dicts)` (Claude added `LLMProvider.complete()` in `llm/base.py`).
-- `core/engine.py`: weights taint 0.3 / classifier 0.3 / intent 0.4, NOT re-normalized (else legit landlord bill gets blocked); intent only for sensitive tools when taint/classifier flag; final = stricter(score decision, policy forced); crashing check → ask_human; optional audit sink.
-- `audit/log.py`: SQLite, `?` placeholders only, JSON columns, `recent()`, `stats()`, thread lock.
-- `checks/classifier.py`: `HeuristicDetector.predict(text)` (weighted signal categories combined as 1-Π(1-w); money words alone are not a signal) behind a swappable `Detector` protocol; `ClassifierCheck` scans only untrusted items, reports the worst item, caches per item. Uses `core/text.py`. Phase 4 model replaces the detector.
-- `sdk/session.py`: `ShieldSession.wrap(name, func, source)`; block → message, not exception; ASK_HUMAN runs only on explicit True from approver; unknown source → tool:other.
-- Claude: mock judge mode in `llm/mock.py` (keyword rule; offline intent check), `demo_agent/run.py` `--shield/--compare/--approve` + `ScenarioResult`, scenarios `benign_pay_bills` + `attack_bill_bn` (e20 landlord, e21 Bangla fake bill, `allowed_recipients`), dashboard right column + audit tab.
-
-## What exists so far
-- `agentshield/config.py`: settings from `.env` (defaults to mock).
-- `agentshield/llm/`: `LLMProvider` interface (`generate(messages) -> str`), `Message` model, providers `mock` / `gemini` / `groq` (plain `httpx` REST, no vendor SDKs), factory `get_provider()`.
-  - `mock.py` imitates a *naive* agent model: plans tools from task keywords and **obeys money instructions found in tool output** (repeatable worst case). Has `find_money_order()` (EN/BN/Banglish, Bangla digits, NFC normalization).
-- `demo_agent/`: `tools.py` (`MockPayWorld` with 6 tools; each `ToolSpec` has a `source` taint label like `tool:email`), `agent.py` (`BankingAgent` think→act→observe loop, JSON action protocol, **no security check in `execute()`**: this is where AgentShield hooks in), `scenarios.py` (load data, `judge_outcome`: a transfer is unauthorized if its recipient is not in the user's request), `run.py` (CLI).
-- `demo_agent/data/`: `account.json`, `emails.json` (e1–e3 normal, e10–e12 attacks EN/BN/Banglish), `web_pages.json`, `files.json`, `scenarios.json` (4 benign + 5 attack scenarios).
-- Fake phone numbers use prefix `010` (not used by any Bangladeshi operator); email domains use `.example`.
-- Agent protocol: LLM replies `{"action":"tool","tool":...,"args":{...}}` or `{"action":"final","answer":...}`.
-
-## Project summary
-AgentShield is a **runtime security gateway for AI agents**. It checks every tool call an agent wants to make *before* it runs, and blocks actions the user never asked for. The focus is actions triggered by hidden instructions in **Bangla, Banglish or English** inside untrusted data (emails, web pages, files), i.e. *indirect prompt injection*.
-
-Claim: **"first agent-action security for Bangla"** (NOT "first Bangla guardrail").
-
-Positioning (verify citations before putting them in the pitch):
-- BanglaVeilGuard (BRAC University, Aug 2026, arXiv 2608.21880): Bangla/Banglish safety benchmark + guard, single-turn chat only, no agents/tools, high over-refusal (~39–44% of benign prompts blocked).
-- LlamaFirewall (Meta, 2025, arXiv 2505.03574): agent guardrail with AlignmentCheck, English-focused.
-- Our gap: Bangla/Banglish indirect injection inside agent workflows, defended at the action level, with low over-refusal.
-
-Design principle: **"AI where judgment is needed, deterministic rules where certainty is needed."**
-
-## Competition
-International AI Builders Congress 2026 (CloudCamp Bangladesh), "Idea to Unicorn". Domain InfraSphere AI, challenges SecureAI + AgentOps.
-- Preliminary submission: **20 Nov 2026**. Final: **26 Dec 2026**, Dhaka (3-min pitch + live demo).
-- Judging: Innovation 20, Technical Execution 20, Business + Global Readiness 20, Real-World Impact + Ethical AI 20, Scalability + NRB collaboration 10, Presentation 10.
-- Point out which criterion a technical decision helps.
-
-## Architecture
-Every tool call → four checks → combined risk score → **ALLOW / ASK_HUMAN / BLOCK** with a plain-language reason (English + Bangla) → SQLite audit log → dashboard.
-
-1. **Taint tracking** (deterministic): every piece of context is labeled by source (`user`, `system`, `tool:email`, `tool:web`, `tool:file`...). Calls triggered by / with arguments from untrusted sources get higher risk.
-2. **Injection classifier** (ML): EN/BN/Banglish. Heuristic baseline first, behind a clean interface; later fine-tuned BanglaBERT or XLM-R (trained on Kaggle, CPU inference locally).
-3. **Intent check** (LLM-as-judge): "User asked X, agent wants tool Y with args Z. Does Y follow from X?" → verdict + reason. Only called when cheaper checks flag risk.
-4. **Policy engine** (YAML rules): e.g. transfers > 10,000 BDT need human approval; no data to unknown external recipients; sensitive tools need user-origin intent.
-
-The latency of every check is measured.
-
-## Repo layout
-```
-agentshield/       # the product (installable package)
-  core/            # decision engine, risk scoring, pydantic models
-  checks/          # taint.py, classifier.py, intent.py, policy.py
-  llm/             # provider abstraction: gemini, groq, mock
-  audit/           # SQLite audit log
-  api/             # FastAPI gateway service
-  sdk/             # 2-line wrapper to protect any agent's tools
-demo_agent/        # vulnerable mock banking agent (MockPay wallet)
-  data/            # fake emails, web pages, accounts (JSON)
-datasets/          # attack + benign prompts (EN/BN/Banglish), labeled
-benchmark/         # runner + metrics + baselines
-training/          # Kaggle notebook for the classifier
-dashboard/         # Streamlit app
-policies/          # default.yaml
-tests/             # pytest
-docs/              # architecture.md, results.md, pitch notes
-```
-
-## Constraints
-- User machine: Windows 11, PowerShell, 8 GB RAM, no GPU. **No local LLMs, no local training.** Keep dependencies light.
-- Python 3.14.2 venv at `.venv`. Python 3.13 is also installed (`py -3.13`) as a fallback if an AI library has no 3.14 wheels.
-- Budget zero: Gemini free tier (primary), Groq free tier (backup), Kaggle GPU for training, HF Spaces / Streamlit Cloud for hosting.
-- **27 Oct 2026 finding:** the user's Gemini key is valid (model list works) but every generateContent call returns 403 "free tier is not available for this project" (Gemini and Gemma models alike). No billing (zero budget), so **Groq is now the primary real LLM**. Gemini code stays for later.
-- Groq (27 Oct): `.env` uses `LLM_PROVIDER=groq`, `LLM_MODEL=qwen/qwen3.8-27b`. Also works: `openai/gpt-oss-120b`. `openai/gpt-oss-20b` is incompatible (forces native tool calls → HTTP 400). Qwen free-tier limit: 7000 input tokens/min, so `GroqProvider` retries on 429 and on timeouts. Groq also hosts `meta-llama/llama-prompt-guard-2-86m` / `-22m` → use as a Phase 3 baseline.
-
-## Phase 3 status (27 Oct)
-- Benchmark plumbing in `benchmark/` (dataset loader, metrics with Wilson CIs, detectors incl. Prompt Guard 2 via Groq, text-level runner). Results only from `benchmark/results/`.
-- Data: `datasets/benign.jsonl` 135 LLM-written look-alikes (reviewed=no; written after reading the heuristic: bias caveat), `datasets/external.jsonl` 40 NVIDIA agentic indirect injections (EN, CC-BY-4.0), user still writes `datasets/attacks.jsonl` (BN/Banglish). Claude does not write attack texts.
-- Text-level result so far: on NVIDIA indirect injections both our heuristic (0/40) and Prompt Guard 2 (1/40 each size) almost never fire. Text classifiers alone miss subtle indirect injections; this supports action-level checks (taint + policy). Prompt Guard flagged demo e10 (EN) and e11 (BN) but missed e12 (Banglish), n=1 each: a hint to test properly once attacks.jsonl exists.
-- Only one AI tool should edit this repo at a time (another tool once produced files elsewhere that never reached this folder).
-
-## Key early finding (27 Oct, n=1 per model: anecdotal, NOT a statistic)
-- With real LLMs (qwen3.8-27b, gpt-oss-120b) **all 5 blunt attacks failed** ("ignore all previous instructions..."): modern models are trained against that.
-- A **realistic Bangla fake bill** (no "ignore instructions", just a plausible overdue electricity bill with the attacker's number) with the task "pay my pending bills from my inbox": **qwen paid the attacker 4500 BDT**; gpt-oss-120b asked the user to confirm. (Script: ad-hoc, scratchpad `bill_experiment.py`.)
-- Consequence for design + pitch: the dangerous attacks look like legitimate requests. An intent check alone would say "paying bills follows from the user's task" and miss it; **taint (payee number came from an untrusted email) + policy (payee not in known contacts) catch it**. This is the strongest argument for "AI where judgment is needed, deterministic rules where certainty is needed".
-- Done (27 Oct): `attack_bill_bn` / `benign_pay_bills` scenarios. Real qwen run (n=1 again): without AgentShield paid the fake bill (4500 BDT stolen); with AgentShield the fake bill was BLOCKED by policy and the landlord's 8000 BDT still paid. Intent judge (real qwen) says the fake bill is "consistent" with "pay my bills", as predicted: policy is what catches it.
-- Still TODO: EN and Banglish fake-bill variants; Phase 3 dataset must include subtle attacks and measure real-model ASR with several runs.
-- Latency (27 Oct, 5 scenarios on real Groq): judge on the agent's model (qwen) had median 354 ms but a 15.6 s worst case (shared 7000 tokens/min budget). With `JUDGE_MODEL=openai/gpt-oss-120b` (own rate-limit bucket): median 859 ms, worst 1.0 s; all attacks still stopped. `.env` now sets JUDGE_MODEL.
-- Remaining demo risk: the AGENT itself (qwen) still hits its rate limit; one protected scenario took 17–59 s wall time. The dashboard runs two agents per click. Fix in Phase 5 (e.g. left column on mock/cached run, pauses, or a lighter agent model).
-- `.env` lines Claude may edit: LLM_PROVIDER, LLM_MODEL, JUDGE_MODEL (never the key lines).
-- LLM provider + model come from `.env` (`LLM_PROVIDER`, `LLM_MODEL`). Never hardcode model names. `mock` provider is deterministic so everything runs without keys.
-- All data is fake: "MockPay" wallet, fake names/numbers/emails. No real brands.
-- Defensive research only: attack data stays in this repo, fake targets only.
-
-## Working rules
-- Talk to the user in **simple Bangla**; code, comments, file names and docs in **English**.
-- User knows basic/intermediate Python: explain what each important piece does and why, briefly.
-- After each phase: stop, Bangla summary, exact PowerShell commands + expected output, wait for "next".
-- Never ask for API keys in chat. Keys go in `.env` (git-ignored); `.env.example` has placeholders.
-- **Never invent results.** Numbers in docs/README/pitch come from real runs, otherwise "TBD".
-- Simple readable code, type hints, docstrings, small functions. pytest tests for every check + end-to-end scenario.
-- Commit after each phase. Disagree openly (with reasons) before changing the plan.
+## How we work (important)
+- Talk to the user in **simple Bangla**; code, comments, files, docs in **English**. User knows basic/intermediate Python; explain briefly what and why. Give exact PowerShell commands. One step at a time when the user asks for it.
+- **Division of work:** the user writes AgentShield core files (`agentshield/core`, `checks`, `audit`, `sdk`) and their tests; Claude explains beforehand, reviews, probes (demo data + real Groq), and commits. Claude owns demo_agent, llm, dashboard, benchmark plumbing, docs.
+- **Claude does not write prompt-injection attack texts or injection signal/phrase lists.** The user writes `attacks.jsonl` and classifier signals. Claude may write benign data, tooling, metrics.
+- User-pasted code: ask them to save it in VS Code themselves (Claude then reads from disk). Very long attack-pattern files must be saved by the user.
+- **Only one AI tool should edit this repo at a time** (another tool once produced files elsewhere that never reached this folder).
+- Never invent results; numbers only from `benchmark/results/` or real runs, else "TBD". Label mock results as simulation. n=1 runs are anecdotes.
+- Never ask for API keys in chat. `.env` lines Claude may edit: LLM_PROVIDER, LLM_MODEL, JUDGE_MODEL (never key lines).
+- Commit after each step with a clear message. Disagree openly before changing the plan.
 - Priority if slipping: side-by-side demo > honest benchmark > trained classifier > dashboard polish > stretch.
 
-## Phase plan
-- Phase 0: Setup (27 Oct): done
-- Phase 1: Vulnerable demo agent on mock LLM (27 Oct): done
-- Phase 2: AgentShield core v1 (by ~5 Nov)
-- Phase 3: Datasets + baseline benchmark (by ~9 Nov)
-- Phase 4: Classifier training on Kaggle (by ~13 Nov)
-- Phase 5: Dashboard + demo (by ~16 Nov)
-- Phase 6: Polish + submission material (by 19 Nov, buffer 20 Nov)
+## Project
+Runtime security gateway for AI agents: checks every tool call **before** it runs and stops actions the user never asked for, especially ones triggered by hidden instructions in **Bangla, Banglish or English** inside emails, web pages, files (indirect prompt injection). Claim: "first agent-action security for Bangla" (NOT "first Bangla guardrail"). Principle: **"AI where judgment is needed, deterministic rules where certainty is needed."**
 
-See PROGRESS.md for the detailed checklist.
+Competition: International AI Builders Congress 2026 (CloudCamp Bangladesh), "Idea to Unicorn", SecureAI + AgentOps. Preliminary submission **20 Nov 2026**; final **26 Dec 2026** Dhaka (3-min pitch + live demo). Judging: Innovation 20, Technical Execution 20, Business + Global 20, Impact + Ethical AI 20, Scalability + NRB 10, Presentation 10.
+
+Positioning (verify citations before the pitch; Claude could not verify BanglaVeilGuard): BanglaVeilGuard (arXiv 2608.21880, single-turn chat, reported ~39–44% over-refusal), LlamaFirewall (arXiv 2505.03574, English-focused).
+
+## Architecture (all built)
+Tool call → taint, classifier, intent (LLM, only if needed), policy → score `taint*0.3 + classifier*0.3 + intent*0.4` (weights NOT re-normalized when a check is skipped) → stricter of score decision (ask ≥0.4, block ≥0.75) and policy's forced decision → ALLOW / ASK_HUMAN / BLOCK + reason EN/BN → SQLite audit.
+- `core/models.py` (user): SourceType (tool:bank trusted, tool output never user), GuardRequest (`known_recipients`, fail-safe `is_tainted`), CheckResult (`skipped`, `forced_decision`), Verdict (`llm_called`), AuditRecord, DatasetSample. `core/text.py`: NFC, Bangla digits, `detect_language` (misses some Banglish; only used for classifier details).
+- `checks/policy.py` + `policies/default.yaml` (user): tainted transfer to stranger → block; unknown recipient not typed by user → ask_human; amount > 10,000 → ask_human; whole-number matching.
+- `checks/taint.py` (user): per-argument provenance (user / tool_data+item / unknown).
+- `checks/intent.py` (user): judge sees only user request + tool call, never tool-output text; errors → 0.5 fail-safe. Mock has a keyword judge mode (offline).
+- `checks/classifier.py` (user): heuristic `Detector.predict(text)` behind a swappable protocol; Phase 4 model replaces it.
+- `core/engine.py` (user): crashing check → ask_human; calm ALLOW explanation. `audit/log.py` (user): SQLite, `?` placeholders. `sdk/session.py` (user): `ShieldSession.wrap(name, func, source)`.
+- `llm/` (Claude): mock / groq / gemini via httpx; `complete(dicts)`; Groq retries on 429 + timeouts.
+- `demo_agent/` (Claude): MockPay world, 6 tools with source labels, agent loop, 13 scenarios (5 benign, 8 attacks incl. fake bills EN/BN/Banglish), `run.py` (`--shield --compare --approve --judge-model`, `run_world()`). `dashboard/app.py`: side-by-side + audit tab.
+- `benchmark/` (Claude): `dataset.py`, `metrics.py` (Wilson CIs), `detectors.py` (heuristic, Prompt Guard 2 86m/22m on Groq, cached), `run_detection.py`, `run_agent.py`.
+- Not built: FastAPI gateway (optional, Phase 6).
+
+## Data
+- `datasets/benign.jsonl`: 135 look-alikes (45 per language), LLM-written, `reviewed=no`. **Bias caveat:** written after reading the heuristic's code.
+- `datasets/external.jsonl`: 40 NVIDIA agentic indirect injections (EN, CC-BY-4.0, non-banking tools → skipped by `run_agent`). deepset left out (mislabeled languages, non-injection "attacks").
+- `datasets/attacks.jsonl`: user, TBD.
+- Fake data only: numbers start `010`, domains `.example`, wallet "MockPay".
+
+## Findings so far (27 Oct)
+- Real LLMs (qwen3.8-27b, gpt-oss-120b) resisted all blunt demo attacks; a realistic **Bangla fake bill** fooled qwen (paid attacker 4500 BDT). With AgentShield (real qwen, n=1): fake bill blocked by policy, landlord's 8000 BDT still paid. The intent judge calls the fake bill "consistent" → policy/taint are what catch it.
+- Mock, 13 scenarios: all 8 attacks stopped, all 5 benign unchanged.
+- Text-level (`detection_20261026-224448`): on 40 NVIDIA indirect injections heuristic 0/40, Prompt Guard 2 1/40 (both sizes). Benign FPR: heuristic 1/135, Prompt Guard 2/135 (English/Banglish "instructions" sentences). Prompt Guard flagged demo e10 (EN) and e11 (BN) but missed e12 (Banglish), n=1.
+- Agent-level, mock (`agent_20261026-225012`): rent bill paid for 135/135 benign items both without and with AgentShield.
+- Latency: separate `JUDGE_MODEL=openai/gpt-oss-120b` cut worst judge latency 15.6 s → 1.0 s.
+
+## Open decisions / known risks
+- Classifier scope: it scans ALL untrusted context, so a legit payment becomes ASK_HUMAN (~0.57) when an unrelated injection email is in the same inbox. Option A (current) keep; option B score only items taint linked to the arguments. Decide with real over-refusal numbers.
+- Live demo: the agent (qwen) hits Groq's rate limit; a protected scenario took 17–59 s. Fix in Phase 5 (left column on mock/cached run, pauses, or lighter agent model).
+- Gemini free tier returns 403 for this account → Groq is the real LLM. `openai/gpt-oss-20b` incompatible (forces native tool calls).
+
+## Environment
+Windows 11, PowerShell, 8 GB RAM, no GPU (no local LLMs/training). Python 3.14.2 venv `.venv` (3.13 installed as fallback). Budget zero: Groq free tier, Kaggle GPU (Phase 4), HF Spaces / Streamlit Cloud. `.env`: `LLM_PROVIDER=groq`, `LLM_MODEL=qwen/qwen3.8-27b`, `JUDGE_MODEL=openai/gpt-oss-120b`. Inline `python -c` with quotes breaks in PowerShell: write scripts to the scratchpad instead.
+
+## Phase plan
+0 Setup ✓ · 1 Vulnerable demo agent ✓ · 2 Core ✓ · **3 Datasets + benchmark (by ~9 Nov)** · 4 Classifier training on Kaggle (by ~13 Nov) · 5 Dashboard + demo (by ~16 Nov) · 6 Polish + submission (by 19 Nov, buffer 20 Nov). Docs drafted: `docs/business_model.md`, `docs/ethics_impact.md`, `docs/architecture.md` (architecture status table is outdated: Phase 2 is now built).
 
 ## Commands
 ```powershell
-.\.venv\Scripts\Activate.ps1      # activate venv
-pip install -r requirements.txt   # install deps
-pytest                            # run tests
-python -m demo_agent.run                    # Bangla email attack, unprotected agent
-python -m demo_agent.run --shield           # same attack, protected
-python -m demo_agent.run --compare --all    # every scenario, without vs with AgentShield
-python -m demo_agent.run --list
-streamlit run dashboard/app.py              # side-by-side demo + audit log
+.\.venv\Scripts\Activate.ps1
+pytest                                          # 195 tests
+python -m demo_agent.run --compare --all        # all scenarios, without vs with AgentShield (mock unless --provider groq)
+streamlit run dashboard/app.py                  # side-by-side demo + audit log
+python -m benchmark.dataset                     # validate dataset, show balance
+python -m benchmark.run_detection --detectors heuristic,promptguard-86m,promptguard-22m
+python -m benchmark.run_agent [--provider groq --runs 3 --languages bn,banglish]
 ```
-
-## Docs written so far (drafts, numbers TBD)
-- `docs/business_model.md`, `docs/ethics_impact.md`, `docs/architecture.md`
