@@ -18,9 +18,11 @@
 - [x] One command runs the attack scenario and prints steps + "money stolen"
 - [x] Tests for tools + attack scenario (31 tests passing)
 - [x] Update CLAUDE.md / PROGRESS.md, commit
-- [ ] When API keys arrive: run `--all --provider gemini` and record how often a REAL LLM obeys the injections
+- [x] API keys: Gemini free tier unavailable (403) → switched to Groq (qwen3.8-27b), retry on 429/timeout
+- [x] First real-LLM check (n=1): blunt attacks 0/5 on qwen and gpt-oss-120b; realistic Bangla fake bill fooled qwen (4500 BDT), not gpt-oss-120b. See CLAUDE.md "Key early finding".
 
 ## Phase 2: AgentShield core v1 (by ~5 Nov)
+- [ ] "Delegated authority" scenarios: pay-bills task, legit known-contact bill + fake bills (EN / BN / Banglish); `allowed_recipients` in scenarios; mock pays bill requests
 - [ ] Pydantic models (ToolCall, ContextItem, CheckResult, Decision)
 - [ ] Taint tracking
 - [ ] Policy engine + policies/default.yaml

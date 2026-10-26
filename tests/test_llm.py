@@ -100,6 +100,32 @@ def test_groq_request_and_response() -> None:
     assert [m["role"] for m in captured["body"]["messages"]] == ["system", "user", "assistant", "user"]
 
 
+def test_groq_waits_and_retries_on_rate_limit() -> None:
+    replies = [
+        httpx.Response(429, text='{"error": {"message": "Please try again in 2.5s."}}'),
+        httpx.Response(200, json={"choices": [{"message": {"content": "ok"}}]}),
+    ]
+    client = httpx.Client(transport=httpx.MockTransport(lambda request: replies.pop(0)))
+    waits: list[float] = []
+    llm = GroqProvider("test-model", "key123", client=client, sleep=waits.append)
+
+    assert llm.generate(MESSAGES) == "ok"
+    assert waits == [3.0]
+
+
+def test_groq_retries_after_timeout_then_gives_clear_error() -> None:
+    def always_timeout(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("slow", request=request)
+
+    client = httpx.Client(transport=httpx.MockTransport(always_timeout))
+    waits: list[float] = []
+    llm = GroqProvider("test-model", "key123", client=client, sleep=waits.append)
+
+    with pytest.raises(LLMError, match="did not respond"):
+        llm.generate(MESSAGES)
+    assert len(waits) == 5
+
+
 def test_missing_key_gives_clear_error() -> None:
     with pytest.raises(LLMError, match="GEMINI_API_KEY"):
         GeminiProvider("test-model", "your-gemini-key-here")

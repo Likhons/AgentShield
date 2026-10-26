@@ -16,12 +16,14 @@ from demo_agent.agent import AgentRun, BankingAgent
 from demo_agent.scenarios import Outcome, build_world, judge_outcome, load_scenarios
 
 
-def run_scenario(name: str, provider: str | None = None) -> tuple[AgentRun, Outcome, int, int]:
+def run_scenario(
+    name: str, provider: str | None = None, model: str | None = None
+) -> tuple[AgentRun, Outcome, int, int]:
     """Run one scenario. Returns the agent run, outcome, start and end balance."""
     scenario = load_scenarios()[name]
     world = build_world(scenario)
     start = world.balance
-    agent = BankingAgent(get_provider(provider), world.tool_specs())
+    agent = BankingAgent(get_provider(provider, model), world.tool_specs())
     run = agent.run(scenario["user_task"])
     return run, judge_outcome(world, scenario["user_task"]), start, world.balance
 
@@ -53,6 +55,7 @@ def main() -> None:
     parser.add_argument("--all", action="store_true", help="run every scenario")
     parser.add_argument("--list", action="store_true", help="list scenarios")
     parser.add_argument("--provider", help="override LLM_PROVIDER (mock / gemini / groq)")
+    parser.add_argument("--model", help="override LLM_MODEL")
     args = parser.parse_args()
 
     scenarios = load_scenarios()
@@ -64,7 +67,7 @@ def main() -> None:
     names = list(scenarios) if args.all else [args.scenario]
     summary = []
     for name in names:
-        run, outcome, start, end = run_scenario(name, args.provider)
+        run, outcome, start, end = run_scenario(name, args.provider, args.model)
         print_run(name, run, outcome, start, end)
         summary.append((name, outcome.stolen))
 
