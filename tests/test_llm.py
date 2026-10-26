@@ -53,6 +53,11 @@ def test_mock_provider_returns_json_action() -> None:
     assert json.loads(reply) == {"action": "tool", "tool": "get_balance", "args": {}}
 
 
+def test_complete_accepts_plain_dicts() -> None:
+    reply = MockProvider().complete([{"role": "user", "content": "What is my balance?"}])
+    assert json.loads(reply)["tool"] == "get_balance"
+
+
 def test_get_provider_mock() -> None:
     assert get_provider("mock").name == "mock"
 

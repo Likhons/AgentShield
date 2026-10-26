@@ -32,6 +32,10 @@ class LLMProvider(ABC):
     def generate(self, messages: list[Message]) -> str:
         """Return the model's reply to the conversation."""
 
+    def complete(self, messages: list[dict[str, str]]) -> str:
+        """Same as generate(), but takes plain dicts like {"role": "user", "content": "..."}."""
+        return self.generate([Message(**m) for m in messages])
+
 
 def message_text(message: Message) -> str:
     """Render a message as plain text.
