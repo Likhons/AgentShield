@@ -1,0 +1,9 @@
+[project]
+name = "agentshield"
+version = "0.0.1"
+description = "Runtime security gateway for AI agents, with Bangla/Banglish prompt-injection defense"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

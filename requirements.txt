@@ -1,0 +1,6 @@
+# Phase 0: kept minimal on purpose (8 GB RAM laptop).
+# More libraries are added in the phase that needs them.
+pydantic>=2.7
+pyyaml>=6.0
+python-dotenv>=1.0
+pytest>=8.0

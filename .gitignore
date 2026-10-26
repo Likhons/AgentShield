@@ -1,0 +1,25 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime output
+*.db
+*.sqlite
+logs/
+
+# Trained models (too large for git; downloaded from Kaggle)
+models/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
