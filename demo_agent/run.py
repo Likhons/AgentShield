@@ -63,15 +63,17 @@ def build_engine(
     model: str | None = None,
     audit: AuditLog | None = None,
     judge_model: str | None = None,
+    classifier: bool = True,
 ) -> Engine:
     """AgentShield engine whose intent judge uses the agent's LLM provider, and
-    JUDGE_MODEL (if set) so the judge has its own rate-limit budget."""
+    JUDGE_MODEL (if set) so the judge has its own rate-limit budget.
+    classifier=False leaves the injection classifier out (for ablation experiments)."""
     judge_model = judge_model or get_settings().judge_model or model
     return Engine(
         policy=PolicyEngine.from_yaml(),
         taint=TaintChecker(),
         intent=IntentChecker(get_provider(provider, judge_model)),
-        classifier=ClassifierCheck(),
+        classifier=ClassifierCheck() if classifier else None,
         audit=audit,
     )
 
@@ -100,6 +102,7 @@ def run_world(
     audit: AuditLog | None = None,
     approve: bool = False,
     judge_model: str | None = None,
+    classifier: bool = True,
 ) -> ScenarioResult:
     """Run the agent on a ready-made world. `scenario` needs "user_task" and may
     list "allowed_recipients". Used by run_scenario() and by the agent benchmark."""
@@ -109,7 +112,7 @@ def run_world(
 
     if shield:
         session = ShieldSession(
-            build_engine(provider, model, audit, judge_model),
+            build_engine(provider, model, audit, judge_model, classifier),
             user_request=scenario["user_task"],
             known_recipients=world.contacts.values(),
             approver=(lambda call, verdict: True) if approve else None,

@@ -5,7 +5,7 @@
 ## RESUME HERE (last updated 27 Oct 2026)
 - **Phase:** 3 (datasets + benchmark) nearly done, ahead of schedule (deadline ~9 Nov). Phases 0–2 done. Phase 4 notebook ready.
 - **Done 27 Oct:** `datasets/attacks.jsonl` (24 BN/Banglish, reviewed). Text benchmark: Prompt Guard 2 flags 0/24. Simulated agent: 0/20 attacks succeed with AgentShield. `docs/results.md` drafted; dashboard Benchmark tab live.
-- **Real-Groq agent run done** (`agent_20261027-153825`): attacks 4/20 → 0/20, but legit rent 17/20 → 0/20 (all held for approval). Cause: gpt-oss-120b judge can't see that the recipient is a saved contact. **Waiting for the user's OK on fix A**: user adds "recipient is a saved contact: yes/no" (from `known_recipients`) to `build_messages()` in `checks/intent.py` + one prompt sentence; Claude explains step by step, then re-runs `python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish --limit 10` (balanced now) and records before/after in docs/results.md §3b.
+- **Real-Groq agent run done** (`agent_20261027-153825`): attacks 4/20 → 0/20, but legit rent 17/20 → 0/20 (all held for approval). Cause: gpt-oss-120b judge can't see that the recipient is a saved contact. **Fix A postponed by the user (do later, together with classifier scope B)**: user adds "recipient is a saved contact: yes/no" (from `known_recipients`) to `build_messages()` in `checks/intent.py` + one prompt sentence; Claude explains step by step, then re-runs `python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish --limit 10` (balanced now) and records before/after in docs/results.md §3b.
 - **After the fix:** record the stage demo once: `python -m demo_agent.run --all --compare --provider groq --record` (dashboard option "recorded (groq)" replays it instantly; recordings in `demo_agent/recordings/groq/`).
 - GitHub is up to date as of `d15133d` (pushed 27 Oct); ask the user before pushing again.
 - **Open user tasks:** read all 135 items in `datasets/benign.jsonl` (then `reviewed=yes`); add ~15 own hand-written benign items per language (BN/Banglish) in `datasets/benign_own.jsonl` (removes bias, see below); ideally a few hand-written attacks too.
@@ -40,7 +40,7 @@ Tool call → taint, classifier, intent (LLM, only if needed), policy → score 
 - `llm/` (Claude): mock / groq / gemini via httpx; `complete(dicts)`; Groq retries on 429 + timeouts.
 - `demo_agent/` (Claude): MockPay world, 6 tools with source labels, agent loop, 13 scenarios (5 benign, 8 attacks incl. fake bills EN/BN/Banglish), `run.py` (`--shield --compare --approve --judge-model`, `run_world()`). `dashboard/app.py`: side-by-side + audit tab.
 - `benchmark/` (Claude): `dataset.py`, `metrics.py` (Wilson CIs), `detectors.py` (heuristic, Prompt Guard 2 86m/22m on Groq, cached), `run_detection.py`, `run_agent.py`.
-- Not built: FastAPI gateway (optional, Phase 6).
+- `api/app.py` (Claude): FastAPI gateway, `uvicorn agentshield.api.app:create_app --factory`; optional `AGENTSHIELD_API_KEY`. `benchmark/run_mixed.py`: mixed-inbox experiment; `run_world(..., classifier=False)` for ablations. `demo_agent/recording.py`: record/replay.
 
 ## Data
 - `datasets/benign.jsonl`: 135 look-alikes (45 per language), LLM-written, `reviewed=no`. **Bias caveat:** written after reading the heuristic's code.
@@ -56,7 +56,7 @@ Tool call → taint, classifier, intent (LLM, only if needed), policy → score 
 - Latency: separate `JUDGE_MODEL=openai/gpt-oss-120b` cut worst judge latency 15.6 s → 1.0 s.
 
 ## Open decisions / known risks
-- Classifier scope: it scans ALL untrusted context, so a legit payment becomes ASK_HUMAN (~0.57) when an unrelated injection email is in the same inbox. Option A (current) keep; option B score only items taint linked to the arguments. Decide with real over-refusal numbers.
+- Classifier scope: it scans ALL untrusted context, so a legit payment becomes ASK_HUMAN (~0.57) when an unrelated injection email is in the same inbox. Option A (current) keep; option B score only items taint linked to the arguments. **Data now (`mixed_20261027-160905`, simulated):** attack email read first → rent held 5/12 with the classifier, 0/12 without it, attacker paid 0/12 either way. Evidence favors B. User's files (`checks/classifier.py` / `core/engine.py`); do together with intent fix A, later.
 - Live demo: the agent (qwen) hits Groq's rate limit; a protected scenario took 17–59 s. Fix in Phase 5 (left column on mock/cached run, pauses, or lighter agent model).
 - Gemini free tier returns 403 for this account → Groq is the real LLM. `openai/gpt-oss-20b` incompatible (forces native tool calls).
 
