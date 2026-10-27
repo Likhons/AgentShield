@@ -3,14 +3,11 @@
 > Read this first. Keep it short and current; details live in PROGRESS.md and the code.
 
 ## RESUME HERE (last updated 27 Oct 2026)
-- **Phase:** 3 (datasets + benchmark), in progress, ahead of schedule (deadline ~9 Nov). Phases 0–2 done.
-- **Blocked on the user:** writing `datasets/attacks.jsonl` (Bangla + Banglish attacks; first goal 12 per language: 3 email blunt, 3 email subtle/fake bill, 2 web, 2 file, 2 direct). Format + rules in `datasets/README.md`. When the user says "attack likhsi":
-  1. `python -m benchmark.dataset` (validate)
-  2. `python -m benchmark.run_detection --detectors heuristic,promptguard-86m,promptguard-22m` → answers "do existing guardrails do worse on Bangla/Banglish?"
-  3. `python -m benchmark.run_agent --provider groq --runs 3 --languages bn,banglish` → real attack success without vs with AgentShield (slow: Groq 7000 tokens/min)
-  4. Report real numbers to the user, update PROGRESS.md, commit.
-- **Other open user tasks:** read all 135 items in `datasets/benign.jsonl` (then set `reviewed=yes`); add some own hand-written benign items (removes bias, see below).
-- **Then:** write `docs/results.md` from `benchmark/results/` only; decide classifier scope (see Open decisions); Phase 4.
+- **Phase:** 3 (datasets + benchmark) nearly done, ahead of schedule (deadline ~9 Nov). Phases 0–2 done. Phase 4 notebook ready.
+- **Done 27 Oct:** `datasets/attacks.jsonl` (24 BN/Banglish, reviewed). Text benchmark: Prompt Guard 2 flags 0/24. Simulated agent: 0/20 attacks succeed with AgentShield. `docs/results.md` drafted; dashboard Benchmark tab live.
+- **In flight:** real-Groq agent run (`--provider groq --runs 1 --languages bn,banglish --limit 20`), started 21:19. When it lands: fill `docs/results.md` §3b and README/ethics TBDs from the new `benchmark/results/agent_*.md`, commit, offer to push.
+- **Open user tasks:** read all 135 items in `datasets/benign.jsonl` (then `reviewed=yes`); add ~15 own hand-written benign items per language (BN/Banglish) in `datasets/benign_own.jsonl` (removes bias, see below); ideally a few hand-written attacks too.
+- **Next:** decide classifier scope (Open decisions); Phase 4 = user runs `training/train_classifier.ipynb` on Kaggle (instructions inside), then a model-backed detector + benchmark on test-split ids only (`split_ids.json`).
 
 ## How we work (important)
 - Talk to the user in **simple Bangla**; code, comments, files, docs in **English**. User knows basic/intermediate Python; explain briefly what and why. Give exact PowerShell commands. One step at a time when the user asks for it.
@@ -46,7 +43,7 @@ Tool call → taint, classifier, intent (LLM, only if needed), policy → score 
 ## Data
 - `datasets/benign.jsonl`: 135 look-alikes (45 per language), LLM-written, `reviewed=no`. **Bias caveat:** written after reading the heuristic's code.
 - `datasets/external.jsonl`: 40 NVIDIA agentic indirect injections (EN, CC-BY-4.0, non-banking tools → skipped by `run_agent`). deepset left out (mislabeled languages, non-injection "attacks").
-- `datasets/attacks.jsonl`: user, TBD.
+- `datasets/attacks.jsonl`: 24 items (12 bn, 12 banglish; 7 blunt + 5 subtle each), ChatGPT-generated, admission phrases removed by the user, `reviewed=yes`. Bangla and Banglish items are near-parallel translations (useful for language comparison, low diversity).
 - Fake data only: numbers start `010`, domains `.example`, wallet "MockPay".
 
 ## Findings so far (27 Oct)

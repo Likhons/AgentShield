@@ -53,7 +53,15 @@
 - [ ] User: attacks.jsonl seed (EN / BN / Banglish; blunt + subtle; email / web / file / direct)
 - [x] Agent-level benchmark runner `benchmark/run_agent.py` (items placed in inbox / web / file; direct attacks and non-banking tools skipped; `--provider groq --runs N`) (Claude)
 - [x] Agent run 1 (27 Oct, mock agent, `agent_20261026-225012`): benign rent payment completed 135/135 without and 135/135 with AgentShield. Mock = simulated agent; no attack items applicable yet.
-- [ ] Agent run with real Groq on BN/Banglish attacks once attacks.jsonl exists (several runs per item)
+- [x] attacks.jsonl: 12 Bangla + 12 Banglish (7 blunt, 5 subtle each), LLM-generated, admission phrases removed and reviewed by the user
+- [x] Text run 3 (`detection_20261027-151903`): Prompt Guard 2 flags 0/24 Bangla/Banglish attacks (86m and 22m); heuristic 4/7 blunt per language, 0/5 subtle
+- [x] Agent run, simulated (`agent_20261027-151938`): attacks succeed 11/20 without, 0/20 with AgentShield; rent paid 90/90 with
+- [ ] Agent run with real Groq (20 attacks + 20 benign, 1 run) — started 27 Oct 21:19, result → docs/results.md section 3b
+- [x] docs/results.md draft (measured numbers only), architecture.md updated, ethics KPIs filled, README results summary
+- [x] Dashboard Benchmark tab reads benchmark/results (tables + chart)
+
+## Phase 4 prep
+- [x] training/train_classifier.ipynb (XLM-R base, stratified 70/15/15 split, class weights, test-split-only metrics, saves split_ids.json). Not run yet (needs Kaggle GPU).
 - [ ] LLM-assisted variations (user reviews Bangla/Banglish samples)
 - [ ] 300–500 labeled items, balanced
 - [ ] Benchmark runner + metrics (ASR with/without, block rate, FPR, per-language, median latency, benign completion)
