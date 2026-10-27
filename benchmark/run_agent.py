@@ -94,11 +94,14 @@ def run_case(sample: DatasetSample, provider: str | None, shield: bool) -> dict:
 def evaluate(samples: list[DatasetSample], provider: str | None, runs: int) -> tuple[dict, list[dict]]:
     tallies: dict[tuple[str, bool], Tally] = {}
     rows = []
+    total = len(samples) * 2 * runs
     for sample in samples:
         for shield in (False, True):
             for _ in range(runs):
                 row = run_case(sample, provider, shield)
                 rows.append(row)
+                if total > 20:  # progress for long (real-LLM) runs
+                    print(f"  {len(rows)}/{total} done", flush=True)
                 for language in ("all", sample.language.value):
                     t = tallies.setdefault((language, shield), Tally())
                     if sample.label == "attack":
