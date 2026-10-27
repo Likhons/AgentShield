@@ -23,6 +23,12 @@ streamlit run dashboard/app.py
 ```
 Opens in the browser. Pick a scenario and press **Run scenario**: the left column runs the unprotected agent, the right column runs the same agent protected by AgentShield. The **Audit log** tab lists every decision; the **Benchmark** tab shows the latest measured results.
 
+## HTTP gateway (any language, any framework)
+```powershell
+uvicorn agentshield.api.app:create_app --factory --port 8000
+```
+Open http://localhost:8000/docs for the interactive API. Before every tool call, `POST /v1/check` with the user's request, the tool call and the labeled context; the answer is ALLOW / ASK_HUMAN / BLOCK with reasons. `GET /v1/audit` and `GET /v1/stats` return the decision log. Set `AGENTSHIELD_API_KEY` in `.env` to require an `X-API-Key` header.
+
 ## Benchmark
 ```powershell
 python -m benchmark.dataset                                                    # validate data

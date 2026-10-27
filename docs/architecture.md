@@ -44,7 +44,7 @@ Design principle: **"AI where judgment is needed, deterministic rules where cert
 | Demo banking agent | `demo_agent/` | Agent with six fake MockPay tools and 13 scenarios (5 benign, 8 attacks), runnable without and with AgentShield | Built, tested |
 | Dashboard | `dashboard/` | Streamlit: side-by-side demo (without vs with AgentShield), audit log with KPIs, benchmark tab | Demo and audit built; benchmark charts planned (Phase 5) |
 | Benchmark | `benchmark/`, `datasets/` | Text-level (detectors) and agent-level (money outcome) benchmarks per language, with 95% confidence intervals | Built; dataset growing (Phase 3) |
-| HTTP gateway | `agentshield/api/` | Same checks as a web service, for any language or framework | Planned (optional) |
+| HTTP gateway | `agentshield/api/app.py` | Same checks as a web service (FastAPI): `POST /v1/check`, `GET /v1/audit`, `GET /v1/stats`; optional API key | Built, tested |
 
 ## 2b. How the decision is made
 
