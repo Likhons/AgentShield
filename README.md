@@ -2,13 +2,18 @@
 
 **Runtime security gateway for AI agents.** AgentShield checks every tool call an agent wants to make before it runs, and blocks actions the user never asked for, especially ones triggered by hidden instructions in Bangla, Banglish or English inside untrusted data (emails, web pages, files).
 
-> Status: Phase 2 (core) working; classifier and benchmark in progress. Benchmark results: TBD.
+> Status: core working end to end; benchmark in progress (Phase 3). All numbers: [docs/results.md](docs/results.md).
+
+## Results so far (measured, small samples)
+- Meta Prompt Guard 2 flagged **0 of 24** Bangla/Banglish prompt-injection attacks (and 1 of 40 subtle English agent injections).
+- On a simulated agent, Bangla/Banglish attacks moved money in 11 of 20 cases without AgentShield and **0 of 20** with it, while the user's real rent payment still went through in **135 of 135** benign cases.
+- Real-LLM agent results: TBD. Details, sources and caveats in [docs/results.md](docs/results.md).
 
 ## See the attack, then see it stopped
 ```powershell
 python -m demo_agent.run                    # agent reads a Bangla phishing email and sends money
 python -m demo_agent.run --shield           # same agent, protected by AgentShield: blocked
-python -m demo_agent.run --compare --all    # all 11 scenarios (5 benign, 6 attacks), side by side
+python -m demo_agent.run --compare --all    # all 13 scenarios (5 benign, 8 attacks), side by side
 ```
 By default this runs on the offline mock LLM, which simulates a naive agent that obeys instructions found in tool output. Add `--provider groq` to use the real model configured in `.env`.
 
@@ -16,21 +21,34 @@ By default this runs on the offline mock LLM, which simulates a naive agent that
 ```powershell
 streamlit run dashboard/app.py
 ```
-Opens in the browser. Pick a scenario and press **Run scenario**: the left column runs the unprotected agent, the right column runs the same agent protected by AgentShield. The **Audit log** tab lists every decision.
+Opens in the browser. Pick a scenario and press **Run scenario**: the left column runs the unprotected agent, the right column runs the same agent protected by AgentShield. The **Audit log** tab lists every decision; the **Benchmark** tab shows the latest measured results.
+
+## Benchmark
+```powershell
+python -m benchmark.dataset                                                    # validate data
+python -m benchmark.run_detection --detectors heuristic,promptguard-86m,promptguard-22m
+python -m benchmark.run_agent --languages bn,banglish                          # simulated agent
+python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish # real LLM (slow)
+```
 
 ## Docs
+- [Measured results](docs/results.md)
 - [Architecture](docs/architecture.md)
 - [Business model and global readiness](docs/business_model.md)
 - [Real-world impact and ethical AI](docs/ethics_impact.md)
 
-## How it works (planned)
-Every tool call passes four checks:
+## How it works
+Every tool call passes four checks before it runs:
 1. **Taint tracking**: where did the data that triggered this call come from?
 2. **Injection classifier**: does the data contain an injection attempt (EN / BN / Banglish)?
 3. **Intent check**: does this action follow from what the user actually asked?
 4. **Policy engine**: deterministic YAML rules (limits, allowed recipients).
 
-Result: **ALLOW / ASK_HUMAN / BLOCK** with a reason in English and Bangla, written to an audit log.
+Result: **ALLOW / ASK_HUMAN / BLOCK** with a reason in English and Bangla, written to an audit log. Protect any agent's tools in two lines:
+```python
+session = ShieldSession(engine, user_request=task, known_recipients=contacts)
+send_money = session.wrap("send_money", send_money, source="tool:bank")
+```
 
 ## Setup (Windows PowerShell)
 ```powershell

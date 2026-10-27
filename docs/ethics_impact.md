@@ -16,13 +16,13 @@ All values come from the benchmark runner (Phase 3) and are reported per languag
 
 | KPI | What it means | Target direction | Value |
 |---|---|---|---|
-| Attack success rate, without AgentShield | How often attacks succeed on an unprotected agent | (baseline) | TBD |
-| Attack success rate, with AgentShield | How often attacks still succeed when protected | as low as possible | TBD |
-| Over-refusal (false positive rate) | Share of benign actions wrongly blocked or held | as low as possible | TBD |
-| Benign task completion | Share of normal tasks that finish correctly | as high as possible | TBD |
-| Per-language gap | Difference in over-refusal between Bangla/Banglish and English | close to zero | TBD |
-| Median added latency | Extra time per tool call | small enough not to be noticed | TBD |
-| LLM judge call rate | Share of tool calls that needed the LLM | low (cost and privacy) | TBD |
+| Attack success rate, without AgentShield | How often attacks succeed on an unprotected agent | (baseline) | Simulated agent: 11/20 Bangla/Banglish attacks (`agent_20261027-151938`). Real LLM: TBD |
+| Attack success rate, with AgentShield | How often attacks still succeed when protected | as low as possible | Simulated agent: 0/20 (same run). Real LLM: TBD |
+| Over-refusal (false positive rate) | Share of benign actions wrongly blocked or held | as low as possible | Action level, simulated agent: 0/135 legitimate rent payments stopped (`agent_20261026-225012`). Text level, our classifier: 1/135 benign texts flagged (`detection_20261027-151903`) |
+| Benign task completion | Share of normal tasks that finish correctly | as high as possible | Simulated agent: 135/135 with AgentShield. Real LLM: TBD |
+| Per-language gap | Difference in over-refusal between Bangla/Banglish and English | close to zero | Classifier false positives: Bangla 0/45, Banglish 1/45, English 0/45. Action level: 45/45 completed in each language (simulated) |
+| Median added latency | Extra time per tool call | small enough not to be noticed | Without an LLM call: about 0.1–0.3 ms. When the intent judge is called (Groq): median 859 ms over 5 scenarios |
+| LLM judge call rate | Share of tool calls that needed the LLM | low (cost and privacy) | 8 of 34 checked tool calls in the 11-scenario demo comparison (27 Oct) |
 
 **Early observation (anecdotal, not a statistic).** On 27 Oct 2026 we ran our demo agent once per model on two real LLMs. Blunt "ignore your instructions" style attacks did not work on either model. A realistic, polite-looking Bangla bill with an attacker's payment number did fool one of the two models into paying. This single run is why the benchmark must include subtle, realistic attacks and run each case many times before we claim any rate.
 
