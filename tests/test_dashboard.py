@@ -24,6 +24,19 @@ def test_dashboard_loads_without_errors() -> None:
     assert app.title[0].value == "🛡️ AgentShield"
 
 
+def test_recorded_mode_without_recordings_explains_how_to_record(monkeypatch, tmp_path) -> None:
+    import demo_agent.recording as recording
+
+    monkeypatch.setattr(recording, "RECORDINGS_DIR", tmp_path)
+    monkeypatch.setattr(recording.recording_path, "__defaults__", (tmp_path,))
+    monkeypatch.setattr(recording.load_result, "__defaults__", (tmp_path,))
+    app = AppTest.from_file(APP, default_timeout=30).run()
+    app.radio[0].set_value("recorded (groq)")
+    app.button[0].click().run()
+    assert not app.exception
+    assert any("--record" in i.value for i in app.info)
+
+
 def test_live_demo_side_by_side_on_mock() -> None:
     app = AppTest.from_file(APP, default_timeout=30).run()
     app.radio[0].set_value("mock")

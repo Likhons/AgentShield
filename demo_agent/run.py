@@ -25,6 +25,7 @@ from agentshield.llm import get_provider
 from agentshield.sdk.session import ShieldSession
 from demo_agent.agent import AgentRun, BankingAgent, Step
 from demo_agent.scenarios import Outcome, build_world, judge_outcome, load_scenarios
+from demo_agent.recording import save_result
 from demo_agent.tools import MockPayWorld
 
 ICONS = {"allow": "ALLOW", "ask_human": "ASK_HUMAN", "block": "BLOCK"}
@@ -173,6 +174,8 @@ def main() -> None:
     parser.add_argument("--provider", help="override LLM_PROVIDER (mock / gemini / groq)")
     parser.add_argument("--model", help="override LLM_MODEL")
     parser.add_argument("--judge-model", help="override JUDGE_MODEL (intent judge)")
+    parser.add_argument("--record", action="store_true",
+                        help="save each run to demo_agent/recordings/<provider>/ for instant replay in the dashboard")
     args = parser.parse_args()
 
     scenarios = load_scenarios()
@@ -193,6 +196,9 @@ def main() -> None:
         ]
         for result in results:
             print_run(result)
+            if args.record:
+                provider = args.provider or get_settings().llm_provider
+                print(f"Recorded: {save_result(result, provider)}")
         rows.append((name, results))
 
     if len(names) > 1 or args.compare:

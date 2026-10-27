@@ -61,6 +61,11 @@
 - [x] docs/results.md draft (measured numbers only), architecture.md updated, ethics KPIs filled, README results summary
 - [x] Dashboard Benchmark tab reads benchmark/results (tables + chart)
 
+- [x] Agent benchmark records outcomes (blocked / held for approval / paid ...) and balances `--limit` per language; dashboard shows them
+
+## Phase 5 prep
+- [x] Record/replay for the stage demo (`--record`, dashboard "recorded (groq)"); recordings still to be made after the intent fix
+
 ## Phase 4 prep
 - [x] training/train_classifier.ipynb (XLM-R base, stratified 70/15/15 split, class weights, test-split-only metrics, saves split_ids.json). Not run yet (needs Kaggle GPU).
 - [ ] LLM-assisted variations (user reviews Bangla/Banglish samples)

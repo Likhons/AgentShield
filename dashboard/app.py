@@ -23,6 +23,7 @@ from agentshield.audit.log import AuditLog  # noqa: E402
 from benchmark.report import agent_rows, detection_rows, latest, outcome_rows  # noqa: E402
 from agentshield.config import get_settings  # noqa: E402
 from agentshield.llm import LLMError  # noqa: E402
+from demo_agent.recording import load_result  # noqa: E402
 from demo_agent.run import ScenarioResult, run_scenario  # noqa: E402
 from demo_agent.scenarios import load_scenarios  # noqa: E402
 
@@ -37,7 +38,19 @@ def audit_log() -> AuditLog:
     return AuditLog(get_settings().audit_db_path)
 
 
+RECORDED = "recorded (groq)"
+
+
 def run_safely(name: str, provider: str, shield: bool) -> ScenarioResult | None:
+    if provider == RECORDED:  # instant replay of a saved real-LLM run
+        loaded = load_result(name, shield, "groq")
+        if loaded is None:
+            st.info("No recording for this scenario yet. Record with:\n\n"
+                    "python -m demo_agent.run --all --compare --provider groq --record")
+            return None
+        result, recorded_utc = loaded
+        st.caption(f"Replay of a real run recorded {recorded_utc} (UTC). Not live.")
+        return result
     try:
         with st.spinner("Agent is working..."):
             return run_scenario(name, provider=provider, shield=shield, audit=audit_log() if shield else None)
@@ -86,9 +99,10 @@ def live_demo_tab() -> None:
     with right:
         provider = st.radio(
             "LLM",
-            ["mock", "groq"],
+            ["mock", "groq", RECORDED],
             horizontal=True,
-            help="mock works offline and simulates a naive agent. groq uses the real model from .env.",
+            help="mock works offline and simulates a naive agent. groq uses the real model from .env. "
+                 "recorded replays a saved real-model run instantly (for the stage).",
         )
 
     if provider == "mock":
