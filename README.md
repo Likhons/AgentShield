@@ -39,6 +39,8 @@ python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish #
 
 ## Docs
 - [Measured results](docs/results.md)
+- [Pitch and demo script](docs/pitch.md)
+- [Putting the dashboard online](docs/deploy.md)
 - [Architecture](docs/architecture.md)
 - [Business model and global readiness](docs/business_model.md)
 - [Real-world impact and ethical AI](docs/ethics_impact.md)

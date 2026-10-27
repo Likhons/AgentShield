@@ -63,6 +63,12 @@
 
 - [x] Agent benchmark records outcomes (blocked / held for approval / paid ...) and balances `--limit` per language; dashboard shows them
 
+## Phase 6 prep
+- [x] docs/pitch.md: 3-minute pitch mapped to judging criteria, stage-safe demo plan, sayable numbers with limits, judge Q&A, demo video script
+- [x] docs/deploy.md: Streamlit Cloud / HF Spaces steps (not deployed; publishing is the user's decision)
+- [x] FastAPI gateway (`agentshield/api/app.py`)
+- [x] Mixed-inbox experiment (`benchmark/run_mixed.py`): evidence for classifier scope B
+
 ## Phase 5 prep
 - [x] Record/replay for the stage demo (`--record`, dashboard "recorded (groq)"); recordings still to be made after the intent fix
 
