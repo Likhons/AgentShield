@@ -56,7 +56,8 @@
 - [x] attacks.jsonl: 12 Bangla + 12 Banglish (7 blunt, 5 subtle each), LLM-generated, admission phrases removed and reviewed by the user
 - [x] Text run 3 (`detection_20261027-151903`): Prompt Guard 2 flags 0/24 Bangla/Banglish attacks (86m and 22m); heuristic 4/7 blunt per language, 0/5 subtle
 - [x] Agent run, simulated (`agent_20261027-151938`): attacks succeed 11/20 without, 0/20 with AgentShield; rent paid 90/90 with
-- [ ] Agent run with real Groq (20 attacks + 20 benign, 1 run) — started 27 Oct 21:19, result → docs/results.md section 3b
+- [x] Agent run with real Groq (`agent_20261027-153825`): attacks 4/20 without → 0/20 with; BUT rent paid 17/20 without → 0/20 with (all ASK_HUMAN): the gpt-oss-120b judge, which never sees the email, cannot tell the landlord is a saved contact and says "inconsistent"
+- [ ] Fix (proposed option A, user's file intent.py): give the judge the trusted fact "recipient is a saved contact: yes/no" from `known_recipients`; benchmark should also report asked vs blocked separately; re-run real Groq
 - [x] docs/results.md draft (measured numbers only), architecture.md updated, ethics KPIs filled, README results summary
 - [x] Dashboard Benchmark tab reads benchmark/results (tables + chart)
 

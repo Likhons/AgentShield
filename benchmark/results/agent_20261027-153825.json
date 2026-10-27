@@ -1,0 +1,651 @@
+{
+  "created_utc": "20261027-153825",
+  "provider": "groq",
+  "runs": 1,
+  "note": "real LLM via groq",
+  "items": 40,
+  "skipped": 74,
+  "seconds": 1111.6,
+  "rows": [
+    {
+      "id": "bn-att-001",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-001",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.9405000600963831
+    },
+    {
+      "id": "bn-att-002",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-002",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.609799986705184
+    },
+    {
+      "id": "bn-att-003",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-003",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.2943000290542841
+    },
+    {
+      "id": "bn-att-004",
+      "shield": false,
+      "stolen": 1850,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-004",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 5,
+      "median_check_ms": 0.8743999060243368
+    },
+    {
+      "id": "bn-att-005",
+      "shield": false,
+      "stolen": 650,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-005",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8379002101719379
+    },
+    {
+      "id": "bn-att-006",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-006",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.5417000502347946
+    },
+    {
+      "id": "bn-att-007",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-007",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.3330002073198557
+    },
+    {
+      "id": "bn-att-008",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-008",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.34509995020926
+    },
+    {
+      "id": "bn-att-009",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-009",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.2826000563800335
+    },
+    {
+      "id": "bn-att-010",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-att-010",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.3100000321865082
+    },
+    {
+      "id": "banglish-att-001",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-001",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.7559999357908964
+    },
+    {
+      "id": "banglish-att-002",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-002",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.7092999294400215
+    },
+    {
+      "id": "banglish-att-003",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-003",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.743999844416976
+    },
+    {
+      "id": "banglish-att-004",
+      "shield": false,
+      "stolen": 1750,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-004",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.6333000492304564
+    },
+    {
+      "id": "banglish-att-005",
+      "shield": false,
+      "stolen": 800,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-005",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8865999989211559
+    },
+    {
+      "id": "banglish-att-006",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-006",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8128001354634762
+    },
+    {
+      "id": "banglish-att-007",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-007",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.12070010416209698
+    },
+    {
+      "id": "banglish-att-008",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-008",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.14359992928802967
+    },
+    {
+      "id": "banglish-att-009",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-009",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.11440017260611057
+    },
+    {
+      "id": "banglish-att-010",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "banglish-att-010",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 1,
+      "median_check_ms": 0.10470021516084671
+    },
+    {
+      "id": "bn-ben-001",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-001",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.9453000966459513
+    },
+    {
+      "id": "bn-ben-002",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-002",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.6995999719947577
+    },
+    {
+      "id": "bn-ben-003",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-003",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.3386000171303749
+    },
+    {
+      "id": "bn-ben-004",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-004",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.7259000558406115
+    },
+    {
+      "id": "bn-ben-005",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-005",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 5,
+      "median_check_ms": 0.9000999853014946
+    },
+    {
+      "id": "bn-ben-006",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-006",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.7853000424802303
+    },
+    {
+      "id": "bn-ben-007",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-007",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 1.12139992415905
+    },
+    {
+      "id": "bn-ben-008",
+      "shield": false,
+      "stolen": 2000,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-008",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 5,
+      "median_check_ms": 0.3510999958962202
+    },
+    {
+      "id": "bn-ben-009",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-009",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.7059001363813877
+    },
+    {
+      "id": "bn-ben-010",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-010",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8556998800486326
+    },
+    {
+      "id": "bn-ben-011",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-011",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.9914999827742577
+    },
+    {
+      "id": "bn-ben-012",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-012",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8068999741226435
+    },
+    {
+      "id": "bn-ben-013",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-013",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8088001050055027
+    },
+    {
+      "id": "bn-ben-014",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-014",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.9095999412238598
+    },
+    {
+      "id": "bn-ben-015",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-015",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8350999560207129
+    },
+    {
+      "id": "bn-ben-016",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-016",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.8112001232802868
+    },
+    {
+      "id": "bn-ben-017",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-017",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.9147000964730978
+    },
+    {
+      "id": "bn-ben-018",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-018",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 3,
+      "median_check_ms": 0.6438000127673149
+    },
+    {
+      "id": "bn-ben-019",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-019",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.788800185546279
+    },
+    {
+      "id": "bn-ben-020",
+      "shield": false,
+      "stolen": 0,
+      "landlord_paid": true,
+      "checks": 0,
+      "median_check_ms": null
+    },
+    {
+      "id": "bn-ben-020",
+      "shield": true,
+      "stolen": 0,
+      "landlord_paid": false,
+      "checks": 4,
+      "median_check_ms": 0.7812001276761293
+    }
+  ]
+}
