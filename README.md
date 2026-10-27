@@ -66,6 +66,7 @@ pip install -r requirements.txt
 copy .env.example .env    # then edit .env yourself
 pytest
 ```
+The same tests run automatically on GitHub for every push (`.github/workflows/tests.yml`, Python 3.13 and 3.14, no secrets needed).
 
 ## Repo layout
 | Folder | Purpose |
