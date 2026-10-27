@@ -7,7 +7,7 @@
 - **Done 27 Oct:** `datasets/attacks.jsonl` (24 BN/Banglish, reviewed). Text benchmark: Prompt Guard 2 flags 0/24. Simulated agent: 0/20 attacks succeed with AgentShield. `docs/results.md` drafted; dashboard Benchmark tab live.
 - **Real-Groq agent run done** (`agent_20261027-153825`): attacks 4/20 → 0/20, but legit rent 17/20 → 0/20 (all held for approval). Cause: gpt-oss-120b judge can't see that the recipient is a saved contact. **Waiting for the user's OK on fix A**: user adds "recipient is a saved contact: yes/no" (from `known_recipients`) to `build_messages()` in `checks/intent.py` + one prompt sentence; Claude explains step by step, then re-runs `python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish --limit 10` (balanced now) and records before/after in docs/results.md §3b.
 - **After the fix:** record the stage demo once: `python -m demo_agent.run --all --compare --provider groq --record` (dashboard option "recorded (groq)" replays it instantly; recordings in `demo_agent/recordings/groq/`).
-- Not pushed to GitHub since `74c0915`; ask the user before pushing.
+- GitHub is up to date as of `d15133d` (pushed 27 Oct); ask the user before pushing again.
 - **Open user tasks:** read all 135 items in `datasets/benign.jsonl` (then `reviewed=yes`); add ~15 own hand-written benign items per language (BN/Banglish) in `datasets/benign_own.jsonl` (removes bias, see below); ideally a few hand-written attacks too.
 - **Next:** decide classifier scope (Open decisions); Phase 4 = user runs `training/train_classifier.ipynb` on Kaggle (instructions inside), then a model-backed detector + benchmark on test-split ids only (`split_ids.json`).
 
