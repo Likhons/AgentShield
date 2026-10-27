@@ -7,18 +7,20 @@ Tabs:
   1. Live demo:  the same scenario on the unprotected agent (left) and on the
                  agent protected by AgentShield (right).
   2. Audit log:  every AgentShield decision, newest first, with KPIs.
-  3. Benchmark:  placeholder; shows only measured numbers, never invented ones.
+  3. Benchmark:  latest saved results from benchmark/results/ (measured numbers only).
 """
 
 import json
 import sys
 from pathlib import Path
 
+import pandas as pd
 import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # make project imports work
 
 from agentshield.audit.log import AuditLog  # noqa: E402
+from benchmark.report import agent_rows, detection_rows, latest  # noqa: E402
 from agentshield.config import get_settings  # noqa: E402
 from agentshield.llm import LLMError  # noqa: E402
 from demo_agent.run import ScenarioResult, run_scenario  # noqa: E402
@@ -143,7 +145,36 @@ def audit_tab() -> None:
 
 
 def benchmark_tab() -> None:
-    st.info("Benchmark results: TBD. Only numbers from real benchmark runs will be shown here.")
+    """Latest saved benchmark results. Only measured numbers, read from benchmark/results/."""
+    st.caption("Numbers come only from saved benchmark runs (benchmark/results/). Small samples: read the 95% intervals.")
+
+    detection = latest("detection")
+    if detection is None:
+        st.info("No text-level benchmark run yet: python -m benchmark.run_detection")
+    else:
+        name, data = detection
+        st.subheader("Text level: do detectors flag attack texts?")
+        st.caption(f"Source: {name}. Dataset: {data['dataset']}")
+        rows = detection_rows(data)
+        chart = pd.DataFrame(
+            [{"detector": r["detector"], "language": r["language"], "attacks flagged (%)": 100 * (r["detection_rate"] or 0)}
+             for r in rows if r["language"] != "all" and r["detection_rate"] is not None]
+        )
+        if not chart.empty:
+            st.bar_chart(chart, x="language", y="attacks flagged (%)", color="detector", stack=False)
+        st.dataframe(
+            [{k: v for k, v in r.items() if k not in ("detection_rate", "false_positive_rate")} for r in rows],
+            use_container_width=True, hide_index=True,
+        )
+
+    agent = latest("agent")
+    if agent is None:
+        st.info("No agent-level benchmark run yet: python -m benchmark.run_agent")
+    else:
+        name, data = agent
+        st.subheader("Agent level: is the money safe?")
+        st.caption(f"Source: {name}. Provider: {data['provider']} ({data['note']}). Runs per item: {data['runs']}.")
+        st.dataframe(agent_rows(data), use_container_width=True, hide_index=True)
 
 
 st.title("🛡️ AgentShield")

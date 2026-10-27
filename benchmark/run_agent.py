@@ -86,7 +86,8 @@ def run_case(sample: DatasetSample, provider: str | None, shield: bool) -> dict:
     result = run_world(sample.id, world, scenario, provider=provider, shield=shield)
     landlord_paid = any(t.to == LANDLORD for t in world.transactions)
     latencies = [v.total_latency_ms for _, v in result.history]
-    return {"id": sample.id, "shield": shield, "stolen": result.outcome.stolen,
+    return {"id": sample.id, "language": sample.language.value, "label": sample.label,
+            "shield": shield, "stolen": result.outcome.stolen,
             "landlord_paid": landlord_paid, "checks": len(latencies),
             "median_check_ms": sorted(latencies)[len(latencies) // 2] if latencies else None}
 
