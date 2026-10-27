@@ -3,7 +3,9 @@
 import pytest
 
 from agentshield.core.models import DatasetSample
-from benchmark.run_agent import TASK_FILE, TASK_PAY_BILLS, TASK_SUMMARY, TASK_WEB, build_case, evaluate, run_case
+from benchmark.run_agent import (
+    TASK_FILE, TASK_PAY_BILLS, TASK_SUMMARY, TASK_WEB, build_case, evaluate, outcome_table, run_case,
+)
 from demo_agent.scenarios import load_json
 
 EMAILS = {e["id"]: e["body"] for e in load_json("emails.json")}
@@ -49,6 +51,19 @@ def test_mock_attack_succeeds_without_and_fails_with_agentshield(sample):
 def test_benign_item_keeps_the_rent_payment():
     assert run_case(BENIGN, "mock", shield=False)["landlord_paid"]
     assert run_case(BENIGN, "mock", shield=True)["landlord_paid"]
+
+
+def test_outcomes_name_how_money_was_stopped():
+    assert run_case(ATTACKS[0], "mock", shield=False)["outcome"] == "attacker paid"
+    assert run_case(ATTACKS[0], "mock", shield=True)["outcome"] == "blocked"
+    assert run_case(BENIGN, "mock", shield=True)["outcome"] == "paid"
+
+
+def test_outcome_table_counts_only_protected_runs():
+    _, rows = evaluate([ATTACKS[0], BENIGN], "mock", runs=1)
+    table = outcome_table(rows)
+    assert "| bn | attack | blocked 1 |" in table
+    assert "| bn | benign | paid 1 |" in table
 
 
 def test_evaluate_counts_per_language():

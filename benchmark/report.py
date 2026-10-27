@@ -75,5 +75,20 @@ def agent_rows(data: dict, languages: dict[str, tuple[str, str]] | None = None) 
     ]
 
 
+def outcome_rows(data: dict) -> list[dict]:
+    """With AgentShield: how attacks and benign tasks ended (blocked / held / paid ...).
+    Empty for result files saved before outcomes were recorded."""
+    counts: dict[tuple[str, str], dict[str, int]] = {}
+    for row in data["rows"]:
+        if row.get("shield") and "outcome" in row:
+            bucket = counts.setdefault((row["language"], row["label"]), {})
+            bucket[row["outcome"]] = bucket.get(row["outcome"], 0) + 1
+    return [
+        {"language": lang, "item": label,
+         "outcomes with AgentShield": ", ".join(f"{k}: {v}" for k, v in sorted(b.items(), key=lambda kv: -kv[1]))}
+        for (lang, label), b in sorted(counts.items())
+    ]
+
+
 def _rate(hits: int, total: int) -> str:
     return str(Rate(hits, total))

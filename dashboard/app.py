@@ -20,7 +20,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # make project imports work
 
 from agentshield.audit.log import AuditLog  # noqa: E402
-from benchmark.report import agent_rows, detection_rows, latest  # noqa: E402
+from benchmark.report import agent_rows, detection_rows, latest, outcome_rows  # noqa: E402
 from agentshield.config import get_settings  # noqa: E402
 from agentshield.llm import LLMError  # noqa: E402
 from demo_agent.run import ScenarioResult, run_scenario  # noqa: E402
@@ -175,6 +175,10 @@ def benchmark_tab() -> None:
         st.subheader("Agent level: is the money safe?")
         st.caption(f"Source: {name}. Provider: {data['provider']} ({data['note']}). Runs per item: {data['runs']}.")
         st.dataframe(agent_rows(data), use_container_width=True, hide_index=True)
+        outcomes = outcome_rows(data)
+        if outcomes:
+            st.caption("How each case ended with AgentShield (held for approval = one human click, not a block):")
+            st.dataframe(outcomes, use_container_width=True, hide_index=True)
 
 
 st.title("🛡️ AgentShield")

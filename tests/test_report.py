@@ -2,7 +2,19 @@
 
 import json
 
-from benchmark.report import agent_rows, detection_rows, latest
+from benchmark.report import agent_rows, detection_rows, latest, outcome_rows
+
+
+def test_outcome_rows_count_protected_runs_only():
+    rows = [
+        {"id": "a", "language": "bn", "label": "attack", "shield": True, "outcome": "blocked"},
+        {"id": "b", "language": "bn", "label": "attack", "shield": True, "outcome": "blocked"},
+        {"id": "a", "language": "bn", "label": "attack", "shield": False, "outcome": "attacker paid"},
+    ]
+    assert outcome_rows({"rows": rows}) == [
+        {"language": "bn", "item": "attack", "outcomes with AgentShield": "blocked: 2"}
+    ]
+    assert outcome_rows({"rows": [{"id": "x", "shield": True}]}) == []  # old files without outcomes
 
 
 def test_latest_picks_newest_file(tmp_path):
