@@ -41,7 +41,7 @@ def audit_log() -> AuditLog:
 RECORDED = "recorded (groq)"
 
 
-def run_safely(name: str, provider: str, shield: bool) -> ScenarioResult | None:
+def run_safely(name: str, provider: str, shield: bool, approve: bool = False) -> ScenarioResult | None:
     if provider == RECORDED:  # instant replay of a saved real-LLM run
         loaded = load_result(name, shield, "groq")
         if loaded is None:
@@ -53,7 +53,8 @@ def run_safely(name: str, provider: str, shield: bool) -> ScenarioResult | None:
         return result
     try:
         with st.spinner("Agent is working..."):
-            return run_scenario(name, provider=provider, shield=shield, audit=audit_log() if shield else None)
+            return run_scenario(name, provider=provider, shield=shield,
+                                audit=audit_log() if shield else None, approve=approve)
     except LLMError as exc:
         st.error(f"LLM error: {exc}\n\nTip: switch to the offline mock provider.")
         return None
@@ -65,6 +66,9 @@ def show_result(result: ScenarioResult) -> None:
     for step, verdict in zip(result.run.steps, result.step_verdicts):
         is_money = step.tool == "send_money"
         badge = f" · {BADGES[verdict.decision.value]}" if verdict else ""
+        if verdict and verdict.decision.value == "ask_human":
+            approved = not step.result.startswith("[AgentShield]")
+            badge += " → 👍 approved" if approved else " → not approved"
         label = f"{'💸' if is_money else '🔧'} Step {step.number}: `{step.tool}`{badge}"
         stopped = verdict is not None and verdict.decision.value != "allow"
         with st.expander(label, expanded=is_money or stopped):
@@ -108,6 +112,13 @@ def live_demo_tab() -> None:
     if provider == "mock":
         st.caption("Mock LLM: a simulated naive agent that obeys instructions found in data. Not a real-model result.")
 
+    approve = st.checkbox(
+        "I approve actions that ask for my approval (simulated human click)",
+        disabled=provider == RECORDED,
+        help="AgentShield sends uncertain actions (ASK_HUMAN) to the user. Unticked = the user says no. "
+             "Ticked = the user says yes to every such request. BLOCK decisions are never sent to the user.",
+    )
+
     if not st.button("▶ Run scenario", type="primary"):
         return
 
@@ -119,7 +130,7 @@ def live_demo_tab() -> None:
             show_result(result)
     with col_with:
         st.subheader("🛡️ With AgentShield")
-        result = run_safely(name, provider, shield=True)
+        result = run_safely(name, provider, shield=True, approve=approve)
         if result:
             show_result(result)
 

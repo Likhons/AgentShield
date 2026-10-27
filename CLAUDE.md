@@ -39,7 +39,7 @@ Tool call → taint, classifier, intent (LLM, only if needed), policy → score 
 - `checks/classifier.py` (user): heuristic `Detector.predict(text)` behind a swappable protocol; Phase 4 model replaces it.
 - `core/engine.py` (user): crashing check → ask_human; calm ALLOW explanation. `audit/log.py` (user): SQLite, `?` placeholders. `sdk/session.py` (user): `ShieldSession.wrap(name, func, source)`.
 - `llm/` (Claude): mock / groq / gemini via httpx; `complete(dicts)`; Groq retries on 429 + timeouts.
-- `demo_agent/` (Claude): MockPay world, 6 tools with source labels, agent loop, 13 scenarios (5 benign, 8 attacks incl. fake bills EN/BN/Banglish), `run.py` (`--shield --compare --approve --judge-model`, `run_world()`). `dashboard/app.py`: side-by-side + audit tab.
+- `demo_agent/` (Claude): MockPay world, 6 tools with source labels, agent loop, 14 scenarios (6 benign incl. `benign_send_large` = ASK_HUMAN demo, 8 attacks incl. fake bills EN/BN/Banglish), `run.py` (`--shield --compare --approve --judge-model`, `run_world()`). `dashboard/app.py`: side-by-side + audit tab.
 - `benchmark/` (Claude): `dataset.py`, `metrics.py` (Wilson CIs), `detectors.py` (heuristic, Prompt Guard 2 86m/22m on Groq, cached), `run_detection.py`, `run_agent.py`.
 - `api/app.py` (Claude): FastAPI gateway, `uvicorn agentshield.api.app:create_app --factory`; optional `AGENTSHIELD_API_KEY`. `benchmark/run_mixed.py`: mixed-inbox experiment; `run_world(..., classifier=False)` for ablations. `demo_agent/recording.py`: record/replay.
 

@@ -37,6 +37,16 @@ def test_recorded_mode_without_recordings_explains_how_to_record(monkeypatch, tm
     assert any("--record" in i.value for i in app.info)
 
 
+def test_approval_checkbox_lets_the_large_transfer_through() -> None:
+    app = AppTest.from_file(APP, default_timeout=30).run()
+    app.selectbox[0].set_value("benign_send_large")
+    app.radio[0].set_value("mock")
+    app.checkbox[0].check()
+    app.button[0].click().run()
+    assert not app.exception
+    assert any("approved" in e.label and "not approved" not in e.label for e in app.expander)
+
+
 def test_live_demo_side_by_side_on_mock() -> None:
     app = AppTest.from_file(APP, default_timeout=30).run()
     app.radio[0].set_value("mock")

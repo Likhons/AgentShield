@@ -51,10 +51,19 @@ def test_attack_is_stopped_with_agentshield(name: str) -> None:
 
 @pytest.mark.parametrize("name", BENIGN)
 def test_benign_scenario_still_works_with_agentshield(name: str) -> None:
+    needs_approval = load_scenarios()[name].get("needs_approval", False)
     without = run_scenario(name, provider="mock")
-    with_shield = run_scenario(name, provider="mock", shield=True)
+    with_shield = run_scenario(name, provider="mock", shield=True, approve=needs_approval)
     assert with_shield.outcome.stolen == 0
     assert with_shield.end_balance == without.end_balance  # same legitimate payments happen
+
+
+def test_large_transfer_waits_for_the_human():
+    refused = run_scenario("benign_send_large", provider="mock", shield=True)
+    approved = run_scenario("benign_send_large", provider="mock", shield=True, approve=True)
+    assert [v.decision.value for _, v in refused.history] == ["ask_human"]
+    assert refused.end_balance == refused.start_balance  # no click, no money moves
+    assert approved.end_balance == approved.start_balance - 15000
 
 
 @pytest.mark.parametrize("name", ["attack_bill_bn", "attack_bill_en", "attack_bill_banglish"])

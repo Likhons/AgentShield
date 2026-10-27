@@ -13,7 +13,7 @@
 ```powershell
 python -m demo_agent.run                    # agent reads a Bangla phishing email and sends money
 python -m demo_agent.run --shield           # same agent, protected by AgentShield: blocked
-python -m demo_agent.run --compare --all    # all 13 scenarios (5 benign, 8 attacks), side by side
+python -m demo_agent.run --compare --all    # all 14 scenarios (6 benign, 8 attacks), side by side
 ```
 By default this runs on the offline mock LLM, which simulates a naive agent that obeys instructions found in tool output. Add `--provider groq` to use the real model configured in `.env`.
 
