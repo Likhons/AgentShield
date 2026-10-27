@@ -10,6 +10,7 @@
 - GitHub is up to date as of `d15133d` (pushed 27 Oct); ask the user before pushing again.
 - **Open user tasks:** read all 135 items in `datasets/benign.jsonl` (then `reviewed=yes`); add ~15 own hand-written benign items per language (BN/Banglish) in `datasets/benign_own.jsonl` (removes bias, see below); ideally a few hand-written attacks too.
 - **Next:** decide classifier scope (Open decisions); Phase 4 = user runs `training/train_classifier.ipynb` on Kaggle (instructions inside), then a model-backed detector + benchmark on test-split ids only (`split_ids.json`).
+- **Claude-side work is caught up** (27 Oct): gateway, mixed-inbox experiment, record/replay, `docs/pitch.md`, `docs/deploy.md`. Everything left depends on the user: fix A + scope B (their files), own benign items, Kaggle run, publish decision. After A+B: re-run real Groq benchmark, record the demo, update results.md/pitch.md numbers.
 
 ## How we work (important)
 - Talk to the user in **simple Bangla**; code, comments, files, docs in **English**. User knows basic/intermediate Python; explain briefly what and why. Give exact PowerShell commands. One step at a time when the user asks for it.
