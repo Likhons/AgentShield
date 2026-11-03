@@ -7,6 +7,7 @@ from agentshield.checks.intent import (
     RISK_INCONSISTENT,
     RISK_UNVERIFIED,
     IntentChecker,
+    build_messages,
     parse_verdict,
 )
 from agentshield.core.models import CheckName, ContextItem, GuardRequest, SourceType, ToolCall
@@ -117,3 +118,29 @@ def test_skipped_result():
 def test_parse_verdict_rejects_missing_field():
     with pytest.raises(ValueError):
         parse_verdict('{"reason_en": "no verdict"}')
+
+
+def saved_contact_request(to: str, tool: str = "send_money") -> GuardRequest:
+    return GuardRequest(
+        user_request="বাড়িভাড়ার বিলটা দিয়ে দাও",
+        tool_call=ToolCall(tool_name=tool, arguments={"to": to, "amount": 8000}),
+        context=[ContextItem(content="বাড়িভাড়ার বিলটা দিয়ে দাও", source=SourceType.USER)],
+        known_recipients=["01000000111"],
+    )
+
+
+@pytest.mark.parametrize("to", ["01000000111", "+880 1000-000111", "০১০০০০০০১১১"])
+def test_judge_is_told_recipient_is_saved_contact(to):
+    user_message = build_messages(saved_contact_request(to))[1]["content"]
+    assert "Recipient is a saved contact: yes" in user_message
+
+
+def test_judge_is_told_recipient_is_not_saved_contact():
+    user_message = build_messages(saved_contact_request("01000000666"))[1]["content"]
+    assert "Recipient is a saved contact: no" in user_message
+
+
+def test_no_context_line_without_recipient():
+    user_message = build_messages(make_request(tool="read_inbox", arguments={"limit": 5}))[1]["content"]
+    assert "CONTEXT" not in user_message
+
