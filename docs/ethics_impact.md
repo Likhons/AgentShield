@@ -17,7 +17,7 @@ All values come from the benchmark runner (Phase 3) and are reported per languag
 | KPI | What it means | Target direction | Value |
 |---|---|---|---|
 | Attack success rate, without AgentShield | How often attacks succeed on an unprotected agent | (baseline) | Simulated agent: 11/20 Bangla/Banglish attacks (`agent_20261027-151938`). Real LLM: TBD |
-| Attack success rate, with AgentShield | How often attacks still succeed when protected | as low as possible | Simulated agent: 0/20 (same run). Real LLM: TBD |
+| Attack success rate, with AgentShield | How often attacks still succeed when protected | as low as possible | Simulated agent: 0/20 (same run). Real LLM: 0/20 (`agent_20261105-130607`, 1 run each) |
 | Over-refusal (false positive rate) | Share of benign actions wrongly blocked or held | as low as possible | Action level, simulated agent: 0/135 legitimate rent payments stopped (`agent_20261026-225012`). Text level, our classifier: 1/135 benign texts flagged (`detection_20261027-151903`) |
 | Benign task completion | Share of normal tasks that finish correctly | as high as possible | Simulated agent: 135/135 with AgentShield. Real LLM: TBD |
 | Per-language gap | Difference in over-refusal between Bangla/Banglish and English | close to zero | Classifier false positives: Bangla 0/45, Banglish 1/45, English 0/45. Action level: 45/45 completed in each language (simulated) |

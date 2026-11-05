@@ -2,12 +2,12 @@
 
 > Read this first. Keep it short and current; details live in PROGRESS.md and the code.
 
-## RESUME HERE (last updated 27 Oct 2026)
+## RESUME HERE (last updated 5 Nov 2026)
 - **Phase:** 3 (datasets + benchmark) nearly done, ahead of schedule (deadline ~9 Nov). Phases 0–2 done. Phase 4 notebook ready.
 - **Done 27 Oct:** `datasets/attacks.jsonl` (24 BN/Banglish, reviewed). Text benchmark: Prompt Guard 2 flags 0/24. Simulated agent: 0/20 attacks succeed with AgentShield. `docs/results.md` drafted; dashboard Benchmark tab live.
-- **Real-Groq agent run done** (`agent_20261027-153825`): attacks 4/20 → 0/20, but legit rent 17/20 → 0/20 (all held for approval). Cause: gpt-oss-120b judge can't see that the recipient is a saved contact. **Fix A postponed by the user (do later, together with classifier scope B)**: user adds "recipient is a saved contact: yes/no" (from `known_recipients`) to `build_messages()` in `checks/intent.py` + one prompt sentence; Claude explains step by step, then re-runs `python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish --limit 10` (balanced now) and records before/after in docs/results.md §3b.
-- **After the fix:** record the stage demo once: `python -m demo_agent.run --all --compare --provider groq --record` (dashboard option "recorded (groq)" replays it instantly; recordings in `demo_agent/recordings/groq/`).
-- GitHub is up to date as of `d15133d` (pushed 27 Oct); ask the user before pushing again.
+- **Fix A done 5 Nov** (`aa4b1b7`, run `agent_20261105-130607`, see docs/results.md §3b): rent paid with AgentShield 0/20 to 14/20 (16/20 without), attacks 0/20 (blocked 3, never tried 17). Remaining: 2 held by classifier scope (`*-ben-005`), so **next step is classifier scope B**; 4 not attempted by the agent itself. Old 0/20 attack runs were mostly the agent halting after a held rent payment.
+- **After scope B:** re-run the Groq benchmark, then record the stage demo once: `python -m demo_agent.run --all --compare --provider groq --record` (dashboard option "recorded (groq)" replays it instantly; recordings in `demo_agent/recordings/groq/`).
+- GitHub is behind local `main` (last push 27 Oct); ask the user before pushing again.
 - **Open user tasks:** read all 135 items in `datasets/benign.jsonl` (then `reviewed=yes`); add ~15 own hand-written benign items per language (BN/Banglish) in `datasets/benign_own.jsonl` (removes bias, see below); ideally a few hand-written attacks too.
 - **Next:** decide classifier scope (Open decisions); Phase 4 = user runs `training/train_classifier.ipynb` on Kaggle (instructions inside), then a model-backed detector + benchmark on test-split ids only (`split_ids.json`).
 - **Claude-side work is caught up** (27 Oct): gateway, mixed-inbox experiment, record/replay, `docs/pitch.md`, `docs/deploy.md`. Everything left depends on the user: fix A + scope B (their files), own benign items, Kaggle run, publish decision. After A+B: re-run real Groq benchmark, record the demo, update results.md/pitch.md numbers.

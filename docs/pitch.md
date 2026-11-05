@@ -30,7 +30,7 @@ Say "first agent-action security for Bangla", never "first Bangla guardrail".
 |---|---|---|
 | Prompt Guard 2 on our Bangla/Banglish attacks | 0/24 flagged (both 86m and 22m) | 24 items; it also missed 39/40 subtle English agent injections, so the gap is not only language |
 | Real model fooled by a Bangla fake bill | Happened in our tests (4/20 attacks moved money without protection) | 20 items, 1 run each |
-| AgentShield with a real model | 0/20 attacks moved money | Version 1 also held 20/20 legitimate rent payments for approval: fix pending; quote the re-run after the fix |
+| AgentShield with a real model | 0/20 attacks moved money; 14/20 rent payments completed (16/20 without AgentShield) | 20 + 20 items, 1 run each, `agent_20261105-130607`. Only 3 of the 20 attacks reached a blocked payment; in the other 17 the agent never tried |
 | Simulated agent | 0/20 attacks succeed with AgentShield; 135/135 benign rent payments completed | Simulation (mock agent), say so |
 | Speed | ~0.1–0.6 ms per check without an LLM call; LLM judge called only when needed | Free-tier LLM latency varies |
 
