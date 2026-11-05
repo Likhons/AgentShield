@@ -21,7 +21,8 @@ def test_order_of_emails():
     assert [e["id"] for e in world.emails] == ["e20", "e91"]
 
 
-def test_classifier_scanning_all_context_holds_the_rent_when_attack_comes_first():
-    assert rent_paid("attack_first", classifier=True) is False  # held for approval (current design)
+def test_unrelated_attack_email_does_not_hold_the_rent():
+    """The classifier scores only the email the payment came from, in either order."""
+    assert rent_paid("attack_first", classifier=True) is True
     assert rent_paid("attack_first", classifier=False) is True
     assert rent_paid("rent_first", classifier=True) is True

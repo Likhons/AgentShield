@@ -6,6 +6,10 @@ For every argument value we look for it:
                                                   -> "tool_data" (tainted, item remembered)
   3. nowhere                                      -> "unknown"   (the LLM made it up)
 
+The details also list every tool item that holds an argument value, not only the
+newest one, and say whether every value could be traced. The engine uses them to
+score only the content a tool call really depends on.
+
 Tool output never counts as user-provided, not even trusted tool:bank output:
 an attacker's number that once landed in a transaction record must not look
 like something the user typed.
@@ -113,13 +117,19 @@ class TaintChecker:
             (_RISK.get((t["status"], sensitive), 0.0) for t in traced.values()), default=0.0
         )
         reason_en, reason_bn = self._reasons(traced)
+        linked = dict.fromkeys(i for t in traced.values() for i in t.get("item_ids", []))
         return CheckResult(
             check=CheckName.TAINT,
             risk_score=risk,
             flagged=risk >= 0.5,
             reason_en=reason_en,
             reason_bn=reason_bn,
-            details={"sensitive_tool": sensitive, "arguments": traced},
+            details={
+                "sensitive_tool": sensitive,
+                "arguments": traced,
+                "linked_item_ids": list(linked),
+                "all_traced": all(t["fully_traced"] for t in traced.values()),
+            },
             latency_ms=(time.perf_counter() - start) * 1000,
         )
 
@@ -129,11 +139,15 @@ class TaintChecker:
         """Trace one argument. With nested values, the worst status wins."""
         worst: dict[str, Any] = {"value": str(raw), "status": "ignored"}
         order = {"ignored": 0, "user": 1, "unknown": 2, "tool_data": 3}
+        item_ids: dict[str, None] = {}
+        fully_traced = True
         for value in _scalar_values(raw):
             result = self._trace_scalar(value, user_texts, tool_items)
+            item_ids.update(dict.fromkeys(result.get("item_ids", [])))
+            fully_traced = fully_traced and result["status"] in ("user", "tool_data")
             if order[result["status"]] > order[worst["status"]]:
                 worst = {**result, "value": str(raw)}
-        return worst
+        return {**worst, "item_ids": list(item_ids), "fully_traced": fully_traced}
 
     @staticmethod
     def _trace_scalar(value: Any, user_texts: list[str], tool_items: list[ContextItem]) -> dict[str, Any]:
@@ -146,14 +160,16 @@ class TaintChecker:
 
         if any(_appears_in(needle, numeric, text) for text in user_texts):
             return {"status": "user"}
-        for item in tool_items:  # newest first
-            if _appears_in(needle, numeric, item.content):
-                return {
-                    "status": "tool_data",
-                    "item_id": item.id,
-                    "source": item.source.value,
-                    "origin": item.origin,
-                }
+        matches = [item for item in tool_items if _appears_in(needle, numeric, item.content)]
+        if matches:
+            newest = matches[0]  # tool_items is newest first
+            return {
+                "status": "tool_data",
+                "item_id": newest.id,
+                "item_ids": [item.id for item in matches],
+                "source": newest.source.value,
+                "origin": newest.origin,
+            }
         return {"status": "unknown"}
 
     # -- reasons ------------------------------------------------------------

@@ -4,11 +4,10 @@ landlord's real rent bill AND one email-borne attack from the dataset.
 Measures, per language, whether the real rent is still paid and whether the attacker
 is paid, in three setups:
   without   no AgentShield
-  full      AgentShield as built (the classifier scans ALL untrusted context)
-  no-clf    AgentShield without the classifier (roughly what scoring only the
-            email the payment came from would give for the rent payment)
+  full      AgentShield as built (the classifier scores the items a payment depends on)
+  no-clf    AgentShield without the classifier
 
-This informs the open design decision about the classifier's scope.
+This measures whether an unrelated injection email can hold the real rent payment.
 
     python -m benchmark.run_mixed                  # offline mock agent + mock judge
     python -m benchmark.run_mixed --provider groq  # real LLM (slow)

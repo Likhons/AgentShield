@@ -2,11 +2,12 @@ import json
 
 import pytest
 
+from agentshield.checks.classifier import ClassifierCheck, DetectorOutput
 from agentshield.checks.intent import IntentChecker
 from agentshield.checks.policy import PolicyEngine
 from agentshield.checks.taint import TaintChecker
 from agentshield.core.engine import Engine
-from agentshield.core.models import CheckName, ContextItem, Decision, GuardRequest, SourceType, ToolCall
+from agentshield.core.models import CheckName, ContextItem, Decision, GuardRequest, Language, SourceType, ToolCall
 
 LANDLORD = "01722222222"
 ATTACKER = "01000000666"
@@ -190,3 +191,93 @@ def test_broken_audit_does_not_crash():
 
     verdict = make_engine(audit=BrokenAudit()).check(FAKE_BILL)
     assert verdict.decision == Decision.BLOCK
+
+
+# -- classifier scope ----------------------------------------------------------
+
+MARKER = "MARKERWORD"  # stands in for injection text; the detector below is a stub
+
+
+class MarkerDetector:
+    name = "marker"
+
+    def predict(self, text):
+        return DetectorOutput(score=0.9 if MARKER in text else 0.0, language=Language.EN)
+
+
+def scoped_engine():
+    return Engine(
+        policy=PolicyEngine.from_yaml(), taint=TaintChecker(),
+        intent=IntentChecker(FakeProvider(consistent=True)), classifier=ClassifierCheck(MarkerDetector()),
+    )
+
+
+def inbox_request(user_request, arguments, *emails, tool="send_money"):
+    context = [ContextItem(content=user_request, source=SourceType.USER)]
+    context += [ContextItem(content=e, source=SourceType.TOOL_EMAIL) for e in emails]
+    return GuardRequest(
+        user_request=user_request, tool_call=ToolCall(tool_name=tool, arguments=arguments),
+        context=context, known_recipients=[LANDLORD],
+    )
+
+
+def classifier_of(verdict):
+    return next(c for c in verdict.checks if c.check == CheckName.CLASSIFIER)
+
+
+RENT = f"Rent bill: please pay 8000 taka to {LANDLORD}"
+
+
+def test_unrelated_suspicious_email_does_not_hold_the_payment():
+    request = inbox_request("pay my bills", {"to": LANDLORD, "amount": 8000}, f"{MARKER} newsletter", RENT)
+    verdict = scoped_engine().check(request)
+    assert verdict.decision == Decision.ALLOW
+    result = classifier_of(verdict)
+    assert not result.flagged
+    assert result.details["scope"] == "linked"
+    assert result.details["items_left_out"] == 1
+
+
+def test_suspicious_email_that_supplied_the_details_is_scored():
+    request = inbox_request("pay my bills", {"to": LANDLORD, "amount": 8000}, f"{MARKER} {RENT}")
+    result = classifier_of(scoped_engine().check(request))
+    assert result.flagged
+    assert result.details["scope"] == "linked"
+
+
+def test_second_email_repeating_the_value_is_scored_too():
+    """The newest match is a clean bill, but an older email holds the same number."""
+    request = inbox_request("pay my bills", {"to": LANDLORD, "amount": 8000}, f"{MARKER} {RENT}", RENT)
+    assert classifier_of(scoped_engine().check(request)).flagged
+
+
+@pytest.mark.parametrize("arguments", [
+    {"to": LANDLORD, "amount": 12345},  # amount traced to nothing
+    {"to": LANDLORD, "amount": 50},  # amount too short to trace
+])
+def test_untraceable_argument_scans_everything(arguments):
+    request = inbox_request("pay my bills", arguments, f"{MARKER} newsletter", RENT)
+    result = classifier_of(scoped_engine().check(request))
+    assert result.flagged
+    assert result.details["scope"] == "all"
+
+
+def test_user_typed_payment_scans_everything():
+    request = inbox_request(f"send 500 taka to {LANDLORD}", {"to": LANDLORD, "amount": 500}, f"{MARKER} newsletter")
+    result = classifier_of(scoped_engine().check(request))
+    assert result.flagged
+    assert result.details["scope"] == "all"
+
+
+def test_tool_that_is_not_sensitive_scans_everything():
+    request = inbox_request("read my mail", {"email_id": "e20x"}, f"{MARKER} newsletter", "see e20x", tool="read_email")
+    assert classifier_of(scoped_engine().check(request)).details["scope"] == "all"
+
+
+def test_crashed_taint_scans_everything():
+    engine = Engine(
+        policy=PolicyEngine.from_yaml(), taint=BrokenTaint(),
+        intent=IntentChecker(FakeProvider(consistent=True)), classifier=ClassifierCheck(MarkerDetector()),
+    )
+    request = inbox_request("pay my bills", {"to": LANDLORD, "amount": 8000}, f"{MARKER} newsletter", RENT)
+    assert classifier_of(engine.check(request)).details["scope"] == "all"

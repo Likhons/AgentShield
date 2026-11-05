@@ -109,3 +109,38 @@ def test_nested_argument_values_are_traced(checker):
     email = (f"cc {ATTACKER}", SourceType.TOOL_EMAIL, None)
     result = checker.check(make_request("hi", {"recipients": ["01711111111", ATTACKER]}, [email]))
     assert status(result, "recipients") == "tool_data"
+
+
+def ids_by_origin(request):
+    return {item.origin: item.id for item in request.context}
+
+
+def test_every_item_holding_the_value_is_linked(checker):
+    request = make_request("hi", {"to": ATTACKER}, [
+        (f"pay {ATTACKER}", SourceType.TOOL_EMAIL, "old"),
+        ("nothing here", SourceType.TOOL_EMAIL, "other"),
+        (f"pay {ATTACKER}", SourceType.TOOL_WEB, "new"),
+    ])
+    ids = ids_by_origin(request)
+    result = checker.check(request)
+    assert set(result.details["linked_item_ids"]) == {ids["old"], ids["new"]}
+    assert result.details["arguments"]["to"]["item_id"] == ids["new"]
+    assert result.details["all_traced"]
+
+
+def test_nested_values_link_all_their_items(checker):
+    request = make_request("hi", {"ids": ["MSG-1111", "MSG-2222"]}, [
+        ("code MSG-1111", SourceType.TOOL_EMAIL, "first"),
+        ("code MSG-2222", SourceType.TOOL_EMAIL, "second"),
+    ])
+    ids = ids_by_origin(request)
+    assert set(checker.check(request).details["linked_item_ids"]) == {ids["first"], ids["second"]}
+
+
+@pytest.mark.parametrize("arguments", [
+    {"to": ATTACKER, "amount": 12345},  # the amount is nowhere: the AI made it up
+    {"to": ATTACKER, "amount": 50},  # too short to trace
+])
+def test_untraceable_value_is_reported(checker, arguments):
+    request = make_request("hi", arguments, [(f"pay {ATTACKER}", SourceType.TOOL_EMAIL, "email")])
+    assert not checker.check(request).details["all_traced"]

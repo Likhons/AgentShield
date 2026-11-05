@@ -4,6 +4,11 @@ Order:  taint (always, cheap) -> classifier -> intent (LLM, only when needed) ->
 Score:  taint * 0.3 + classifier * 0.3 + intent * 0.4   (skipped checks count as 0)
 Final:  the stricter of (score decision, policy forced decision, check-error floor)
 
+Classifier scope: for a sensitive tool whose arguments all trace back, and at least
+one to tool output, only the items holding those values are scored. An unrelated
+suspicious email then cannot hold a legitimate payment. In every other case, the
+whole context is scanned.
+
 The weights are fixed and NOT re-normalized when a check is skipped. Otherwise
 taint alone would reach 0.9 and a legitimate bill payment would be blocked.
 """
@@ -93,7 +98,7 @@ class Engine:
         start = time.perf_counter()
 
         taint = self._safe_run(CheckName.TAINT, self.taint.check, request)
-        classifier = self._run_classifier(request)
+        classifier = self._run_classifier(request, taint)
         intent = self._run_intent(request, taint, classifier)
         policy = self._safe_run(CheckName.POLICY, self.policy.check, request)
         checks = [taint, classifier, intent, policy]
@@ -135,7 +140,16 @@ class Engine:
                 details={"error": f"{type(exc).__name__}: {exc}"[:300]},
             )
 
-    def _run_classifier(self, request: GuardRequest) -> CheckResult:
+    @staticmethod
+    def _classifier_request(request: GuardRequest, taint: CheckResult) -> GuardRequest:
+        """The request the classifier should see: narrowed to the linked items when safe."""
+        linked = set(taint.details.get("linked_item_ids", []))
+        if not (linked and taint.details.get("sensitive_tool") and taint.details.get("all_traced")):
+            return request
+        context = [item for item in request.context if item.is_trusted or item.id in linked]
+        return request.model_copy(update={"context": context})
+
+    def _run_classifier(self, request: GuardRequest, taint: CheckResult) -> CheckResult:
         if self.classifier is None:
             return CheckResult(
                 check=CheckName.CLASSIFIER,
@@ -145,7 +159,11 @@ class Engine:
                 reason_bn="Classifier এখনো যুক্ত করা হয়নি।",
                 details={"skip_reason": "not configured"},
             )
-        return self._safe_run(CheckName.CLASSIFIER, self.classifier.check, request)
+        scoped = self._classifier_request(request, taint)
+        result = self._safe_run(CheckName.CLASSIFIER, self.classifier.check, scoped)
+        result.details["scope"] = "all" if scoped is request else "linked"
+        result.details["items_left_out"] = len(request.context) - len(scoped.context)
+        return result
 
     def _run_intent(self, request: GuardRequest, taint: CheckResult, classifier: CheckResult) -> CheckResult:
         try:
