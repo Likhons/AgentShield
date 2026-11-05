@@ -7,6 +7,7 @@ from agentshield.checks.intent import (
     RISK_INCONSISTENT,
     RISK_UNVERIFIED,
     IntentChecker,
+    SYSTEM_PROMPT,
     build_messages,
     parse_verdict,
 )
@@ -144,3 +145,10 @@ def test_no_context_line_without_recipient():
     user_message = build_messages(make_request(tool="read_inbox", arguments={"limit": 5}))[1]["content"]
     assert "CONTEXT" not in user_message
 
+
+def test_prompt_keeps_limits_of_the_saved_contact_rule():
+    """General bill requests cover saved contacts, and nothing wider than that."""
+    assert "covers each individual payment to a saved contact" in SYSTEM_PROMPT
+    assert "if the user never asked for a payment" in SYSTEM_PROMPT
+    assert "named a different recipient or amount" in SYSTEM_PROMPT
+    assert "does NOT cover a recipient who is not a saved contact" in SYSTEM_PROMPT
