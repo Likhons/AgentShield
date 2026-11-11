@@ -64,7 +64,11 @@ html, body, .stApp, [class*="css"], .stMarkdown, button, input, textarea {
   font-family: "Inter", "Segoe UI", "Nirmala UI", "Noto Sans Bengali", system-ui, sans-serif;
 }
 .stApp { background: radial-gradient(1200px 500px at 70% -10%, rgba(113,56,255,.18), transparent 60%), var(--bg); }
-header[data-testid="stHeader"] { background: rgba(8,13,36,.82); backdrop-filter: blur(8px); height: 2.75rem; }
+header[data-testid="stHeader"] { background: transparent; }
+@media (max-width: 760px) {
+  /* on phones the menu button floats over scrolled content, so the bar gets a solid background */
+  header[data-testid="stHeader"] { background: rgba(8,13,36,.88); backdrop-filter: blur(8px); }
+}
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"] { display: none; }
 .block-container { padding-top: 4rem; max-width: 1480px; }
 .ic { vertical-align: middle; flex-shrink: 0; }
