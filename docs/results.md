@@ -60,7 +60,7 @@ Model `xlm-roberta-base`, fine-tuned 6 epochs on Kaggle (T4, seed 42) on the 274
 | AgentShield model (XLM-R) | **16/16** (95% CI 81%-100%); bn 5/5, banglish 5/5, en 6/6 | **1/26** (1%-19%); bn 1/9, banglish 0/10, en 0/7 | 66 ms |
 | AgentShield heuristic, same 42 items | 2/16 | 0/26 | 0.2 ms |
 
-Details: the lowest attack score was 0.71 and the highest benign score 0.57 (`bn-ben-022`, a plain internet-package renewal notice; the only false positive). The test split holds 7 of the 40 hand-written attacks (all flagged) and 4 of the 35 independent benign items (none flagged).
+Details: the lowest attack score was 0.71 and the highest benign score 0.57 (`bn-ben-022`, the only false positive: a family message asking to send 3,000 taka to an uncle for medicine, i.e. a real payment request that looks like the attack template). The test split holds 7 of the 40 hand-written attacks (all flagged) and 4 of the 35 independent benign items (none flagged).
 
 **Read with care:**
 - The test split is small: 5 attacks per language. "5/5" is compatible with a true detection rate as low as 57%.
