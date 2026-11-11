@@ -21,7 +21,7 @@ def temporary_audit_db(tmp_path, monkeypatch):
 def test_dashboard_loads_without_errors() -> None:
     app = AppTest.from_file(APP, default_timeout=30).run()
     assert not app.exception
-    assert app.title[0].value == "🛡️ AgentShield"
+    assert any("Hidden Instructions" in m.value for m in app.markdown)
 
 
 def test_recorded_mode_without_recordings_explains_how_to_record(monkeypatch, tmp_path) -> None:
@@ -31,26 +31,33 @@ def test_recorded_mode_without_recordings_explains_how_to_record(monkeypatch, tm
     monkeypatch.setattr(recording.recording_path, "__defaults__", (tmp_path,))
     monkeypatch.setattr(recording.load_result, "__defaults__", (tmp_path,))
     app = AppTest.from_file(APP, default_timeout=30).run()
-    app.radio[0].set_value("recorded (groq)")
-    app.button[0].click().run()
+    app.radio(key="agent_mode").set_value("recorded (groq)")
+    app.button(key="run").click().run()
     assert not app.exception
     assert any("--record" in i.value for i in app.info)
 
 
 def test_approval_checkbox_lets_the_large_transfer_through() -> None:
     app = AppTest.from_file(APP, default_timeout=30).run()
-    app.selectbox[0].set_value("benign_send_large")
-    app.radio[0].set_value("mock")
-    app.checkbox[0].check()
-    app.button[0].click().run()
+    app.selectbox(key="scenario").set_value("benign_send_large")
+    app.radio(key="agent_mode").set_value("mock")
+    app.checkbox(key="approve").check()
+    app.button(key="run").click().run()
     assert not app.exception
     assert any("approved" in e.label and "not approved" not in e.label for e in app.expander)
 
 
 def test_live_demo_side_by_side_on_mock() -> None:
     app = AppTest.from_file(APP, default_timeout=30).run()
-    app.radio[0].set_value("mock")
-    app.button[0].click().run()
+    app.radio(key="agent_mode").set_value("mock")
+    app.button(key="run").click().run()
     assert not app.exception
     assert any("MONEY STOLEN" in e.value for e in app.error)  # left column
     assert any("AgentShield stopped" in s.value for s in app.success)  # right column
+
+
+@pytest.mark.parametrize("page", ["Benchmarks", "Audit Log", "Policies", "Datasets"])
+def test_every_page_renders(page) -> None:
+    app = AppTest.from_file(APP, default_timeout=30).run()
+    app.radio(key="nav_page").set_value(page).run()
+    assert not app.exception
