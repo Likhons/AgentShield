@@ -106,6 +106,13 @@ def real_llm_attack_numbers() -> tuple[str, str, str] | None:
     return frac(row["attack success WITH AgentShield"]), frac(row["attack success WITHOUT AgentShield"]), name
 
 
+def short(text: str, limit: int) -> str:
+    """Cut at a word boundary and mark the cut, so table cells never end mid-word."""
+    if len(text) <= limit:
+        return text
+    return text[:limit].rsplit(" ", 1)[0].rstrip(".,;:") + "…"
+
+
 def taka(amount: int) -> str:
     return f"৳ {amount:,}"
 
@@ -250,10 +257,10 @@ def recent_card() -> None:
         else:
             rows = "".join(
                 f'<tr><td class="muted">{r.timestamp.strftime("%b %d, %H:%M")}</td>'
-                f'<td>{ui.esc(r.user_request[:48])}</td><td><code>{ui.esc(r.tool_name)}</code></td>'
-                f'<td>{ui.badge(r.decision.value)}</td><td class="muted">{ui.esc(r.reason_en[:90])}</td></tr>'
+                f'<td class="c-req">{ui.esc(r.user_request[:48])}</td><td class="c-tool"><code>{ui.esc(r.tool_name)}</code></td>'
+                f'<td>{ui.badge(r.decision.value)}</td><td class="muted">{ui.esc(short(r.reason_en, 90))}</td></tr>'
                 for r in records)
-            body = ('<div class="rwrap"><table class="rtable"><tr><th>Time (UTC)</th><th>User request</th><th>Tool</th>'
+            body = ('<div class="rwrap"><table class="rtable"><tr><th>Time (UTC)</th><th class="c-req">User request</th><th class="c-tool">Tool</th>'
                     f'<th>Decision</th><th>Reason</th></tr>{rows}</table></div>')
         st.markdown(ui.panel_title("file-text", "Recent Evaluations", right=link) + body, unsafe_allow_html=True)
 

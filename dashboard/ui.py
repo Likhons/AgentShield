@@ -64,7 +64,7 @@ html, body, .stApp, [class*="css"], .stMarkdown, button, input, textarea {
   font-family: "Inter", "Segoe UI", "Nirmala UI", "Noto Sans Bengali", system-ui, sans-serif;
 }
 .stApp { background: radial-gradient(1200px 500px at 70% -10%, rgba(113,56,255,.18), transparent 60%), var(--bg); }
-header[data-testid="stHeader"] { background: transparent; }
+header[data-testid="stHeader"] { background: rgba(8,13,36,.82); backdrop-filter: blur(8px); height: 2.75rem; }
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"] { display: none; }
 .block-container { padding-top: 1.6rem; max-width: 1480px; }
 .ic { vertical-align: middle; flex-shrink: 0; }
@@ -72,7 +72,10 @@ h1, h2, h3 { color: var(--text); letter-spacing: -0.01em; }
 
 /* ---------- sidebar ---------- */
 section[data-testid="stSidebar"] { background: var(--side); border-right: 1px solid var(--line); }
-.brand { display: flex; gap: .7rem; align-items: center; padding: .2rem .2rem 1.1rem; }
+section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] { position: absolute; top: 0; right: 0; z-index: 3;
+  height: auto; padding: .7rem .7rem 0 0; }
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-top: 1.4rem; }
+.brand { display: flex; gap: .7rem; align-items: center; padding: 0 2.2rem 1.1rem .2rem; }
 .brand-name { font-weight: 800; font-size: 1.25rem; color: var(--text); line-height: 1.1; }
 .brand-sub { font-size: .78rem; color: var(--muted); }
 .side-label { font-size: .7rem; letter-spacing: .08em; color: #6E7699; text-transform: uppercase; margin: .4rem 0 .3rem .2rem; }
@@ -198,6 +201,7 @@ section[data-testid="stSidebar"] { background: var(--side); border-right: 1px so
 .money-label { color: var(--muted); font-size: .8rem; }
 .user-quote { border-left: 3px solid var(--accent); background: var(--card2); padding: .55rem .85rem; border-radius: 0 10px 10px 0; margin: .6rem 0; color: var(--text); }
 .reason-bn { font-size: 1rem; margin: .3rem 0; color: var(--text); }
+[data-testid="stCode"] pre, [data-testid="stCode"] code { white-space: pre-wrap !important; word-break: break-word; }
 [data-testid="stExpander"] details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
 .page-title { font-size: 1.8rem; font-weight: 800; color: var(--text); margin: .2rem 0 .1rem; }
 .page-sub { color: var(--muted); margin-bottom: 1rem; }
@@ -209,6 +213,15 @@ section[data-testid="stSidebar"] { background: var(--side); border-right: 1px so
   margin: .15rem .3rem .15rem 0; font-size: .78rem; color: #C9B6FF; font-family: ui-monospace, Consolas, monospace; }
 
 /* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  /* the big two-column rows stack, so cards never get squeezed (sidebar takes ~300px) */
+  [data-testid="stHorizontalBlock"]:has(.st-key-card_run), [data-testid="stHorizontalBlock"]:has(.st-key-card_pipe),
+  [data-testid="stHorizontalBlock"]:has(.hero), [data-testid="stHorizontalBlock"]:has(.col-head) { flex-wrap: wrap; }
+  [data-testid="stHorizontalBlock"]:has(.st-key-card_run) > [data-testid="stColumn"],
+  [data-testid="stHorizontalBlock"]:has(.st-key-card_pipe) > [data-testid="stColumn"],
+  [data-testid="stHorizontalBlock"]:has(.hero) > [data-testid="stColumn"],
+  [data-testid="stHorizontalBlock"]:has(.col-head) > [data-testid="stColumn"] { flex: 1 1 100% !important; min-width: 100% !important; width: 100% !important; }
+}
 @media (max-width: 1200px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pipe { grid-template-columns: 1fr 1fr; } .pipe .arrow { display: none; }
@@ -224,6 +237,7 @@ section[data-testid="stSidebar"] { background: var(--side); border-right: 1px so
   .hero-art .feat { position: static; }
   .hero-art svg.shield-art { position: static; transform: none; width: 180px; height: 180px; }
   .rwrap { overflow-x: auto; }
+  .rtable .c-req, .rtable .c-tool { display: none; }
 }
 </style>
 """
