@@ -2,15 +2,16 @@
 
 > Read this first. Keep it short and current; details live in PROGRESS.md and the code.
 
-## RESUME HERE (last updated 5 Nov 2026)
-- **Phase:** 3 (datasets + benchmark) nearly done, ahead of schedule (deadline ~9 Nov). Phases 0–2 done. Phase 4 notebook ready.
-- **Done 27 Oct:** `datasets/attacks.jsonl` (24 BN/Banglish, reviewed). Text benchmark: Prompt Guard 2 flags 0/24. Simulated agent: 0/20 attacks succeed with AgentShield. `docs/results.md` drafted; dashboard Benchmark tab live.
-- **Fix A done 5 Nov** (`aa4b1b7`, run `agent_20261105-130607`, see docs/results.md §3b): rent paid with AgentShield 0/20 to 14/20 (16/20 without), attacks 0/20 (blocked 3, never tried 17). Remaining: 2 held by classifier scope (`*-ben-005`), so **next step is classifier scope B**; 4 not attempted by the agent itself. Old 0/20 attack runs were mostly the agent halting after a held rent payment.
-- **After scope B:** re-run the Groq benchmark, then record the stage demo once: `python -m demo_agent.run --all --compare --provider groq --record` (dashboard option "recorded (groq)" replays it instantly; recordings in `demo_agent/recordings/groq/`).
-- GitHub is behind local `main` (last push 27 Oct); ask the user before pushing again.
-- **Open user tasks:** read all 135 items in `datasets/benign.jsonl` (then `reviewed=yes`); add ~15 own hand-written benign items per language (BN/Banglish) in `datasets/benign_own.jsonl` (removes bias, see below); ideally a few hand-written attacks too.
-- **Next:** decide classifier scope (Open decisions); Phase 4 = user runs `training/train_classifier.ipynb` on Kaggle (instructions inside), then a model-backed detector + benchmark on test-split ids only (`split_ids.json`).
-- **Claude-side work is caught up** (27 Oct): gateway, mixed-inbox experiment, record/replay, `docs/pitch.md`, `docs/deploy.md`. Everything left depends on the user: fix A + scope B (their files), own benign items, Kaggle run, publish decision. After A+B: re-run real Groq benchmark, record the demo, update results.md/pitch.md numbers.
+## RESUME HERE (last updated 11 Nov 2026)
+- **Phase:** 3 done, 4 trained but NOT adopted. Next: Phase 5 (demo, by ~16 Nov), Phase 6 (submission, 19-20 Nov).
+- **Done 11 Nov:** scope B results recorded (mixed inbox rent held 5/12 → 0/12, `mixed_20261105-164804`). User reviewed `benign.jsonl` (reviewed=yes), wrote `benign_own.jsonl` (35) and 40 hand-written attacks (attacks now 64 = 32/language). Heuristic on hand-written attacks 2/40, on own benign 0/35.
+- **Phase 4:** XLM-R trained on Kaggle, unzipped to `models/agentshield-classifier/` (git-ignored, 1 GB; zip also at `E:gentshield-classifier.zip`). Text test split: 16/16 attacks, 1/26 benign (`detection_20261111-091439`, results.md §2b). Wired in as `AGENTSHIELD_DETECTOR=model` (default stays `heuristic`; `checks/model_detector.py`, loads once per process). **But** in the simulated agent benchmark it holds every real rent payment (0/125, `agent_20261111-092942`, results.md §3e): all 64 BN/Banglish attacks contain a 010 number vs 8/125 benign, so it learned "payment request with number = attack". Fix = retrain with benign payment requests that carry numbers (landlord, tuition, friends, shops), then re-run the agent benchmark with the model. Decide with the user who writes those items.
+- **Groq agent re-run after scope B** started 11 Nov as a detached process (`--limit 10`, 40 items, heuristic); result goes to `benchmark/results/agent_<stamp>.*`. If missing, re-run: `python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish --limit 10`. Then update results.md §3b, README (results TBD), pitch.md numbers, then record the stage demo: `python -m demo_agent.run --all --compare --provider groq --record`.
+- Groq free tier: qwen 1000 requests/day and 8000 tokens/minute; a 40-item agent run takes ~1 h and ~400 requests.
+- Still TBD: Prompt Guard 2 on the 75 new items and on the 42 test-split items (Groq).
+- `make_detector()` lives in `demo_agent/run.py`; `core/engine.build_default_engine` (API) uses `ClassifierCheck()` (heuristic). Unify later by moving `make_detector` into `agentshield/checks/`.
+- GitHub: last push `fba31ec` (5 Nov); local is many commits ahead. Ask the user before pushing.
+- **Open user tasks:** decide on retraining data for the model; verify pitch citations; business-model market data; find out exactly what the 20 Nov preliminary submission requires.
 
 ## How we work (important)
 - Talk to the user in **simple Bangla**; code, comments, files, docs in **English**. User knows basic/intermediate Python; explain briefly what and why. Give exact PowerShell commands. One step at a time when the user asks for it.
@@ -71,7 +72,7 @@ GitHub: `origin` = https://github.com/Likhons/AgentShield (private; `main` track
 ## Commands
 ```powershell
 .\.venv\Scripts\Activate.ps1
-pytest                                          # 195 tests
+pytest                                          # 240 tests
 python -m demo_agent.run --compare --all        # all scenarios, without vs with AgentShield (mock unless --provider groq)
 streamlit run dashboard/app.py                  # side-by-side demo + audit log
 python -m benchmark.dataset                     # validate dataset, show balance
