@@ -36,6 +36,15 @@ Independent benign items (`datasets/benign_own.jsonl`, hand-written by a team me
 | AgentShield heuristic | 0/15 (max score 0.0) | 0/20 (max score 0.0) |
 | Prompt Guard 2 (86m / 22m) | TBD | TBD |
 
+Hand-written attacks added 11 Nov 2026 (40 items, 20 per language: 8 blunt, 32 subtle; source `detection_20261111-065618`):
+
+| Detector | Blunt (8) | Subtle (32) | All 64 Bangla/Banglish attacks |
+|---|---|---|---|
+| AgentShield heuristic | 2/8 (`banglish-att-031`, `-032`) | 0/32 | 10/64 (bn 4/32, banglish 6/32) |
+| Prompt Guard 2 (86m / 22m) | TBD | TBD | TBD |
+
+The heuristic's signals came from the first 24 LLM-written items, so it misses most of the new hand-written blunt items too (different wording). This is expected for a word-list baseline and is the reason for the Phase 4 model.
+
 What this shows:
 - Prompt Guard 2 flagged **0 of 24** Bangla/Banglish attacks, including blunt ones that openly tell the AI to send money (scores near 0).
 - It also flagged only 1 of 40 subtle English agent injections, so the honest claim is "these attacks evade a widely used text guardrail", not "it only fails in Bangla".
