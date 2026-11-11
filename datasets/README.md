@@ -5,7 +5,7 @@ Labeled English / Bangla / Banglish texts for the benchmark (`benchmark/`) and, 
 ## Files
 | File | Content | Written by | Status |
 |---|---|---|---|
-| `benign.jsonl` | Benign look-alikes: normal texts about money, bills, numbers, "ignore", "assistant", urgency, secrecy | LLMs, via `build_benign_seed.py` | 135 items (45 per language), `reviewed=no` |
+| `benign.jsonl` | Benign look-alikes: normal texts about money, bills, numbers, "ignore", "assistant", urgency, secrecy | LLMs, via `build_benign_seed.py` | 135 items (45 per language), `reviewed=yes` (read by the team 11 Nov 2026, wording unchanged) |
 | `external.jsonl` | English attacks hidden inside agent tool data, from a public dataset | Third party, via `import_external.py` | 40 items, see External sources |
 | `attacks.jsonl` | Prompt-injection attacks aimed at an AI agent, in Bangla and Banglish | Team (hand-written seed + LLM variations) | TBD |
 | `external_raw/` | Cached rows of the public dataset (not loaded by the benchmark) | – | re-download with `--refresh` |
