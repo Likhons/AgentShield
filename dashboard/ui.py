@@ -66,11 +66,13 @@ html, body, .stApp, [class*="css"], .stMarkdown, button, input, textarea {
 .stApp { background: radial-gradient(1200px 500px at 70% -10%, rgba(113,56,255,.18), transparent 60%), var(--bg); }
 header[data-testid="stHeader"] { background: transparent; }
 @media (max-width: 760px) {
-  /* on phones the menu button floats over scrolled content, so the bar gets a solid background */
+  /* on phones the menu button floats over scrolled content, so the bar gets a solid background
+     and the content starts below it */
   header[data-testid="stHeader"] { background: rgba(8,13,36,.88); backdrop-filter: blur(8px); }
+  .block-container, [data-testid="stMainBlockContainer"] { padding-top: 4.4rem !important; }
 }
 [data-testid="stAppDeployButton"], [data-testid="stMainMenu"] { display: none; }
-.block-container { padding-top: 4rem; max-width: 1480px; }
+.block-container { padding-top: 2.1rem; max-width: 1480px; }
 .ic { vertical-align: middle; flex-shrink: 0; }
 h1, h2, h3 { color: var(--text); letter-spacing: -0.01em; }
 
