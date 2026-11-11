@@ -45,9 +45,9 @@ st.set_page_config(page_title="AgentShield", page_icon="🛡️", layout="wide",
 BADGES = {"allow": "✅ ALLOW", "ask_human": "✋ ASK HUMAN", "block": "🛑 BLOCK"}
 RECORDED = "recorded (groq)"
 MODES = {
-    "mock": (":material/smart_toy: Offline (simulated)", "A naive agent that obeys instructions found in data. No internet."),
-    "groq": (":material/wifi: Live (Groq)", "The real model from .env, with the same tools."),
-    RECORDED: (":material/play_circle: Recorded run", "Instant replay of a saved real-model run."),
+    "mock": (":material/smart_toy: Offline (simulated)", "Simulated naive agent. Works offline."),
+    "groq": (":material/wifi: Live (Groq)", "Real model via Groq, same tools."),
+    RECORDED: (":material/play_circle: Recorded run", "Instant replay of a saved real run."),
 }
 PAGES = {
     "Playground": ":material/play_circle: Playground",
@@ -157,7 +157,7 @@ def hero() -> None:
     with left:
         st.markdown(
             '<div class="hero"><div class="hero-title" role="heading" aria-level="1">'
-            '<span class="l1">Stop AI Agents from Acting on</span> <span class="grad l2">Hidden Instructions</span></div>'
+            '<span class="l1">Stop AI Agents from Acting&nbsp;on</span> <span class="grad l2">Hidden Instructions</span></div>'
             '<p class="lead">AgentShield checks every tool call before it runs, so an AI agent cannot be tricked into '
             'sending money by text hidden in emails, web pages or files, in Bangla, Banglish and English.</p>'
             '<div class="cta-row">'
@@ -174,15 +174,15 @@ def kpis() -> None:
     measured = real_llm_attack_numbers()
     if measured:
         with_shield, without, source = measured
-        last = ui.kpi("chart", "#16C784", with_shield, "Attacks that moved money (real LLM)",
-                      note=f"without AgentShield: {without} · {source}")
+        last = ui.kpi("chart", "#16C784", with_shield, "Attacks that moved money",
+                      note=f"real LLM · {without} without AgentShield")
     else:
-        last = ui.kpi("chart", "#16C784", "–", "Attacks that moved money (real LLM)", note="no real-LLM run yet")
+        last = ui.kpi("chart", "#16C784", "–", "Attacks that moved money", note="no real-LLM run yet")
     cards = [
-        ui.kpi("shield-check", "#B44CFF", str(len(CheckName)), "Security checks per tool call",
+        ui.kpi("shield-check", "#B44CFF", str(len(CheckName)), "Checks per tool call",
                note=" · ".join(c.value for c in CheckName)),
-        ui.kpi("list-checks", "#5B8CFF", str(len(policy_rules())), "Deterministic policy rules", note="policies/default.yaml"),
-        ui.kpi("bug", "#F04452", str(sum(attacks.values())), "Labeled attack samples",
+        ui.kpi("list-checks", "#5B8CFF", str(len(policy_rules())), "Policy rules", note="deterministic · default.yaml"),
+        ui.kpi("bug", "#F04452", str(sum(attacks.values())), "Attack samples",
                note=" · ".join(f"{k} {v}" for k, v in sorted(attacks.items()))),
         last,
     ]
@@ -356,11 +356,8 @@ def playground_page() -> None:
         how_it_works_card()
     if clicked:
         results(name, mode, approve)
-    left, right = st.columns([1.25, 1], gap="medium")
-    with left:
-        pipeline_card()
-    with right:
-        recent_card()
+    pipeline_card()
+    recent_card()
 
 
 # ---------------------------------------------------------------------------

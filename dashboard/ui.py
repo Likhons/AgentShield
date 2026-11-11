@@ -103,7 +103,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .version { color: #6E7699; font-size: .75rem; margin-top: .7rem; }
 
 /* ---------- hero ---------- */
-.hero-title { font-size: 2.55rem; font-weight: 800; line-height: 1.15; margin: 0 0 .7rem; padding: 0; color: var(--text); letter-spacing: -0.01em; }
+.hero-title { font-size: clamp(2rem, 2.35vw + .6rem, 2.55rem); font-weight: 800; line-height: 1.15; margin: 0 0 .8rem; padding: 0; color: var(--text); letter-spacing: -0.01em; text-wrap: balance; }
 [data-testid="stHeaderActionElements"] { display: none; }
 .grad { background: linear-gradient(90deg, #B44CFF, #8B5CFF); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero p.lead { color: var(--muted); font-size: 1.08rem; max-width: 560px; margin-bottom: 1.1rem; }
@@ -121,13 +121,13 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .feat .ic { color: #C9B6FF; }
 
 /* ---------- cards ---------- */
-.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; margin: .6rem 0 1.1rem; }
-.kpi { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem;
-  display: flex; gap: .9rem; align-items: center; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; margin: 1.6rem 0 1.4rem; }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem 1.15rem;
+  display: flex; gap: .9rem; align-items: flex-start; }
 .kpi-icon { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
 .kpi-num { font-size: 1.75rem; font-weight: 800; color: var(--text); line-height: 1.05; }
-.kpi-label { color: var(--muted); font-size: .85rem; }
-.kpi-note { font-size: .72rem; color: #8E96B8; margin-top: .15rem; }
+.kpi-label { color: var(--text); opacity: .86; font-size: .86rem; font-weight: 500; margin-top: .15rem; }
+.kpi-note { font-size: .74rem; color: #8E96B8; margin-top: .2rem; line-height: 1.35; }
 .trend { display: inline-block; font-size: .72rem; font-weight: 600; padding: .05rem .4rem; border-radius: 6px; margin-left: .35rem;
   background: rgba(22,199,132,.14); color: var(--ok); vertical-align: middle; }
 .panel-title { display: flex; gap: .6rem; align-items: center; font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
@@ -149,6 +149,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .st-key-mode [role="radiogroup"] > div:hover { border-color: var(--line2); }
 .st-key-mode [role="radiogroup"] > div[data-selected="true"] { border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent), 0 0 22px rgba(113,56,255,.35); background: rgba(113,56,255,.13); }
+.st-key-mode [data-testid="stRadioOption"] > div > div:first-child { display: none; }  /* selection shown by the card border */
 .st-key-mode [data-testid="stRadioOption"] p { font-weight: 600; color: var(--text); }
 .st-key-mode [data-testid="stRadioOption"] p span[role="img"] { color: #C9B6FF; margin-right: .2rem; }
 .st-key-mode [data-testid="stRadioCaption"] { color: var(--muted); font-size: .8rem; padding-left: 0; margin-top: .2rem; }
@@ -159,8 +160,10 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .stButton > button[data-testid="stBaseButton-primary"]:hover { filter: brightness(1.08); }
 
 /* how it works */
-.flow { display: grid; grid-template-columns: 1fr auto 1.15fr auto 1fr; gap: .5rem; align-items: center; margin-top: .4rem; }
-.node { border-radius: 12px; padding: .8rem .6rem; text-align: center; border: 1px solid var(--line); background: var(--card2); }
+.flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: .45rem; align-items: stretch; margin-top: .5rem; }
+.flow .arrow { align-self: center; }
+.node { border-radius: 12px; padding: .85rem .55rem; text-align: center; border: 1px solid var(--line); background: var(--card2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; }
 .node b { display: block; color: var(--text); font-size: .9rem; margin-top: .35rem; }
 .node span { color: var(--muted); font-size: .76rem; }
 .node-user { background: rgba(240,68,82,.10); border-color: rgba(240,68,82,.35); }
@@ -177,7 +180,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 
 /* pipeline */
 .pipe { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: .45rem; align-items: stretch; margin-top: .5rem; }
-.pnode { background: var(--card2); border: 1px solid var(--line2); border-radius: 12px; padding: .7rem .75rem; display: flex; gap: .6rem; align-items: center; }
+.pnode { background: var(--card2); border: 1px solid var(--line2); border-radius: 12px; padding: .85rem 1rem; display: flex; gap: .75rem; align-items: center; }
 .pnode b { color: var(--text); font-size: .86rem; display: block; }
 .pnode span { color: var(--muted); font-size: .74rem; }
 .pnode .ic { color: #C9B6FF; }
@@ -186,7 +189,8 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 /* recent evaluations */
 .rtable { width: 100%; border-collapse: collapse; font-size: .84rem; }
 .rtable th { text-align: left; color: #8E96B8; font-weight: 500; padding: .45rem .4rem; border-bottom: 1px solid var(--line); }
-.rtable td { color: var(--text); padding: .55rem .4rem; border-bottom: 1px solid rgba(140,120,255,.08); vertical-align: top; }
+.rtable td { color: var(--text); font-weight: 400; padding: .6rem .5rem; border-bottom: 1px solid rgba(140,120,255,.08); vertical-align: middle; }
+.rtable td.muted:first-child, .rtable th:first-child { white-space: nowrap; }
 .rtable td.muted { color: var(--muted); }
 .link { color: #C9B6FF !important; text-decoration: none !important; font-size: .85rem; font-weight: 500; }
 .badge { display: inline-block; padding: .14rem .55rem; border-radius: 7px; font-size: .72rem; font-weight: 700; letter-spacing: .02em; }
@@ -216,6 +220,21 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .rule p { color: var(--muted); margin: .4rem 0; font-size: .9rem; }
 .cond { display: inline-block; background: var(--card2); border: 1px solid var(--line); border-radius: 7px; padding: .1rem .5rem;
   margin: .15rem .3rem .15rem 0; font-size: .78rem; color: #C9B6FF; font-family: ui-monospace, Consolas, monospace; }
+
+/* st.metric (Audit Log) styled like the KPI cards */
+[data-testid="stMetric"] { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: .9rem 1.1rem;
+  transition: border-color .28s, transform .28s; }
+[data-testid="stMetric"]:hover { border-color: var(--line2); transform: translateY(-2px); }
+[data-testid="stMetricLabel"] p { color: var(--muted); font-size: .85rem; }
+[data-testid="stMetricValue"] { font-weight: 800; font-size: 1.8rem; color: var(--text); }
+
+/* equal-height cards in a row */
+[data-testid="stHorizontalBlock"]:has(.st-key-card_run) { align-items: stretch; }
+[data-testid="stHorizontalBlock"]:has(.st-key-card_run) > [data-testid="stColumn"] > [data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"]:has(.st-key-card_run) > [data-testid="stColumn"] > [data-testid="stVerticalBlock"] > [data-testid="stLayoutWrapper"] { height: 100%; }
+.st-key-card_run, .st-key-card_how { height: 100%; box-sizing: border-box; }
+.st-key-card_pipe { margin-top: .4rem; }
+.st-key-card_pipe, .st-key-card_recent { padding-bottom: 1.5rem !important; }
 
 /* ---------- motion: slow, purposeful, never decorative noise ---------- */
 :root { --ease: cubic-bezier(.22, .61, .36, 1); }
@@ -392,11 +411,11 @@ def badge(decision: str) -> str:
 
 HOW_IT_WORKS = f"""
 <div class="flow">
-  <div class="node node-user">{icon("mail", 26, "#FF6B78")}<b>Untrusted input</b><span>email, web page, file (possibly malicious)</span></div>
+  <div class="node node-user">{icon("mail", 26, "#FF6B78")}<b>Untrusted input</b><span>email · web · file</span></div>
   <div class="arrow">{icon("arrow-right", 22)}</div>
-  <div class="node node-shield">{icon("shield-check", 28, "#C9B6FF")}<b>AgentShield</b><span>checks every tool call before it runs</span></div>
+  <div class="node node-shield">{icon("shield-check", 28, "#C9B6FF")}<b>AgentShield</b><span>checks each tool call</span></div>
   <div class="arrow">{icon("arrow-right", 22)}</div>
-  <div class="node node-dec">{icon("circle-check", 26, "#16C784")}<b>Decision</b><span>allow / ask / block</span></div>
+  <div class="node node-dec">{icon("circle-check", 26, "#16C784")}<b>Decision</b><span>allow · ask · block</span></div>
 </div>
 """
 
