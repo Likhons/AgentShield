@@ -37,7 +37,7 @@
 - [x] All 6 attack scenarios stopped on mock, all 5 benign scenarios unchanged; fake bill blocked and landlord paid on real qwen (n=1)
 - [x] Heuristic injection classifier behind a `predict()` interface (user), wired into the demo engine
 - [x] Unit tests for every check (156 tests passing)
-- [ ] Decide classifier scope (all untrusted items vs. items linked by taint) using Phase 3 over-refusal numbers
+- [x] Classifier scope decided: B (score only items taint-linked to the arguments), commit `69d2e4d`; mixed inbox rent held 5/12 → 0/12, attacker still 0/12 (`mixed_20261105-164804`, simulated)
 - [ ] FastAPI gateway (basic), optional
 - [x] Policy template keys from rule args; whole-number match in `not_mentioned_by_user` (user)
 - [x] Friendlier ALLOW reason when a check flagged but the action is allowed (user)
@@ -57,7 +57,7 @@
 - [x] Text run 3 (`detection_20261027-151903`): Prompt Guard 2 flags 0/24 Bangla/Banglish attacks (86m and 22m); heuristic 4/7 blunt per language, 0/5 subtle
 - [x] Agent run, simulated (`agent_20261027-151938`): attacks succeed 11/20 without, 0/20 with AgentShield; rent paid 90/90 with
 - [x] Agent run with real Groq (`agent_20261027-153825`): attacks 4/20 without → 0/20 with; BUT rent paid 17/20 without → 0/20 with (all ASK_HUMAN): the gpt-oss-120b judge, which never sees the email, cannot tell the landlord is a saved contact and says "inconsistent"
-- [ ] Fix (proposed option A, user's file intent.py): give the judge the trusted fact "recipient is a saved contact: yes/no" from `known_recipients`; benchmark should also report asked vs blocked separately; re-run real Groq
+- [x] Fix A (intent judge: saved-contact fact + prompt rule, `aa4b1b7`): real Groq rent paid 0/20 → 14/20 with AgentShield, attacks 0/20 (`agent_20261105-130607`); benchmark reports blocked / held / never tried separately
 - [x] docs/results.md draft (measured numbers only), architecture.md updated, ethics KPIs filled, README results summary
 - [x] Dashboard Benchmark tab reads benchmark/results (tables + chart)
 
