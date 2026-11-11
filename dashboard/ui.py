@@ -217,6 +217,75 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .cond { display: inline-block; background: var(--card2); border: 1px solid var(--line); border-radius: 7px; padding: .1rem .5rem;
   margin: .15rem .3rem .15rem 0; font-size: .78rem; color: #C9B6FF; font-family: ui-monospace, Consolas, monospace; }
 
+/* ---------- motion: slow, purposeful, never decorative noise ---------- */
+:root { --ease: cubic-bezier(.22, .61, .36, 1); }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes breathe { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+@keyframes orbit { to { stroke-dashoffset: -1000; } }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes sheen { from { transform: translateX(-120%) skewX(-18deg); } to { transform: translateX(260%) skewX(-18deg); } }
+@keyframes scan { 0%, 12%, 100% { border-color: var(--line2); box-shadow: none; }
+                  4% { border-color: rgba(180,76,255,.85); box-shadow: 0 0 0 1px rgba(180,76,255,.45), 0 0 22px rgba(113,56,255,.35); } }
+@keyframes halo { 0%, 100% { box-shadow: 0 0 18px rgba(113,56,255,.25); } 50% { box-shadow: 0 0 30px rgba(113,56,255,.45); } }
+
+/* hero: the shield floats, a light streak orbits its ring, the aura breathes */
+.shield-art .shield-body { animation: float 6s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
+.shield-art .orbit { stroke-dashoffset: 0; animation: orbit 9s linear infinite; opacity: .9; }
+.shield-art .aura, .shield-art .pad-glow { animation: breathe 6s var(--ease) infinite; }
+.feat { animation: rise .6s var(--ease) backwards; transition: border-color .25s var(--ease), transform .25s var(--ease), background .25s; }
+.feat:nth-of-type(1) { animation-delay: .05s; } .feat:nth-of-type(2) { animation-delay: .12s; } .feat:nth-of-type(3) { animation-delay: .19s; }
+.feat:nth-of-type(4) { animation-delay: .26s; } .feat:nth-of-type(5) { animation-delay: .33s; } .feat:nth-of-type(6) { animation-delay: .40s; }
+.feat:hover { border-color: rgba(180,76,255,.7); background: rgba(40,30,90,.9); transform: translateY(-1px); }
+
+/* cards: a quiet lift and a brighter edge on hover */
+.kpi, .node, .dec, .pnode, .rule, .status, .st-key-card_run, .st-key-card_how, .st-key-card_pipe, .st-key-card_recent {
+  transition: transform .28s var(--ease), border-color .28s var(--ease), box-shadow .28s var(--ease), background .28s; }
+.kpi:hover, .rule:hover { transform: translateY(-2px); border-color: var(--line2);
+  box-shadow: 0 10px 30px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(140,120,255,.12); }
+.kpi .kpi-icon { transition: transform .28s var(--ease), box-shadow .28s var(--ease); }
+.kpi:hover .kpi-icon { transform: scale(1.06); box-shadow: 0 0 18px rgba(113,56,255,.25); }
+.kpi { animation: rise .55s var(--ease) backwards; }
+.kpis .kpi:nth-child(2) { animation-delay: .06s; } .kpis .kpi:nth-child(3) { animation-delay: .12s; } .kpis .kpi:nth-child(4) { animation-delay: .18s; }
+.st-key-card_how:hover, .st-key-card_pipe:hover, .st-key-card_recent:hover { border-color: var(--line2); }
+.node:hover, .dec:hover { transform: translateY(-2px); }
+.node-shield { animation: halo 4s var(--ease) infinite; }
+
+/* pipeline: each check lights up in turn, like a tool call passing through */
+.pipe .pnode { animation: scan 6s var(--ease) infinite; }
+.pipe .pnode:nth-child(1) { animation-delay: 0s; } .pipe .pnode:nth-child(3) { animation-delay: .7s; }
+.pipe .pnode:nth-child(5) { animation-delay: 1.4s; } .pipe .pnode:nth-child(7) { animation-delay: 2.1s; }
+.pnode:hover { border-color: rgba(180,76,255,.8); }
+
+/* buttons */
+.cta-primary, .stButton > button[data-testid="stBaseButton-primary"] { position: relative; overflow: hidden; }
+.cta-primary::after, .stButton > button[data-testid="stBaseButton-primary"]::after {
+  content: ""; position: absolute; top: 0; left: 0; width: 40%; height: 100%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent); transform: translateX(-120%) skewX(-18deg); }
+.cta-primary:hover::after, .stButton > button[data-testid="stBaseButton-primary"]:hover::after { animation: sheen .9s var(--ease); }
+.stButton > button[data-testid="stBaseButton-primary"] { transition: transform .2s var(--ease), box-shadow .2s var(--ease), filter .2s; }
+.stButton > button[data-testid="stBaseButton-primary"]:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(113,56,255,.45); }
+.stButton > button[data-testid="stBaseButton-primary"]:active { transform: translateY(0); }
+.cta-ghost { transition: border-color .2s var(--ease), background .2s var(--ease), transform .15s; }
+.cta-ghost:hover { border-color: rgba(180,76,255,.6); background: rgba(113,56,255,.08); }
+
+/* sidebar nav */
+.st-key-nav [role="radiogroup"] > div { transition: background .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease); }
+.st-key-nav [role="radiogroup"] > div:not([data-selected="true"]):hover { transform: translateX(2px); }
+.dot { animation: breathe 2.4s var(--ease) infinite; }
+
+/* results: the outcome arrives, the saved banner catches the light once */
+.summary { position: relative; overflow: hidden; animation: rise .5s var(--ease) both; }
+.summary::after { content: ""; position: absolute; top: 0; left: 0; width: 35%; height: 100%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent); animation: sheen 1.4s .35s var(--ease) both; }
+.money, .col-head { animation: rise .5s var(--ease) both; }
+.money { animation-delay: .1s; }
+.rtable tr { transition: background .2s; }
+.rtable tr:hover td { background: rgba(113,56,255,.06); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   /* the big two-column rows stack, so cards never get squeezed (sidebar takes ~300px) */
@@ -255,13 +324,17 @@ SHIELD_ART = """
     <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#7138FF" stop-opacity=".55"/><stop offset="1" stop-color="#7138FF" stop-opacity="0"/></radialGradient>
     <filter id="blur"><feGaussianBlur stdDeviation="6"/></filter>
   </defs>
-  <circle cx="125" cy="118" r="112" fill="url(#glow)"/>
+  <circle class="aura" cx="125" cy="118" r="112" fill="url(#glow)"/>
   <ellipse cx="125" cy="200" rx="92" ry="22" fill="none" stroke="#7138FF" stroke-opacity=".55" stroke-width="2"/>
-  <ellipse cx="125" cy="200" rx="66" ry="14" fill="#7138FF" fill-opacity=".25" filter="url(#blur)"/>
+  <ellipse class="pad-glow" cx="125" cy="200" rx="66" ry="14" fill="#7138FF" fill-opacity=".25" filter="url(#blur)"/>
   <ellipse cx="125" cy="120" rx="118" ry="34" fill="none" stroke="#B44CFF" stroke-opacity=".35" stroke-width="1.2"/>
+  <ellipse class="orbit" cx="125" cy="120" rx="118" ry="34" fill="none" stroke="#E2D4FF" stroke-width="2.2"
+           stroke-linecap="round" pathLength="1000" stroke-dasharray="70 930"/>
+  <g class="shield-body">
   <path d="M125 32 L188 56 C188 120 166 162 125 186 C84 162 62 120 62 56 Z" fill="url(#sg)" stroke="#D7C2FF" stroke-opacity=".7" stroke-width="2"/>
   <path d="M125 50 L172 68 C172 118 155 150 125 168 C95 150 78 118 78 68 Z" fill="url(#sg2)" stroke="#B44CFF" stroke-opacity=".6" stroke-width="1.5"/>
   <path d="M101 110 L118 127 L151 92" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>
 """
 
