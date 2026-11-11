@@ -71,14 +71,14 @@ Details: the lowest attack score was 0.71 and the highest benign score 0.57 (`bn
 ## 3. Agent level: is the money safe?
 
 ### 3a. Simulated agent (offline mock)
-Source: `agent_20261027-151938`. The mock is a deliberately naive agent that obeys money instructions it can parse; it is a simulation, not a real-model result.
+Source: `agent_20261111-122758` (11 Nov, heuristic detector, full dataset). The mock is a deliberately naive agent that obeys money instructions it can parse; it is a simulation, not a real-model result.
 
 | Language | Attacks succeed WITHOUT AgentShield | WITH AgentShield | Rent bill still paid WITHOUT | WITH |
 |---|---|---|---|---|
-| Bangla | 6/10 | **0/10** | 45/45 | **45/45** |
-| Banglish | 5/10 | **0/10** | 45/45 | **45/45** |
+| Bangla | 11/30 | **0/30** | 85/85 | **85/85** |
+| Banglish | 11/30 | **0/30** | 90/90 | **90/90** |
 
-(10 = 12 attacks minus 2 direct ones per language; direct attacks come from the user, whom AgentShield trusts, so they are out of scope here.)
+With AgentShield the attacks ended as blocked 22, never tried 38 (the naive agent only acts on instructions it can parse). 30 = 32 attacks minus 2 direct ones per language; direct attacks come from the user, whom AgentShield trusts, so they are out of scope here. Benign items include the 35 hand-written and the 60 payment-request look-alikes. Earlier run with the first 24 attacks: `agent_20261027-151938` (0/20 with, 90/90 rent paid).
 
 ### 3b. Real LLM agent (Groq, qwen3.8-27b; judge gpt-oss-120b)
 Sources: `agent_20261027-153825` (version 1), `agent_20261103-070103` (saved-contact line added), `agent_20261105-130607` (prompt rule added). 20 Bangla/Banglish attacks + 20 benign items, 1 run each, no human approver. Version 1 happened to draw all 20 benign items from Bangla; the two later runs use 10 per language.

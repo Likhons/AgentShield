@@ -22,6 +22,18 @@ def latest(kind: str, results_dir: Path = RESULTS_DIR) -> tuple[str, dict] | Non
     return files[-1].stem, json.loads(files[-1].read_text(encoding="utf-8"))
 
 
+def latest_where(kind: str, keep, results_dir: Path = RESULTS_DIR) -> tuple[str, dict] | None:
+    """Newest result of a kind whose data passes keep(data), or None.
+
+    The newest file is not always the one to show: e.g. an agent run with the
+    experimental model detector must not replace the headline real-LLM run."""
+    for path in sorted(results_dir.glob(f"{kind}_*.json"), reverse=True):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if keep(data):
+            return path.stem, data
+    return None
+
+
 def detection_rows(data: dict) -> list[dict]:
     """One row per detector and language: detection rate and false positive rate."""
     rows = []

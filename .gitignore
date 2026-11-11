@@ -26,3 +26,6 @@ Thumbs.db
 
 # Benchmark score cache (re-creatable; results/ is committed)
 benchmark/cache/
+
+# Browser screenshots from UI checks
+.playwright-mcp/
