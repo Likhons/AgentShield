@@ -23,6 +23,7 @@ from pathlib import Path
 
 from benchmark.dataset import DATASET_DIR, load_dataset
 from benchmark.metrics import Rate
+from agentshield.config import get_settings
 from demo_agent.run import run_world
 from demo_agent.scenarios import load_json
 from demo_agent.tools import MockPayWorld
@@ -85,7 +86,7 @@ def main() -> None:
     note = "mock = simulated naive agent and keyword judge; not a real-model result" if args.provider == "mock" \
         else f"real LLM via {args.provider}"
     (RESULTS_DIR / f"mixed_{stamp}.json").write_text(
-        json.dumps({"created_utc": stamp, "provider": args.provider, "note": note, "rows": rows}, indent=2),
+        json.dumps({"created_utc": stamp, "provider": args.provider, "detector": get_settings().detector, "note": note, "rows": rows}, indent=2),
         encoding="utf-8")
     (RESULTS_DIR / f"mixed_{stamp}.md").write_text(
         f"# Mixed-inbox experiment {stamp} (UTC)\n\nProvider: {args.provider} ({note}). Task: \"{TASK}\". "

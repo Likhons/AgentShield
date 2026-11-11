@@ -50,3 +50,38 @@ def test_model_detector_is_registered_and_lazy(tmp_path):
     missing = TrainedModel(model_dir=tmp_path / "no-model")
     with pytest.raises(FileNotFoundError, match="Kaggle"):
         missing.score("hello")
+
+
+# ---- runtime adapter (agentshield/checks/model_detector.py) ------------------
+
+
+def test_model_detector_predict_uses_worst_chunk_and_signals(monkeypatch):
+    from agentshield.checks.model_detector import ModelDetector
+    from agentshield.core.models import Language
+
+    detector = ModelDetector(model_dir="nowhere")
+    seen = []
+
+    def fake_predict(texts):
+        seen.extend(texts)
+        return [0.1 if "attack" not in t else 0.9 for t in texts]
+
+    monkeypatch.setattr(detector, "_load", lambda: fake_predict)
+    calm = detector.predict("Apnar bidyut bill 1250 taka, 15 November er moddhe pay korun.")
+    assert calm.score == pytest.approx(0.1) and calm.signals == [] and calm.language == Language.BANGLISH
+    loud = detector.predict(("normal words " * 60) + "attack")
+    assert loud.score == pytest.approx(0.9) and loud.signals == ["model_attack"]
+    assert len(seen) > 2  # the long text was split into chunks
+
+
+def test_make_detector_reads_the_env(monkeypatch):
+    from agentshield.checks.classifier import HeuristicDetector
+    from agentshield.checks.model_detector import ModelDetector
+    from demo_agent.run import make_detector
+
+    monkeypatch.delenv("AGENTSHIELD_DETECTOR", raising=False)
+    assert isinstance(make_detector(), HeuristicDetector)
+    monkeypatch.setenv("AGENTSHIELD_DETECTOR", "model")
+    assert isinstance(make_detector(), ModelDetector)  # lazy: no torch needed yet
+    with pytest.raises(ValueError):
+        make_detector("gpt")

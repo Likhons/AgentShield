@@ -161,6 +161,7 @@ _LABELS = {
     "hidden_block": ("hidden or fake system text", "লুকানো বা নকল system লেখা"),
     "action_with_number": ("orders a payment to a number", "একটা নম্বরে টাকা পাঠানোর আদেশ"),
     "urgency": ("creates urgency", "তাড়াহুড়ো করতে বলে"),
+    "model_attack": ("the trained model rates this text as an injection", "ট্রেইন করা মডেল এই লেখাকে injection বলছে"),
 }
 
 

@@ -16,6 +16,7 @@ class Settings:
     gemini_api_key: str
     groq_api_key: str
     audit_db_path: str
+    detector: str  # injection classifier: "heuristic" (default) or "model" (Phase 4 XLM-R in models/)
 
 
 def get_settings() -> Settings:
@@ -31,4 +32,5 @@ def get_settings() -> Settings:
         gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
         groq_api_key=os.getenv("GROQ_API_KEY", ""),
         audit_db_path=os.getenv("AUDIT_DB_PATH", "agentshield_audit.db"),
+        detector=os.getenv("AGENTSHIELD_DETECTOR", "heuristic"),
     )

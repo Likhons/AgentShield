@@ -14,7 +14,7 @@ import sys
 from dataclasses import dataclass, field, replace
 
 from agentshield.audit.log import AuditLog
-from agentshield.checks.classifier import ClassifierCheck
+from agentshield.checks.classifier import ClassifierCheck, HeuristicDetector
 from agentshield.checks.intent import IntentChecker
 from agentshield.checks.policy import PolicyEngine
 from agentshield.checks.taint import TaintChecker
@@ -58,6 +58,20 @@ def match_verdicts(steps: list[Step], history: list[tuple[ToolCall, Verdict]]) -
     return matched
 
 
+def make_detector(name: str | None = None):
+    """The injection detector named by AGENTSHIELD_DETECTOR (or `name`):
+    "heuristic" (default, no dependencies) or "model" (Phase 4 XLM-R, needs torch
+    + transformers and models/agentshield-classifier/; loaded on first use)."""
+    name = (name or get_settings().detector).strip().lower()
+    if name == "heuristic":
+        return HeuristicDetector()
+    if name == "model":
+        from agentshield.checks.model_detector import ModelDetector  # local import: torch is optional
+
+        return ModelDetector()
+    raise ValueError(f"unknown detector {name!r}; use 'heuristic' or 'model'")
+
+
 def build_engine(
     provider: str | None = None,
     model: str | None = None,
@@ -73,7 +87,7 @@ def build_engine(
         policy=PolicyEngine.from_yaml(),
         taint=TaintChecker(),
         intent=IntentChecker(get_provider(provider, judge_model)),
-        classifier=ClassifierCheck() if classifier else None,
+        classifier=ClassifierCheck(make_detector()) if classifier else None,
         audit=audit,
     )
 

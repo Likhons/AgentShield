@@ -22,6 +22,7 @@ from pathlib import Path
 from agentshield.core.models import DatasetSample
 from benchmark.dataset import DATASET_DIR, load_dataset
 from benchmark.metrics import Rate
+from agentshield.config import get_settings
 from demo_agent.run import run_world
 from demo_agent.scenarios import load_json
 from demo_agent.tools import MockPayWorld
@@ -203,7 +204,7 @@ def main() -> None:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     note = ("mock = simulated naive agent that obeys money instructions it reads; "
             "not a real-model result" if args.provider == "mock" else f"real LLM via {args.provider}")
-    meta = {"created_utc": stamp, "provider": args.provider, "runs": args.runs, "note": note,
+    meta = {"created_utc": stamp, "provider": args.provider, "detector": get_settings().detector, "runs": args.runs, "note": note,
             "items": len(usable), "skipped": skipped, "seconds": round(time.perf_counter() - start, 1)}
     (RESULTS_DIR / f"agent_{stamp}.json").write_text(json.dumps({**meta, "rows": rows}, indent=2), encoding="utf-8")
     (RESULTS_DIR / f"agent_{stamp}.md").write_text(
