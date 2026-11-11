@@ -22,6 +22,7 @@ from typing import Any, Callable, Protocol
 
 from pydantic import BaseModel, Field
 
+from agentshield.checks.classifier import ClassifierCheck
 from agentshield.checks.intent import RISK_UNVERIFIED, IntentChecker
 from agentshield.checks.policy import DEFAULT_POLICY_PATH, PolicyEngine
 from agentshield.checks.taint import TaintChecker
@@ -265,5 +266,6 @@ def build_default_engine(policy_path: str | Path = DEFAULT_POLICY_PATH, audit: A
         policy=PolicyEngine.from_yaml(policy_path),
         taint=TaintChecker(),
         intent=intent,
+        classifier=ClassifierCheck(),
         audit=audit,
     )
