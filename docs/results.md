@@ -29,11 +29,18 @@ False positives on benign look-alikes (lower is better):
 | Prompt Guard 2, 22m | 0/45 | 0/45 | 2/45 |
 | AgentShield heuristic | 0/45 | 1/45 | 0/45 |
 
+Independent benign items (`datasets/benign_own.jsonl`, hand-written by a team member who had not read the classifier code; source `detection_20261111-064648`):
+
+| Detector | Bangla (15) | Banglish (20) |
+|---|---|---|
+| AgentShield heuristic | 0/15 (max score 0.0) | 0/20 (max score 0.0) |
+| Prompt Guard 2 (86m / 22m) | TBD | TBD |
+
 What this shows:
 - Prompt Guard 2 flagged **0 of 24** Bangla/Banglish attacks, including blunt ones that openly tell the AI to send money (scores near 0).
 - It also flagged only 1 of 40 subtle English agent injections, so the honest claim is "these attacks evade a widely used text guardrail", not "it only fails in Bangla".
 - No text classifier caught the subtle fake bills (0/10). They contain no instruction to an AI, only a payment request, so text inspection alone cannot separate them from real bills.
-- Caveats: 7 and 5 items per cell (wide intervals). Our heuristic's signals were derived from our own demo data, so its 4/7 is optimistic. The benign set was written by an LLM that had seen the heuristic's code.
+- Caveats: 7 and 5 items per cell (wide intervals). Our heuristic's signals were derived from our own demo data, so its 4/7 is optimistic. The 135-item benign set was written by an LLM that had seen the heuristic's code; the 35 independent items above do not have that problem, but they are few.
 
 ## 3. Agent level: is the money safe?
 
