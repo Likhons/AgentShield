@@ -31,6 +31,9 @@ def chunks(text: str, size: int = CHUNK_CHARS) -> list[str]:
     return pieces or [""]
 
 
+_LOADED: dict[tuple[str, int], object] = {}  # (model_dir, max_len) -> predict function, shared
+
+
 class ModelDetector:
     name = "agentshield-model"
 
@@ -42,6 +45,10 @@ class ModelDetector:
 
     def _load(self):
         if self._predict is None:
+            key = (str(self.model_dir), self.max_len)
+            if key in _LOADED:  # one copy per process: a new engine per scenario must not reload 1 GB
+                self._predict = _LOADED[key]
+                return self._predict
             if not (self.model_dir / "config.json").exists():
                 raise FileNotFoundError(f"no trained model in {self.model_dir}; unzip the Kaggle output there")
             import torch
@@ -57,7 +64,7 @@ class ModelDetector:
                     probs = torch.softmax(model(**batch).logits, dim=-1)[:, attack_index]
                 return [float(p) for p in probs]
 
-            self._predict = predict
+            self._predict = _LOADED[key] = predict
         return self._predict
 
     def predict(self, text: str) -> DetectorOutput:
