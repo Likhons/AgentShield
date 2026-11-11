@@ -7,6 +7,7 @@ Labeled English / Bangla / Banglish texts for the benchmark (`benchmark/`) and, 
 |---|---|---|---|
 | `benign.jsonl` | Benign look-alikes: normal texts about money, bills, numbers, "ignore", "assistant", urgency, secrecy | LLMs, via `build_benign_seed.py` | 135 items (45 per language), `reviewed=yes` (read by the team 11 Nov 2026, wording unchanged) |
 | `benign_own.jsonl` | Independent benign look-alikes written by a team member who had not read the classifier code (everyday Bangla/Banglish messages: money, urgency, secrecy, instructions to people, plain chat) | Team, hand-written | 35 items (15 bn, 20 banglish), `reviewed=yes` |
+| `benign_payreq.jsonl` | Legitimate payment requests that carry a phone number (rent, tuition, bills, friends, family, shops, office collections), the benign twin of a subtle fake bill | LLM (Claude), 11 Nov 2026, written after seeing the attacks on purpose | 60 items (25 bn, 25 banglish, 10 en), `reviewed=no` |
 | `external.jsonl` | English attacks hidden inside agent tool data, from a public dataset | Third party, via `import_external.py` | 40 items, see External sources |
 | `attacks.jsonl` | Prompt-injection attacks aimed at an AI agent, in Bangla and Banglish: email / web / file / direct, blunt and subtle | Team: 24 LLM-generated (reviewed, admission phrases removed) + 40 hand-written (11 Nov 2026) | 64 items (32 per language), `reviewed=yes` |
 | `external_raw/` | Cached rows of the public dataset (not loaded by the benchmark) | – | re-download with `--refresh` |
