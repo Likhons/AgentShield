@@ -2,6 +2,9 @@
 
 - agentshield-heuristic: our Phase 2 classifier (HeuristicDetector)
 - promptguard-86m / promptguard-22m: Meta Llama Prompt Guard 2, served free by Groq
+- model: the Phase 4 transformer trained on Kaggle, loaded from models/agentshield-classifier/
+  (CPU inference; needs `pip install torch transformers`). Evaluate it on the test split only:
+  `python -m benchmark.run_detection --detectors model --split test`.
 """
 
 from __future__ import annotations
@@ -17,6 +20,7 @@ from agentshield.llm.base import LLMProvider
 from agentshield.llm.groq import GroqProvider
 
 CACHE_DIR = Path(__file__).resolve().parent / "cache"
+MODEL_DIR = Path(__file__).resolve().parent.parent / "models" / "agentshield-classifier"
 
 # Prompt Guard 2 reads at most 512 tokens; Bangla needs many tokens per word,
 # so long texts are split and the highest chunk score is used (as Meta suggests).
@@ -88,11 +92,54 @@ class CachedDetector:
         return self._scores[key]
 
 
+class TrainedModel:
+    """Phase 4 classifier (XLM-R fine-tuned on Kaggle), run on CPU.
+
+    Loads lazily so that importing this module never needs torch. The score is the
+    model's probability for the "attack" label; long texts are split like Prompt Guard
+    and the highest chunk score counts.
+    """
+
+    name = "agentshield-model"
+
+    def __init__(self, model_dir: Path = MODEL_DIR, max_len: int = 256) -> None:
+        self.model_dir = Path(model_dir)
+        self.max_len = max_len
+        self._pipeline = None
+
+    def _load(self):
+        if self._pipeline is None:
+            if not (self.model_dir / "config.json").exists():
+                raise FileNotFoundError(
+                    f"no trained model in {self.model_dir}; unzip agentshield-classifier.zip from Kaggle there")
+            try:
+                import torch
+                from transformers import AutoModelForSequenceClassification, AutoTokenizer
+            except ImportError as e:  # pragma: no cover - depends on the environment
+                raise ImportError("pip install torch transformers (CPU wheels) to use the trained model") from e
+            tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
+            model = AutoModelForSequenceClassification.from_pretrained(self.model_dir).eval()
+            attack_index = int(model.config.label2id.get("attack", 1))
+
+            def predict(texts: list[str]) -> list[float]:
+                batch = tokenizer(texts, truncation=True, max_length=self.max_len, padding=True, return_tensors="pt")
+                with torch.no_grad():
+                    probs = torch.softmax(model(**batch).logits, dim=-1)[:, attack_index]
+                return [float(p) for p in probs]
+
+            self._pipeline = predict
+        return self._pipeline
+
+    def score(self, text: str) -> float:
+        return max(self._load()(chunks(text)))
+
+
 def build_detectors(names: list[str]) -> list[Detector]:
     available = {
         "heuristic": lambda: HeuristicBaseline(),
         "promptguard-86m": lambda: CachedDetector(PromptGuard("86m")),
         "promptguard-22m": lambda: CachedDetector(PromptGuard("22m")),
+        "model": lambda: TrainedModel(),
     }
     unknown = [n for n in names if n not in available]
     if unknown:

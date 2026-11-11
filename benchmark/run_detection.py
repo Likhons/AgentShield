@@ -3,6 +3,7 @@ per language?
 
     python -m benchmark.run_detection                                  # heuristic only (offline)
     python -m benchmark.run_detection --detectors heuristic,promptguard-86m,promptguard-22m
+    python -m benchmark.run_detection --detectors model,heuristic --split test   # trained model: held-out items only
 
 Writes benchmark/results/detection_<timestamp>.json and .md. Only these files
 are a valid source for numbers in docs, README and the pitch.
@@ -19,10 +20,31 @@ from pathlib import Path
 
 from agentshield.core.models import DatasetSample
 from benchmark.dataset import DATASET_DIR, load_dataset, summarize
-from benchmark.detectors import Detector, build_detectors
+from benchmark.detectors import MODEL_DIR, Detector, build_detectors
 from benchmark.metrics import DetectionMetrics
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
+SPLIT_FILE = MODEL_DIR / "split_ids.json"
+
+
+def filter_split(samples: list[DatasetSample], split: str, split_file: Path = SPLIT_FILE) -> list[DatasetSample]:
+    """Keep only the items of one split (train / val / test) as recorded by the training notebook.
+
+    The trained model must be scored on the test split only; the other items were used
+    to fit or select it. Fails loudly if the split file is missing or names unknown ids.
+    """
+    if not split_file.exists():
+        raise FileNotFoundError(f"{split_file} not found; it is written by training/train_classifier.ipynb")
+    splits = json.loads(split_file.read_text(encoding="utf-8"))
+    if split not in splits:
+        raise ValueError(f"split {split!r} not in {sorted(splits)}")
+    wanted = set(splits[split])
+    kept = [s for s in samples if s.id in wanted]
+    missing = wanted - {s.id for s in kept}
+    if missing:
+        raise ValueError(f"{len(missing)} ids of split {split!r} are not in the dataset (e.g. {sorted(missing)[:3]}); "
+                         "the dataset changed after training, so the split is stale")
+    return kept
 
 
 def evaluate(
@@ -62,10 +84,16 @@ def main() -> None:
     parser.add_argument("--dataset", default=str(DATASET_DIR))
     parser.add_argument("--detectors", default="heuristic")
     parser.add_argument("--threshold", type=float, default=0.5)
+    parser.add_argument("--split", default=None, choices=["train", "val", "test"],
+                        help="score only this split from the training run (use 'test' for the trained model)")
+    parser.add_argument("--split-file", default=str(SPLIT_FILE))
     args = parser.parse_args()
 
     samples = load_dataset(args.dataset)
     print(f"Dataset: {len(samples)} samples {summarize(samples)}")
+    if args.split:
+        samples = filter_split(samples, args.split, Path(args.split_file))
+        print(f"Split {args.split!r}: {len(samples)} samples {summarize(samples)}")
 
     results: dict[str, dict[str, DetectionMetrics]] = {}
     per_sample: dict[str, list[dict]] = {}
@@ -78,14 +106,16 @@ def main() -> None:
 
     RESULTS_DIR.mkdir(exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    meta = {"created_utc": stamp, "threshold": args.threshold, "dataset": summarize(samples)}
+    meta = {"created_utc": stamp, "threshold": args.threshold, "dataset": summarize(samples),
+            "split": args.split, "split_file": str(args.split_file) if args.split else None}
     (RESULTS_DIR / f"detection_{stamp}.json").write_text(
         json.dumps({**meta, "metrics": {d: {lang: m.to_dict() for lang, m in r.items()} for d, r in results.items()},
                     "samples": per_sample}, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
     (RESULTS_DIR / f"detection_{stamp}.md").write_text(
-        f"# Detection benchmark {stamp} (UTC)\n\nThreshold {args.threshold}. Dataset: {meta['dataset']}\n\n{table}\n",
+        f"# Detection benchmark {stamp} (UTC)\n\nThreshold {args.threshold}. "
+        f"{'Split: ' + args.split + '. ' if args.split else ''}Dataset: {meta['dataset']}\n\n{table}\n",
         encoding="utf-8",
     )
     print(f"\nSaved benchmark/results/detection_{stamp}.json and .md")
