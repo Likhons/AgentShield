@@ -11,7 +11,7 @@
 - **Model v2** (retrained with `benign_payreq.jsonl`, 334 items): text test 16/16 attacks, 3/35 benign, but agent-level rent still 0/175 because runtime emails carry "From/Subject" headers that score high (results.md §3e). Heuristic stays default. Possible fix: train on texts wrapped in runtime formats.
 - Still TBD: Prompt Guard 2 on the 75 new items and on the 42 test-split items (Groq).
 - `make_detector()` lives in `demo_agent/run.py`; `core/engine.build_default_engine` (API) uses `ClassifierCheck()` (heuristic). Unify later by moving `make_detector` into `agentshield/checks/`.
-- GitHub: last push `fba31ec` (5 Nov); local is many commits ahead. Ask the user before pushing.
+- GitHub up to date as of `4810f53` (pushed 11 Nov). Ask the user before pushing again.
 - **Open user tasks:** decide on retraining data for the model; verify pitch citations; business-model market data; find out exactly what the 20 Nov preliminary submission requires.
 
 ## How we work (important)
