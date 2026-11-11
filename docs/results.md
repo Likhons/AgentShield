@@ -51,6 +51,23 @@ What this shows:
 - No text classifier caught the subtle fake bills (0/10). They contain no instruction to an AI, only a payment request, so text inspection alone cannot separate them from real bills.
 - Caveats: 7 and 5 items per cell (wide intervals). Our heuristic's signals were derived from our own demo data, so its 4/7 is optimistic. The 135-item benign set was written by an LLM that had seen the heuristic's code; the 35 independent items above do not have that problem, but they are few.
 
+## 2b. Trained classifier (Phase 4): XLM-R fine-tuned on Kaggle
+
+Model `xlm-roberta-base`, fine-tuned 6 epochs on Kaggle (T4, seed 42) on the 274-item dataset, stratified split 70/15/15 by language and label. Only the **test split** (42 items the model never saw: 16 attacks, 26 benign) counts. Local CPU run `detection_20261111-091439` reproduces Kaggle's `test_metrics.json` exactly.
+
+| Detector | Attacks flagged (test split) | Benign flagged (test split) | Median latency (CPU laptop) |
+|---|---|---|---|
+| AgentShield model (XLM-R) | **16/16** (95% CI 81%-100%); bn 5/5, banglish 5/5, en 6/6 | **1/26** (1%-19%); bn 1/9, banglish 0/10, en 0/7 | 66 ms |
+| AgentShield heuristic, same 42 items | 2/16 | 0/26 | 0.2 ms |
+
+Details: the lowest attack score was 0.71 and the highest benign score 0.57 (`bn-ben-022`, a plain internet-package renewal notice; the only false positive). The test split holds 7 of the 40 hand-written attacks (all flagged) and 4 of the 35 independent benign items (none flagged).
+
+**Read with care:**
+- The test split is small: 5 attacks per language. "5/5" is compatible with a true detection rate as low as 57%.
+- The Bangla/Banglish attacks share one domain (MockPay payments, `010...` numbers, taka amounts), so the model may partly have learned that template. Attacks of a different style have not been tested.
+- The model is a text classifier; like Prompt Guard it cannot tell a subtle fake bill from a real one by text alone. In AgentShield it is one of four checks; taint and policy are what stop the subtle cases.
+- Prompt Guard 2 on the same 42 items: TBD (Groq busy at the time of writing).
+
 ## 3. Agent level: is the money safe?
 
 ### 3a. Simulated agent (offline mock)
