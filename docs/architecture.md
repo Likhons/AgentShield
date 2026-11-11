@@ -1,6 +1,6 @@
 # AgentShield Architecture
 
-> Draft, updated 27 Oct 2026. The status column shows what is built today. Nothing marked "planned" exists in code yet.
+> Draft, updated 11 Nov 2026. The status column shows what is built today. Nothing marked "planned" exists in code yet.
 
 ## 1. The idea in one picture
 
@@ -35,14 +35,14 @@ Design principle: **"AI where judgment is needed, deterministic rules where cert
 |---|---|---|---|
 | LLM provider layer | `agentshield/llm/` | One interface for `mock` (offline, also an offline intent judge), `groq` and `gemini`; provider and models come from `.env`; retries on rate limits and timeouts | Built, tested |
 | Taint tracking | `agentshield/checks/taint.py` | Traces every argument of a tool call to the user's request, a specific tool output (email, web page, file, bank data) or nowhere | Built, tested |
-| Injection classifier | `agentshield/checks/classifier.py` | Scans untrusted context for attempts to instruct the AI (EN/BN/Banglish); heuristic baseline behind a swappable detector interface | Heuristic built; trained model planned (Phase 4) |
+| Injection classifier | `agentshield/checks/classifier.py` | Scans untrusted context for attempts to instruct the AI (EN/BN/Banglish); for sensitive tools only the items that supplied the arguments are scored (scope B); heuristic baseline behind a swappable detector interface | Heuristic built; trained model planned (Phase 4) |
 | Intent check | `agentshield/checks/intent.py` | LLM judge: does this action follow from what the user asked? Sees only the user's request and the tool call, never the untrusted text | Built, tested |
 | Policy engine | `agentshield/checks/policy.py`, `policies/default.yaml` | Readable, validated YAML rules (amount limits, unknown recipients, tainted transfers) | Built, tested |
 | Decision engine | `agentshield/core/engine.py` | Combines the checks into a risk score and a decision with a bilingual reason; measures latency | Built, tested |
 | Audit log | `agentshield/audit/log.py` | Every decision with per-check results, latency and KPI stats (SQLite) | Built, tested |
 | SDK wrapper | `agentshield/sdk/session.py` | Protect any agent's tools: `session.wrap(name, func, source)` | Built, tested |
-| Demo banking agent | `demo_agent/` | Agent with six fake MockPay tools and 13 scenarios (5 benign, 8 attacks), runnable without and with AgentShield | Built, tested |
-| Dashboard | `dashboard/` | Streamlit: side-by-side demo (without vs with AgentShield), audit log with KPIs, benchmark tab | Demo and audit built; benchmark charts planned (Phase 5) |
+| Demo banking agent | `demo_agent/` | Agent with six fake MockPay tools and 14 scenarios (6 benign, 8 attacks), runnable without and with AgentShield; real runs can be recorded and replayed | Built, tested |
+| Dashboard | `dashboard/` | Streamlit: side-by-side demo (mock, live Groq, or recorded replay), simulated human approval, audit log with KPIs, benchmark tab reading `benchmark/results/` | Built, tested |
 | Benchmark | `benchmark/`, `datasets/` | Text-level (detectors) and agent-level (money outcome) benchmarks per language, with 95% confidence intervals | Built; dataset growing (Phase 3) |
 | HTTP gateway | `agentshield/api/app.py` | Same checks as a web service (FastAPI): `POST /v1/check`, `GET /v1/audit`, `GET /v1/stats`; optional API key | Built, tested |
 
