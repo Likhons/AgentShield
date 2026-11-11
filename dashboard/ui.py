@@ -228,6 +228,21 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
                   4% { border-color: rgba(180,76,255,.85); box-shadow: 0 0 0 1px rgba(180,76,255,.45), 0 0 22px rgba(113,56,255,.35); } }
 @keyframes halo { 0%, 100% { box-shadow: 0 0 18px rgba(113,56,255,.25); } 50% { box-shadow: 0 0 30px rgba(113,56,255,.45); } }
 
+/* hero headline: each line comes into focus once; a slow light crosses the key words */
+@keyframes focus-in { from { opacity: 0; filter: blur(10px); transform: translateY(14px); } to { opacity: 1; filter: blur(0); transform: none; } }
+@keyframes light-pass { 0% { background-position: 100% 50%; } 55%, 100% { background-position: 0% 50%; } }
+.hero-title .l1, .hero-title .l2 { display: inline-block; }
+.hero-title .l1 { animation: focus-in .9s var(--ease) backwards; }
+.hero-title .grad.l2 {
+  /* three equal panels: [rest look][light band][rest look]; only one panel is visible at a time,
+     so the words look normal at rest and the light shows only while it crosses */
+  background-image: linear-gradient(90deg, #B44CFF 0%, #8B5CFF 33.33%, #8B5CFF 44%, #F1E6FF 50%,
+                                    #B44CFF 56%, #B44CFF 66.67%, #8B5CFF 100%);
+  background-size: 300% 100%; background-position: 100% 50%;
+  animation: focus-in .9s .16s var(--ease) backwards, light-pass 8s 1.6s var(--ease) infinite; }
+.hero p.lead { animation: rise .7s .38s var(--ease) backwards; }
+.hero .cta-row { animation: rise .7s .5s var(--ease) backwards; }
+
 /* hero: the shield floats, a light streak orbits its ring, the aura breathes */
 .shield-art .shield-body { animation: float 6s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
 .shield-art .orbit { stroke-dashoffset: 0; animation: orbit 9s linear infinite; opacity: .9; }

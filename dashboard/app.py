@@ -156,8 +156,8 @@ def hero() -> None:
     left, right = st.columns([1.15, 1], gap="large")
     with left:
         st.markdown(
-            '<div class="hero"><div class="hero-title" role="heading" aria-level="1">Stop AI Agents from Acting on '
-            '<span class="grad">Hidden Instructions</span></div>'
+            '<div class="hero"><div class="hero-title" role="heading" aria-level="1">'
+            '<span class="l1">Stop AI Agents from Acting on</span> <span class="grad l2">Hidden Instructions</span></div>'
             '<p class="lead">AgentShield checks every tool call before it runs, so an AI agent cannot be tricked into '
             'sending money by text hidden in emails, web pages or files, in Bangla, Banglish and English.</p>'
             '<div class="cta-row">'
