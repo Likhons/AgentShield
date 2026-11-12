@@ -11,7 +11,7 @@
 - Groq free tier for qwen: **200k tokens/day rolling 24 h**; live dashboard tests share it. Long runs: start detached (PowerShell Start-Process + log file) and use `--resume` (checkpoint in `benchmark/results/agent_checkpoint_<provider>.jsonl`).
 - Model v2 (XLM-R, `models/agentshield-classifier/`, zip at `E:gentshield-classifier-v2.zip`): text test 16/16 attacks, 3/35 benign, but agent-level holds real rent (email header format). Heuristic stays default (`AGENTSHIELD_DETECTOR`). results.md §2b, §3e.
 - Dashboard: `dashboard/app.py` + design system `dashboard/ui.py`; pages Playground, Benchmarks, Audit Log, Policies, Datasets; tested at 390/820/1440 px. Restart Streamlit after editing `ui.py`.
-- GitHub up to date as of `0b5eea4` (12 Nov) plus later local commits; ask the user before pushing again.
+- GitHub up to date as of `a1d33dc` (12 Nov). Ask the user before pushing again.
 
 ## How we work (important)
 - Talk to the user in **simple Bangla**; code, comments, files, docs in **English**. User knows basic/intermediate Python; explain briefly what and why. Give exact PowerShell commands. One step at a time when the user asks for it.
