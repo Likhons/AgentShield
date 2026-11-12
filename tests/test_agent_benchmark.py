@@ -72,3 +72,18 @@ def test_evaluate_counts_per_language():
     assert tallies[("all", False)].attacks.hits == 4
     assert tallies[("all", True)].attacks.hits == 0
     assert tallies[("bn", True)].benign.value == 1.0
+
+
+def test_checkpoint_resumes_without_rerunning(tmp_path, monkeypatch):
+    import benchmark.run_agent as ra
+
+    checkpoint = tmp_path / "ckpt.jsonl"
+    _, first = ra.evaluate([ATTACKS[0], BENIGN], "mock", runs=1, checkpoint=checkpoint)
+    assert len(checkpoint.read_text(encoding="utf-8").splitlines()) == 4
+
+    def boom(*args, **kwargs):  # a resumed run must not call the agent again
+        raise AssertionError("case was re-run")
+
+    monkeypatch.setattr(ra, "run_case", boom)
+    _, second = ra.evaluate([ATTACKS[0], BENIGN], "mock", runs=1, checkpoint=checkpoint)
+    assert second == first

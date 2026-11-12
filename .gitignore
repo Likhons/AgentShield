@@ -29,3 +29,6 @@ benchmark/cache/
 
 # Browser screenshots from UI checks
 .playwright-mcp/
+
+# Partial agent-benchmark runs (resume files)
+benchmark/results/agent_checkpoint_*.jsonl

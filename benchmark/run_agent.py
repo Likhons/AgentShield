@@ -135,14 +135,33 @@ def outcome_table(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def evaluate(samples: list[DatasetSample], provider: str | None, runs: int) -> tuple[dict, list[dict]]:
+def evaluate(samples: list[DatasetSample], provider: str | None, runs: int,
+             checkpoint: Path | None = None) -> tuple[dict, list[dict]]:
+    """Run every sample without and with AgentShield.
+
+    With a checkpoint file, each finished case is appended as one JSON line and cases already
+    in the file are not run again, so a run stopped by a crash or a daily quota can resume.
+    """
     tallies: dict[tuple[str, bool], Tally] = {}
-    rows = []
+    rows: list[dict] = []
+    done: dict[tuple[str, bool], list[dict]] = {}
+    if checkpoint is not None and checkpoint.exists():
+        for line in checkpoint.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                row = json.loads(line)
+                done.setdefault((row["id"], row["shield"]), []).append(row)
     total = len(samples) * 2 * runs
     for sample in samples:
         for shield in (False, True):
             for _ in range(runs):
-                row = run_case(sample, provider, shield)
+                saved = done.get((sample.id, shield))
+                if saved:
+                    row = saved.pop(0)
+                else:
+                    row = run_case(sample, provider, shield)
+                    if checkpoint is not None:
+                        with open(checkpoint, "a", encoding="utf-8") as f:
+                            f.write(json.dumps(row) + chr(10))
                 rows.append(row)
                 if total > 20:  # progress for long (real-LLM) runs
                     print(f"  {len(rows)}/{total} done", flush=True)
@@ -176,6 +195,9 @@ def main() -> None:
     parser.add_argument("--runs", type=int, default=1, help="repeats per item (real LLMs vary)")
     parser.add_argument("--languages", default="", help="comma list, e.g. bn,banglish (default: all)")
     parser.add_argument("--limit", type=int, default=0, help="max items per label and language (0 = all)")
+    parser.add_argument("--resume", action="store_true",
+                        help="save each finished case to benchmark/results/agent_checkpoint_<provider>.jsonl "
+                             "and skip saved cases on the next start (long real-LLM runs, daily quotas)")
     args = parser.parse_args()
 
     samples = load_dataset(args.dataset)
@@ -196,7 +218,11 @@ def main() -> None:
           f"provider={args.provider}, runs={args.runs}")
 
     start = time.perf_counter()
-    tallies, rows = evaluate(usable, args.provider, args.runs)
+    checkpoint = RESULTS_DIR / f"agent_checkpoint_{args.provider}.jsonl" if args.resume else None
+    if checkpoint is not None:
+        RESULTS_DIR.mkdir(exist_ok=True)
+        print(f"checkpoint: {checkpoint.name}")
+    tallies, rows = evaluate(usable, args.provider, args.runs, checkpoint)
     table = markdown_table(tallies) + "\n\n" + outcome_table(rows)
     print("\n" + table)
 
@@ -211,6 +237,8 @@ def main() -> None:
         f"# Agent benchmark {stamp} (UTC)\n\nProvider: {args.provider} ({note}). Runs per item: {args.runs}. "
         f"Items: {len(usable)} (skipped {skipped}).\n\n{table}\n", encoding="utf-8")
     print(f"\nSaved benchmark/results/agent_{stamp}.json and .md")
+    if checkpoint is not None and checkpoint.exists():
+        checkpoint.unlink()  # full result saved; the next --resume run starts fresh
 
 
 if __name__ == "__main__":
