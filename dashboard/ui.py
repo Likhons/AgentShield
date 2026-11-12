@@ -221,6 +221,8 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .money-label { color: var(--muted); font-size: .8rem; }
 .user-quote { border-left: 3px solid var(--accent); background: var(--card2); padding: .55rem .85rem; border-radius: 0 10px 10px 0; margin: .6rem 0; color: var(--text); }
 .reason-bn { font-size: 1rem; margin: .3rem 0; color: var(--text); }
+.args { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: .7rem .9rem; margin: .2rem 0 .6rem;
+  color: #C9B6FF; font-family: ui-monospace, Consolas, monospace; font-size: .86rem; white-space: pre-wrap; word-break: break-word; }
 [data-testid="stCode"] pre, [data-testid="stCode"] code { white-space: pre-wrap !important; word-break: break-word; }
 [data-testid="stExpander"] details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
 .page-title { font-size: 1.8rem; font-weight: 800; color: var(--text); margin: .2rem 0 .1rem; }

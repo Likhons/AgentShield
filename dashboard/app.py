@@ -303,7 +303,9 @@ def show_steps(result: ScenarioResult) -> None:
         label = f"{'💸' if is_money else '🔧'} Step {step.number}: `{step.tool}`{badge}"
         stopped = verdict is not None and verdict.decision.value != "allow"
         with st.expander(label, expanded=is_money or stopped):
-            st.code(json.dumps(step.args, ensure_ascii=False), language="json")
+            # plain styled block: st.code lazy-loads a highlighter that showed only a skeleton online
+            st.markdown(f'<div class="args">{ui.esc(json.dumps(step.args, ensure_ascii=False))}</div>',
+                        unsafe_allow_html=True)
             if verdict:
                 st.markdown(f'{ui.badge(verdict.decision.value)} &nbsp;risk {verdict.risk_score:.2f} · '
                             f'{verdict.total_latency_ms:.0f} ms', unsafe_allow_html=True)
