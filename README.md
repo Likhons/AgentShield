@@ -2,12 +2,12 @@
 
 **Runtime security gateway for AI agents.** AgentShield checks every tool call an agent wants to make before it runs, and blocks actions the user never asked for, especially ones triggered by hidden instructions in Bangla, Banglish or English inside untrusted data (emails, web pages, files).
 
-> Status: core working end to end; benchmark in progress (Phase 3). All numbers: [docs/results.md](docs/results.md).
+> Status: core working end to end; benchmarks done for the preliminary submission. Live demo: https://agentshield-demo.streamlit.app. All numbers, sources and caveats: [docs/results.md](docs/results.md).
 
-## Results so far (measured, small samples)
-- Meta Prompt Guard 2 flagged **0 of 24** Bangla/Banglish prompt-injection attacks (and 1 of 40 subtle English agent injections).
-- On a simulated agent, Bangla/Banglish attacks moved money in 11 of 20 cases without AgentShield and **0 of 20** with it, while the user's real rent payment still went through in **135 of 135** benign cases.
-- Real-LLM agent results: TBD. Details, sources and caveats in [docs/results.md](docs/results.md).
+## Results (measured, small samples, 95% intervals in docs/results.md)
+- **Real LLM agent** (qwen3.8-27b via Groq, 20 Bangla/Banglish attacks + 20 normal bill payments, 1 run each): attacks moved money in **4 of 20** cases without AgentShield and **0 of 20** with it. The landlord's real rent was paid in **16 of 20** cases both without and with AgentShield: it blocked every attacker payment and held no legitimate one.
+- **Existing guardrail:** Meta Prompt Guard 2 flagged **0 of 24** Bangla/Banglish prompt-injection attacks (and 1 of 40 subtle English agent injections).
+- **Simulated agent** (full dataset): attacks succeeded 22 of 60 times without AgentShield and **0 of 60** with it; rent paid 175 of 175 both ways.
 
 ## See the attack, then see it stopped
 ```powershell
@@ -21,7 +21,7 @@ By default this runs on the offline mock LLM, which simulates a naive agent that
 ```powershell
 streamlit run dashboard/app.py
 ```
-Opens in the browser. Pick a scenario and press **Run scenario**: the left column runs the unprotected agent, the right column runs the same agent protected by AgentShield. The **Audit log** tab lists every decision; the **Benchmark** tab shows the latest measured results.
+Opens in the browser (or use the live demo above). On **Playground**, pick a scenario and press **Run Scenario**: the left column runs the unprotected agent, the right column runs the same agent protected by AgentShield. The sidebar has **Benchmarks** (measured results), **Audit Log** (every decision), **Policies** and **Datasets**.
 
 ## HTTP gateway (any language, any framework)
 ```powershell

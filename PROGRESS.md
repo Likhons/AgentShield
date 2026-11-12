@@ -90,10 +90,10 @@
 
 ## Phase 5: Dashboard + demo (by ~16 Nov)
 - [x] Streamlit skeleton: tabs, live demo of the unprotected agent (mock + groq), dashboard tests
-- [ ] Streamlit side-by-side demo: right column "with AgentShield" (needs Phase 2)
-- [ ] Live audit log view
-- [ ] Metrics page with benchmark charts
-- [ ] Works fully with mock LLM (offline-safe)
+- [x] Streamlit side-by-side demo, redesigned dark UI (12 Nov), live at agentshield-demo.streamlit.app
+- [x] Live audit log view
+- [x] Metrics page with benchmark charts
+- [x] Works fully with mock LLM (offline-safe)
 - [ ] Commit
 
 ## Phase 6: Polish + submission (by 19 Nov, buffer 20 Nov)
@@ -101,7 +101,7 @@
 - [ ] User: verify market data, interview 5–10 potential customers for pricing
 - [x] docs/ethics_impact.md draft (KPIs, data use, bias, transparency, oversight, limitations); KPI values TBD
 - [x] docs/architecture.md draft (diagram, component status, model selection); update after Phase 2
-- [ ] docs/results.md (real numbers only)
+- [x] docs/results.md (real numbers only; real-LLM run 12 Nov: attacks 0/20 with, rent 16/20 = same as without)
 - [ ] Clean README with setup steps
 - [ ] Demo video script
 - [ ] Pitch talking points mapped to judging criteria

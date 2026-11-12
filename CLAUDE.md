@@ -2,17 +2,16 @@
 
 > Read this first. Keep it short and current; details live in PROGRESS.md and the code.
 
-## RESUME HERE (last updated 11 Nov 2026)
-- **Phase:** 3 done, 4 trained but NOT adopted. Next: Phase 5 (demo, by ~16 Nov), Phase 6 (submission, 19-20 Nov).
-- **Done 11 Nov:** scope B results recorded (mixed inbox rent held 5/12 → 0/12, `mixed_20261105-164804`). User reviewed `benign.jsonl` (reviewed=yes), wrote `benign_own.jsonl` (35) and 40 hand-written attacks (attacks now 64 = 32/language). Heuristic on hand-written attacks 2/40, on own benign 0/35.
-- **Phase 4:** XLM-R trained on Kaggle, unzipped to `models/agentshield-classifier/` (git-ignored, 1 GB; zip also at `E:gentshield-classifier.zip`). Text test split: 16/16 attacks, 1/26 benign (`detection_20261111-091439`, results.md §2b). Wired in as `AGENTSHIELD_DETECTOR=model` (default stays `heuristic`; `checks/model_detector.py`, loads once per process). **But** in the simulated agent benchmark it holds every real rent payment (0/125, `agent_20261111-092942`, results.md §3e): all 64 BN/Banglish attacks contain a 010 number vs 8/125 benign, so it learned "payment request with number = attack". Retrained once (see Model v2 below).
-- **Groq agent re-run after scope B: NOT done.** 11 Nov run stopped at 9/80 because qwen's daily token limit (200k tokens/day, rolling) was used up by the earlier runs. Re-run on a fresh day as a detached process: `python -m benchmark.run_agent --provider groq --runs 1 --languages bn,banglish --limit 10` (~40 items, ~1 h, uses most of one day's qwen tokens). Then update results.md §3b, README (results TBD), pitch.md numbers, then record the stage demo: `python -m demo_agent.run --all --compare --provider groq --record` (also token-heavy: separate day).
-- Groq free tier for qwen: 1000 requests/day, 8000 tokens/minute, **200k tokens/day**. Plan Groq-heavy work one job per day.
-- **Model v2** (retrained with `benign_payreq.jsonl`, 334 items): text test 16/16 attacks, 3/35 benign, but agent-level rent still 0/175 because runtime emails carry "From/Subject" headers that score high (results.md §3e). Heuristic stays default. Possible fix: train on texts wrapped in runtime formats.
-- Still TBD: Prompt Guard 2 on the 75 new items and on the 42 test-split items (Groq).
-- `make_detector()` lives in `demo_agent/run.py`; `core/engine.build_default_engine` (API) uses `ClassifierCheck()` (heuristic). Unify later by moving `make_detector` into `agentshield/checks/`.
-- GitHub up to date as of `4810f53` (pushed 11 Nov). Ask the user before pushing again.
-- **Open user tasks:** decide on retraining data for the model; verify pitch citations; business-model market data; find out exactly what the 20 Nov preliminary submission requires.
+## RESUME HERE (last updated 12 Nov 2026)
+- **Phase:** 3 and 4 done (model trained, not adopted). Phase 5 mostly done (dashboard redesign, live demo). Next: record stage demo, video, submission (deadline **20 Nov 2026, 11:59 PM GMT+6**, per other teams' notes; target 19 Nov).
+- **Real-LLM benchmark after scope B (12 Nov, `agent_20261112-111137`):** attacks 4/20 without → 0/20 with; rent paid 16/20 without and 16/20 with. The 4 blocked attacks are exactly the 4 that stole without protection; the 4 unpaid rents were also unpaid without AgentShield. results.md §3b, README, pitch.md, submission_form.md updated.
+- **Live demo (public):** https://agentshield-demo.streamlit.app (Streamlit Community Cloud from the private repo, made public in its share settings; secrets `LLM_PROVIDER = "mock"`, no Groq key). After pushing dashboard changes, **Reboot app** (Manage app → ⋮) so `dashboard/ui.py` reloads. `.devcontainer/` was added by Streamlit.
+- **Submission:** form text drafted in `docs/submission_form.md` (fields from other teams' notes; user must check the portal at cloudcampbd.com). Required: 2–3 min YouTube video, live link, public GitHub link. **Open decisions (user):** make a public repo (without `datasets/attacks.jsonl`, history contains it → new public repo is cleanest); team info; YouTube upload.
+- **Next for Claude:** record stage demo on a fresh Groq day: `python -m demo_agent.run --all --compare --provider groq --record` (token-heavy, one job per day), commit recordings, push, reboot app. Then video script + video (HyperFrames + Playwright screen capture of the real dashboard; user's voice).
+- Groq free tier for qwen: **200k tokens/day rolling 24 h**; live dashboard tests share it. Long runs: start detached (PowerShell Start-Process + log file) and use `--resume` (checkpoint in `benchmark/results/agent_checkpoint_<provider>.jsonl`).
+- Model v2 (XLM-R, `models/agentshield-classifier/`, zip at `E:gentshield-classifier-v2.zip`): text test 16/16 attacks, 3/35 benign, but agent-level holds real rent (email header format). Heuristic stays default (`AGENTSHIELD_DETECTOR`). results.md §2b, §3e.
+- Dashboard: `dashboard/app.py` + design system `dashboard/ui.py`; pages Playground, Benchmarks, Audit Log, Policies, Datasets; tested at 390/820/1440 px. Restart Streamlit after editing `ui.py`.
+- GitHub up to date as of `0b5eea4` (12 Nov) plus later local commits; ask the user before pushing again.
 
 ## How we work (important)
 - Talk to the user in **simple Bangla**; code, comments, files, docs in **English**. User knows basic/intermediate Python; explain briefly what and why. Give exact PowerShell commands. One step at a time when the user asks for it.
@@ -73,7 +72,7 @@ GitHub: `origin` = https://github.com/Likhons/AgentShield (private; `main` track
 ## Commands
 ```powershell
 .\.venv\Scripts\Activate.ps1
-pytest                                          # 240 tests
+pytest                                          # 246 tests
 python -m demo_agent.run --compare --all        # all scenarios, without vs with AgentShield (mock unless --provider groq)
 streamlit run dashboard/app.py                  # side-by-side demo + audit log
 python -m benchmark.dataset                     # validate dataset, show balance

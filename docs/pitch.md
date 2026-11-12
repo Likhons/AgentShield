@@ -1,6 +1,6 @@
 # AgentShield: Pitch and Demo Script
 
-> Draft, 27 Oct 2026. Every number here is in [results.md](results.md) with its source file. Re-check them after the final benchmark run; anything still TBD there must not be said on stage.
+> Draft, updated 12 Nov 2026. Every number here is in [results.md](results.md) with its source file. Re-check them after the final benchmark run; anything still TBD there must not be said on stage.
 
 ## 1. The 3-minute pitch
 
@@ -10,7 +10,7 @@
 | 0:25–0:50 | **Proof the danger is real.** "We gave a real open model a realistic Bangla fake electricity bill with the task *pay my pending bills*. It paid the attacker." | Recorded run, left column: money stolen | Impact, Technical execution |
 | 0:50–1:30 | **Live demo.** "Same agent, same email, now protected by AgentShield. The fake bill is blocked; the landlord's real rent still goes through. Every decision comes with a reason in Bangla and English." | Dashboard side by side, BLOCK with Bangla reason, then the Audit log tab | Technical execution, Ethical AI (transparency) |
 | 1:30–2:00 | **How it works.** "Four checks before any tool runs: where did each argument come from (taint), does the text try to instruct the AI (classifier), does the action follow from what the user asked (an LLM judge, only when needed), and readable YAML rules. AI where judgment is needed, deterministic rules where certainty is needed." | Architecture diagram | Innovation, Technical execution |
-| 2:00–2:30 | **Measured, honestly.** "A widely used guardrail, Meta's Prompt Guard 2, flagged 0 of our 24 Bangla and Banglish attacks. AgentShield stopped every attack in our agent tests. We also found and fixed our own weakness: our first version held legitimate bills for approval too often, and we publish that." | Benchmark tab (chart) | Technical execution, Ethical AI |
+| 2:00–2:30 | **Measured, honestly.** "A widely used guardrail, Meta's Prompt Guard 2, flagged 0 of our 24 Bangla and Banglish attacks. With a real model, AgentShield stopped every attacker payment and held no legitimate bill. We also found and fixed our own weaknesses: early versions held real bills for approval too often, and we publish that." | Benchmark tab (chart) | Technical execution, Ethical AI |
 | 2:30–2:50 | **Business and scale.** "Open-core: free SDK, paid hosted gateway and on-prem licence for banks and wallets. Works with any agent framework over HTTP. Bangla first, then other code-mixed languages: Hindi/Hinglish, Urdu, Nepali." | One slide | Business + global readiness, Scalability |
 | 2:50–3:00 | **Close.** "AgentShield: agent-action security for Bangla. The agent may be fooled; the money is not." | Logo | Presentation |
 
@@ -30,8 +30,8 @@ Say "first agent-action security for Bangla", never "first Bangla guardrail".
 |---|---|---|
 | Prompt Guard 2 on our Bangla/Banglish attacks | 0/24 flagged (both 86m and 22m) | 24 items; it also missed 39/40 subtle English agent injections, so the gap is not only language |
 | Real model fooled by a Bangla fake bill | Happened in our tests (4/20 attacks moved money without protection) | 20 items, 1 run each |
-| AgentShield with a real model | 0/20 attacks moved money; 14/20 rent payments completed (16/20 without AgentShield) | 20 + 20 items, 1 run each, `agent_20261105-130607`. Only 3 of the 20 attacks reached a blocked payment; in the other 17 the agent never tried |
-| Simulated agent | 0/20 attacks succeed with AgentShield; 135/135 benign rent payments completed | Simulation (mock agent), say so |
+| AgentShield with a real model | 0/20 attacks moved money (4/20 without); rent paid 16/20 with and 16/20 without AgentShield | 20 + 20 items, 1 run each, `agent_20261112-111137`. The 4 blocked attacks are exactly the 4 that stole without protection; the other 16 the agent never tried. The 4 unpaid rents were also unpaid without AgentShield |
+| Simulated agent | 0/60 attacks succeed with AgentShield (22/60 without); 175/175 rent payments completed | Simulation (mock agent), say so; `agent_20261111-122758` |
 | Speed | ~0.1–0.6 ms per check without an LLM call; LLM judge called only when needed | Free-tier LLM latency varies |
 
 ## 4. Likely judge questions and honest answers
