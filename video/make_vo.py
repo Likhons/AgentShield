@@ -1,6 +1,6 @@
 """Generate the narration, one clip per beat, with the chosen neural voice.
 
-    python video/make_vo.py            # writes video/assets/vo/<beat>.mp3
+    python video/make_vo.py [beat ...]  # writes video/film/assets/vo/<beat>.mp3 (all beats, or only those named)
 
 Voice: en-IN-PrabhatNeural via edge-tts (free; the text is sent to Microsoft's TTS service).
 The demo beat's amounts must match the recorded real-model run; re-run after editing them.
@@ -12,9 +12,10 @@ from pathlib import Path
 import edge_tts
 
 VOICE, RATE = "en-IN-PrabhatNeural", "-5%"
+RATES = {"01_hook": "+4%"}  # the cold open is read a little faster
 OUT = Path(__file__).resolve().parent / "film" / "assets" / "vo"
 BEATS = {
-    "01_hook": "AI agents are starting to pay bills for us. What happens when one of those bills is fake?",
+    "01_hook": "Four thousand five hundred taka, gone. Your AI agent paid a bill that was never real.",
     "02_problem": ("An agent reads emails, web pages and files, and it cannot always tell its user's request "
                    "from text an attacker planted there. In Bangladesh, that text is often Bangla or Banglish. "
                    "A widely used guardrail, Meta's Prompt Guard 2, flagged none of our 24 Bangla and Banglish attacks."),
@@ -36,13 +37,16 @@ BEATS = {
 }
 
 
-async def main() -> None:
+async def main(only=None) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    timings = {}
+    tf = OUT / "timings.json"
+    timings = json.loads(tf.read_text(encoding="utf-8")) if tf.exists() else {}
     for name, text in BEATS.items():
+        if only and name not in only:
+            continue
         words = []
         with open(OUT / f"{name}.mp3", "wb") as audio:
-            async for chunk in edge_tts.Communicate(text, VOICE, rate=RATE, boundary="WordBoundary").stream():
+            async for chunk in edge_tts.Communicate(text, VOICE, rate=RATES.get(name, RATE), boundary="WordBoundary").stream():
                 if chunk["type"] == "audio":
                     audio.write(chunk["data"])
                 elif chunk["type"] == "WordBoundary":
@@ -53,4 +57,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import sys
+    asyncio.run(main(sys.argv[1:] or None))
