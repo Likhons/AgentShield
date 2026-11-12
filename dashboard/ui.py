@@ -118,8 +118,8 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .hero-art { position: relative; height: 270px; }
 .hero-art svg.shield-art { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%); }
 .feat { position: absolute; display: inline-flex; gap: .45rem; align-items: center; padding: .42rem .8rem; border-radius: 999px;
-  background: rgba(19,26,56,.88); border: 1px solid var(--line2); color: var(--text); font-size: .8rem; font-weight: 500;
-  backdrop-filter: blur(4px); white-space: nowrap; }
+  background: rgba(19,26,56,.96); border: 1px solid var(--line2); color: var(--text); font-size: .8rem; font-weight: 500;
+  white-space: nowrap; }
 .feat .ic { color: #C9B6FF; }
 
 /* ---------- cards ---------- */
@@ -245,9 +245,8 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 @keyframes orbit { to { stroke-dashoffset: -1000; } }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes sheen { from { transform: translateX(-120%) skewX(-18deg); } to { transform: translateX(260%) skewX(-18deg); } }
-@keyframes scan { 0%, 12%, 100% { border-color: var(--line2); box-shadow: none; }
-                  4% { border-color: rgba(180,76,255,.85); box-shadow: 0 0 0 1px rgba(180,76,255,.45), 0 0 22px rgba(113,56,255,.35); } }
-@keyframes halo { 0%, 100% { box-shadow: 0 0 18px rgba(113,56,255,.25); } 50% { box-shadow: 0 0 30px rgba(113,56,255,.45); } }
+@keyframes scan { 0%, 12%, 100% { opacity: 0; } 4% { opacity: 1; } }
+@keyframes halo { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 
 /* hero headline: each line comes into focus once; a slow light crosses the key words */
 @keyframes focus-in { from { opacity: 0; filter: blur(10px); transform: translateY(14px); } to { opacity: 1; filter: blur(0); transform: none; } }
@@ -265,7 +264,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .hero .cta-row { animation: rise .7s .5s var(--ease) backwards; }
 
 /* hero: the shield floats, a light streak orbits its ring, the aura breathes */
-.shield-art .shield-body { animation: float 6s var(--ease) infinite; transform-box: fill-box; transform-origin: center; }
+.shield-art .shield-body { animation: float 6s var(--ease) infinite; transform-box: fill-box; transform-origin: center; will-change: transform; }
 .shield-art .orbit { stroke-dashoffset: 0; animation: orbit 9s linear infinite; opacity: .9; }
 .shield-art .aura, .shield-art .pad-glow { animation: breathe 6s var(--ease) infinite; }
 .feat { animation: rise .6s var(--ease) backwards; transition: border-color .25s var(--ease), transform .25s var(--ease), background .25s; }
@@ -284,12 +283,16 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .kpis .kpi:nth-child(2) { animation-delay: .06s; } .kpis .kpi:nth-child(3) { animation-delay: .12s; } .kpis .kpi:nth-child(4) { animation-delay: .18s; }
 .st-key-card_how:hover, .st-key-card_pipe:hover, .st-key-card_recent:hover { border-color: var(--line2); }
 .node:hover, .dec:hover { transform: translateY(-2px); }
-.node-shield { animation: halo 4s var(--ease) infinite; }
+.node-shield { position: relative; }
+.node-shield::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(180,76,255,.55), 0 0 28px rgba(113,56,255,.45); animation: halo 4s var(--ease) infinite; will-change: opacity; }
 
 /* pipeline: each check lights up in turn, like a tool call passing through */
-.pipe .pnode { animation: scan 6s var(--ease) infinite; }
-.pipe .pnode:nth-child(1) { animation-delay: 0s; } .pipe .pnode:nth-child(3) { animation-delay: .7s; }
-.pipe .pnode:nth-child(5) { animation-delay: 1.4s; } .pipe .pnode:nth-child(7) { animation-delay: 2.1s; }
+.pipe .pnode { position: relative; }
+.pipe .pnode::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0;
+  border: 1px solid rgba(180,76,255,.85); box-shadow: 0 0 22px rgba(113,56,255,.35); animation: scan 6s var(--ease) infinite; will-change: opacity; }
+.pipe .pnode:nth-child(1)::after { animation-delay: 0s; } .pipe .pnode:nth-child(3)::after { animation-delay: .7s; }
+.pipe .pnode:nth-child(5)::after { animation-delay: 1.4s; } .pipe .pnode:nth-child(7)::after { animation-delay: 2.1s; }
 .pnode:hover { border-color: rgba(180,76,255,.8); }
 
 /* buttons */
@@ -358,11 +361,11 @@ SHIELD_ART = """
     <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B44CFF"/><stop offset="1" stop-color="#4A22D6"/></linearGradient>
     <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1C72"/><stop offset="1" stop-color="#140F3F"/></linearGradient>
     <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#7138FF" stop-opacity=".55"/><stop offset="1" stop-color="#7138FF" stop-opacity="0"/></radialGradient>
-    <filter id="blur"><feGaussianBlur stdDeviation="6"/></filter>
+    <radialGradient id="padglow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#7138FF" stop-opacity=".45"/><stop offset="1" stop-color="#7138FF" stop-opacity="0"/></radialGradient>
   </defs>
   <circle class="aura" cx="125" cy="118" r="112" fill="url(#glow)"/>
   <ellipse cx="125" cy="200" rx="92" ry="22" fill="none" stroke="#7138FF" stroke-opacity=".55" stroke-width="2"/>
-  <ellipse class="pad-glow" cx="125" cy="200" rx="66" ry="14" fill="#7138FF" fill-opacity=".25" filter="url(#blur)"/>
+  <ellipse class="pad-glow" cx="125" cy="200" rx="80" ry="20" fill="url(#padglow)"/>
   <ellipse cx="125" cy="120" rx="118" ry="34" fill="none" stroke="#B44CFF" stroke-opacity=".35" stroke-width="1.2"/>
   <ellipse class="orbit" cx="125" cy="120" rx="118" ry="34" fill="none" stroke="#E2D4FF" stroke-width="2.2"
            stroke-linecap="round" pathLength="1000" stroke-dasharray="70 930"/>
