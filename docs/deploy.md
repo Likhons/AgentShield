@@ -1,6 +1,6 @@
 # Putting the dashboard online (free)
 
-> Nothing here has been deployed yet. Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
+> Status (12 Nov 2026): not deployed yet. The preliminary submission form asks for a live demo URL, so deploy before submitting. Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
 
 ## Before you publish
 - **Secrets never go into the repo.** API keys (`GROQ_API_KEY`) go into the platform's secret settings. Without a key the dashboard still works in `mock` and `recorded (groq)` mode.
@@ -22,6 +22,7 @@
 4. A Space can be private; a public Space is visible to everyone.
 
 ## After deploying
-- Open the link in a private browser window and run `attack_bill_bn` in `mock` and `recorded (groq)` mode.
-- Check the Audit log and Benchmark tabs load.
+- Open the link in a private browser window and run `attack_bill_bn` in Offline and Recorded mode.
+- Open every sidebar page (Benchmarks, Audit Log, Policies, Datasets).
+- Live (Groq) needs `GROQ_API_KEY` in the secrets; without it the dashboard shows a clear "LLM error" and Offline keeps working.
 - Never paste the key into a public file or issue; rotate it at https://console.groq.com/keys if it ever leaks.
