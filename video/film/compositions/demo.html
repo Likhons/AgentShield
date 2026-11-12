@@ -1,0 +1,93 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #080D24; overflow: hidden; font-family: "Outfit", sans-serif; color: #F5F5FF; }
+    #demo-cam { position: absolute; inset: 0; transform-origin: 0 0; }
+    /* the real side-by-side columns (captures), 628 CSS px wide -> 785 px */
+    .col { position: absolute; top: 70px; width: 785px; height: 980px; overflow: hidden; border-radius: 14px; }
+    .col img { position: absolute; left: 0; top: 0; width: 785px; }
+    #demo-L { left: 145px; } #demo-R { left: 990px; }
+    .dim { position: absolute; inset: 0; background: #080D24; opacity: 0; }
+    /* lifted pieces: the same capture, cropped to one step and kept above the dim layer */
+    .lift { position: absolute; left: 145px; width: 785px; border-radius: 12px; background-image: url("assets/ui/col_without.png");
+      background-size: 785px auto; background-repeat: no-repeat; opacity: 0; }
+    #demo-lift-rent { top: 529px; height: 197px; background-position: 0 -459px; box-shadow: 0 0 0 3px rgba(245,245,255,.9); }
+    #demo-lift-fake { top: 814px; height: 197px; background-position: 0 -744px; box-shadow: 0 0 0 3px #F04452; }
+    /* pulled-forward cards from the protected column */
+    .card { position: absolute; border-radius: 16px; box-shadow: 0 40px 80px rgba(0,0,0,.5); }
+    #demo-block { left: 930px; top: 210px; width: 900px; }
+    #demo-rent { left: 990px; top: 250px; width: 860px; }
+    #demo-stamp { position: absolute; left: 944px; top: 366px; padding: 6px 22px; border-radius: 10px; background: #3A1420; color: #FF6B78;
+      border: 3px solid #F04452; font-family: "IBM Plex Mono", monospace; font-weight: 700; font-size: 40px; letter-spacing: .06em; opacity: 0; }
+    @font-face { font-family: "Anek Bangla"; src: url("assets/fonts/anek-bangla.woff2") format("woff2"); font-weight: 100 800; }
+    /* payoff: the dashboard's own summary banner, rebuilt at 2x with its real wording and colours */
+    #demo-saved { position: absolute; left: 160px; top: 330px; width: 1600px; height: 420px; border-radius: 28px; opacity: 0;
+      background: linear-gradient(90deg, #12A877, #0F766E); border: 2px solid rgba(22,199,132,.7); box-shadow: 0 40px 90px rgba(0,0,0,.5);
+      display: flex; flex-direction: column; justify-content: center; padding: 0 90px; gap: 18px; }
+    #demo-saved .en { font-size: 96px; font-weight: 800; letter-spacing: -0.02em; color: #FFFFFF; display: flex; align-items: center; gap: 30px; }
+    #demo-saved .bn { font-family: "Anek Bangla", sans-serif; font-size: 60px; font-weight: 700; color: #D1FAE5; }
+    #demo-amt { font-weight: 800; }
+    #demo-iris { position: absolute; inset: 0; background: #7138FF; clip-path: circle(150% at 50% 50%); }
+  </style>
+  <div id="root" data-composition-id="demo" data-width="1920" data-height="1080">
+    <div id="demo-cam">
+      <div id="demo-L" class="col"><img src="assets/ui/col_without.png" alt="Without AgentShield column" /><div id="demo-dimL" class="dim"></div></div>
+      <div id="demo-R" class="col"><img src="assets/ui/col_with.png" alt="With AgentShield column" /><div id="demo-dimR" class="dim"></div></div>
+      <div id="demo-lift-rent" class="lift"></div>
+      <div id="demo-lift-fake" class="lift"></div>
+      <img id="demo-block" class="card" src="assets/ui/step_block.png" alt="BLOCK step with Bangla and English reason" />
+      <div id="demo-stamp">BLOCK</div>
+      <img id="demo-rent" class="card" src="assets/ui/step_allow_rent.png" alt="ALLOW step for the rent payment" />
+    </div>
+    <div id="demo-saved">
+      <div class="en"><svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>AgentShield saved <span id="demo-amt">৳ 4,500</span></div>
+      <div class="bn">AgentShield ৳ 4,500 বাঁচিয়েছে</div>
+    </div>
+    <div id="demo-iris"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Only the first tween of a target+property sets its start state at load; later ones wait for their time
+    // (fromTo renders its "from" immediately by default, which would show a later state on frame 0).
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // iris out of the Run button's violet onto the result
+    ft("#demo-iris", { clipPath: "circle(150% at 50% 50%)" }, { clipPath: "circle(0% at 50% 50%)", duration: 0.4, ease: "power3.inOut" }, 0);
+    ft("#demo-L", { x: -60, filter: "blur(8px)" }, { x: 0, filter: "blur(0px)", duration: 0.45, ease: "power3.out" }, 0.15);
+    ft("#demo-R", { x: 60, filter: "blur(8px)" }, { x: 0, filter: "blur(0px)", duration: 0.45, ease: "power3.out" }, 0.22);
+
+    // "paid the rent" -> "also paid the fake bill": the unprotected agent's two payments
+    ft(["#demo-dimL", "#demo-dimR"], { opacity: 0 }, { opacity: 0.62, duration: 0.3, ease: "power2.out" }, 1.55);
+    ft("#demo-lift-rent", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 1.6);
+    ft("#demo-lift-rent", { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, 3.55);
+    ft("#demo-lift-fake", { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: 0.25, ease: "power3.out" }, 3.7);
+
+    // "four and a half thousand taka": punch into the left column's Stolen figure
+    ft("#demo-lift-fake", { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, 4.95);
+    ft("#demo-dimL", { opacity: 0.62 }, { opacity: 0, duration: 0.2, ease: "power2.out" }, 4.95);
+    ft("#demo-cam", { x: 0, y: 0, scale: 1 }, { x: 355, y: 198, scale: 1.8, duration: 0.55, ease: "expo.inOut" }, 4.95);
+    ft("#demo-cam", { x: 355, y: 198, scale: 1.8 }, { x: 0, y: 0, scale: 1, duration: 0.55, ease: "expo.inOut" }, 7.7);
+    ft("#demo-dimL", { opacity: 0 }, { opacity: 0.62, duration: 0.3, ease: "power2.out" }, 8.4);
+
+    // "With AgentShield ... blocked": the protected column's BLOCK step comes forward, the stamp lands on "blocked"
+    ft("#demo-block", { scale: 0.62, x: 160, y: 300, opacity: 0 }, { scale: 1, x: 0, y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 9.2);
+    ft("#demo-stamp", { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "power4.out" }, 11.5);
+    ft("#demo-stamp", { x: -6 }, { x: 0, duration: 0.07, ease: "none" }, 11.7);
+    // "reason in Bangla and English": push into the reason lines
+    ft("#demo-cam", { x: 0, y: 0, scale: 1 }, { x: -1167, y: -243, scale: 1.55, duration: 0.6, ease: "expo.inOut" }, 13.9);
+    ft("#demo-cam", { x: -1167, y: -243, scale: 1.55 }, { x: 0, y: 0, scale: 1, duration: 0.55, ease: "expo.inOut" }, 16.6);
+
+    // "the landlord's real rent still goes through": the rent's ALLOW step joins it
+    ft(["#demo-block", "#demo-stamp"], { x: 0 }, { x: -860, duration: 0.55, ease: "power2.inOut" }, 17.15);
+    ft("#demo-rent", { x: 900, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 17.25);
+
+    // payoff: everything collapses into one line, AgentShield saved the money
+    ft("#demo-cam", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(10px)", duration: 0.45, ease: "power2.in" }, 19.55);
+    ft("#demo-saved", { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "power4.out" }, 19.9);
+    window.__timelines["demo"] = tl;
+  </script>
+</template>

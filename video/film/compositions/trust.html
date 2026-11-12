@@ -1,0 +1,60 @@
+<template>
+  <style>
+    @font-face { font-family: "Anek Bangla"; src: url("assets/fonts/anek-bangla.woff2") format("woff2"); font-weight: 100 800; }
+    #root { position: absolute; inset: 0; background: #080D24; overflow: hidden; font-family: "Outfit", sans-serif; color: #F5F5FF; }
+    #trust-cam { position: absolute; inset: 0; transform-origin: 0 0; }
+    #trust-frame { position: absolute; left: 160px; top: 90px; width: 1600px; height: 960px; border-radius: 18px; overflow: hidden;
+      background: #0B1030; box-shadow: 0 40px 80px rgba(0,0,0,.45); border: 1px solid rgba(140,120,255,.25); }
+    .chrome { height: 60px; background: #0E1336; display: flex; align-items: center; gap: 10px; padding: 0 22px; border-bottom: 1px solid rgba(140,120,255,.18); }
+    .chrome i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+    .chrome .url { margin-left: 20px; padding: 7px 18px; border-radius: 10px; background: #080D24; color: #A8B0CE; font-size: 28px; }
+    .shot { position: absolute; left: 0; top: 60px; width: 1600px; height: 900px; }
+    #trust-pol { opacity: 0; }
+    .code { position: absolute; left: 160px; width: 1600px; background: #0B1020; border: 1px solid rgba(140,120,255,.35); border-radius: 22px;
+      padding: 40px 54px; font-family: "IBM Plex Mono", monospace; font-size: 31px; line-height: 1.55; color: #E6E8F5; white-space: pre;
+      box-shadow: 0 40px 80px rgba(0,0,0,.45); clip-path: inset(0% 100% 0% 0% round 22px); }
+    #trust-c1 { top: 170px; } #trust-c2 { top: 610px; }
+    .code .k { color: #C9B6FF; } .code .s { color: #4BE0A8; } .code .c { color: #8E96B8; } .code .r { color: #FF8A94; }
+    .code .bn { font-family: "Anek Bangla", sans-serif; }
+    .code .l { display: block; opacity: 0; }
+    .lab { font-family: "Outfit", sans-serif; font-size: 28px; color: #A8B0CE; margin-bottom: 10px; display: block; }
+  </style>
+  <div id="root" data-composition-id="trust" data-width="1920" data-height="1080">
+    <div id="trust-cam">
+      <div id="trust-frame">
+        <div class="chrome"><i style="background:#F87171"></i><i style="background:#FBBF24"></i><i style="background:#34D399"></i>
+          <div class="url">agentshield-demo.streamlit.app</div></div>
+        <img id="trust-audit" class="shot" src="assets/ui/page_audit.png" alt="Audit Log page" />
+        <img id="trust-pol" class="shot" src="assets/ui/page_policies.png" alt="Policies page" />
+      </div>
+    </div>
+    <div id="trust-c1" class="code"><span class="lab">Python SDK: one wrapper per tool</span><span class="l" id="trust-c1a"><span class="k">from</span> agentshield.sdk.session <span class="k">import</span> ShieldSession</span><span class="l" id="trust-c1b">session = ShieldSession(engine, user_request=task, known_recipients=contacts)</span><span class="l" id="trust-c1c">send_money = session.wrap(<span class="s">"send_money"</span>, send_money, source=<span class="s">"tool:bank"</span>)</span></div>
+    <div id="trust-c2" class="code" data-hold><span class="lab">HTTP API: any framework, any language</span><span class="l" id="trust-c2a"><span class="k">POST</span> /v1/check</span><span class="l" id="trust-c2b"><span class="c">→</span> { <span class="s">"decision"</span>: <span class="r">"block"</span>, <span class="s">"risk_score"</span>: 0.95, <span class="s">"reason_bn"</span>: <span class="bn">"আটকানো হয়েছে। …"</span> }</span></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    // Only the first tween of a target+property sets its start state at load; later ones wait for their time
+    // (fromTo renders its "from" immediately by default, which would show a later state on frame 0).
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // whip in on the audit log, into the decisions with their Bangla reasons
+    ft("#trust-frame", { x: 260, filter: "blur(16px)", opacity: 0 }, { x: 0, filter: "blur(0px)", opacity: 1, duration: 0.3, ease: "power3.out" }, 0.0);
+    ft("#trust-cam", { x: 0, y: 0, scale: 1 }, { x: -613, y: -273, scale: 1.45, duration: 0.7, ease: "expo.inOut" }, 0.4);
+    // whip to the readable policy rules
+    ft("#trust-audit", { x: 0, filter: "blur(0px)", opacity: 1 }, { x: -300, filter: "blur(18px)", opacity: 0, duration: 0.18, ease: "power2.in" }, 3.25);
+    ft("#trust-pol", { x: 300, filter: "blur(18px)", opacity: 0 }, { x: 0, filter: "blur(0px)", opacity: 1, duration: 0.2, ease: "power3.out" }, 3.38);
+    ft("#trust-cam", { x: -613, y: -273, scale: 1.45 }, { x: -668, y: 39, scale: 1.5, duration: 0.5, ease: "expo.inOut" }, 3.3);
+    // "Developers add AgentShield": the product steps back, the real calls are written out
+    ft("#trust-cam", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(12px)", duration: 0.35, ease: "power2.in" }, 6.6);
+    ft("#trust-c1", { clipPath: "inset(0% 100% 0% 0% round 22px)" }, { clipPath: "inset(0% 0% 0% 0% round 22px)", duration: 0.45, ease: "power3.out" }, 6.85);
+    ["#trust-c1a", "#trust-c1b", "#trust-c1c"].forEach((id, i) => ft(id, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, 7.35 + i * 0.75));
+    ft("#trust-c2", { clipPath: "inset(0% 100% 0% 0% round 22px)" }, { clipPath: "inset(0% 0% 0% 0% round 22px)", duration: 0.45, ease: "power3.out" }, 11.75);
+    ["#trust-c2a", "#trust-c2b"].forEach((id, i) => ft(id, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, 12.15 + i * 0.7));
+    window.__timelines["trust"] = tl;
+  </script>
+</template>
