@@ -1,7 +1,7 @@
 # Demo video script (target 2:30, limit 2–3 min)
 
 > For the preliminary submission (YouTube link, scored on "working software UI, features, workflow; crisp audio").
-> Narration in English (international judges), read by a team member; Bangla appears on screen in the product itself.
+> Narration in English (international judges), AI voice `en-IN-PrabhatNeural`; Bangla appears on screen in the product itself.
 > About 320 spoken words at a calm pace. Every number is from `docs/results.md`.
 > Screen footage: the real dashboard, captured in the browser. The demo segment uses a **recorded real-model run** ("Recorded run" mode), recorded with the Groq model before the video is made.
 > The amounts in rows 0:50–1:15 (৳ 4,500, the rent) come from a live test on 12 Nov; a real model can act differently in the recording, so **match the narration to the recording** before the voice is recorded.
@@ -20,7 +20,7 @@
 ## Recording plan
 1. **Real-model recordings** (Claude, on a day with Groq budget): only the scenarios the video and stage need, e.g. `python -m demo_agent.run --scenario attack_bill_bn --compare --provider groq --record`, plus `attack_bill_banglish`, `benign_pay_bills`, `benign_send_large`. Commit `demo_agent/recordings/`, push, reboot the app.
 2. **Screen footage** (Claude): Playwright drives the real dashboard and records each segment as video at 1920×1080; the Recorded run makes it instant and identical every take.
-3. **Voice** (team member): read the narration column in a quiet room, phone microphone is fine; one file per row or one take. Speak slowly; pauses are fine.
+3. **Voice** (decided 12 Nov): AI narration with Microsoft neural voice `en-IN-PrabhatNeural` via `edge-tts`, rate `-5%`, English. Generate one clip per row after the demo recording, so the spoken amounts match it. (Fallback: a team member reads the narration column.)
 4. **Edit** (Claude): title and closing cards, captions (English, with Bangla where the product shows Bangla), cuts timed to the voice, export MP4 1080p.
 5. **Upload** (team): YouTube, visibility "Unlisted", title "AgentShield: agent-action security for Bangla (CloudCamp AI Builders Congress 2026)". Paste the link into the form.
 
