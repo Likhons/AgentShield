@@ -241,6 +241,9 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 [data-testid="stMetricLabel"] p { color: var(--muted); font-size: .85rem; }
 [data-testid="stMetricValue"] { font-weight: 800; font-size: 1.8rem; color: var(--text); }
 
+/* inline code (tool names in step labels) readable everywhere */
+[data-testid="stExpander"] summary code, [data-testid="stMarkdownContainer"] p code { font-size: .82rem !important; }
+
 /* equal-height cards in a row */
 [data-testid="stHorizontalBlock"]:has(.st-key-card_run) { align-items: stretch; }
 [data-testid="stHorizontalBlock"]:has(.st-key-card_run) > [data-testid="stColumn"] > [data-testid="stVerticalBlock"],
@@ -362,6 +365,27 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
   .hero-art svg.shield-art { position: static; transform: none; width: 180px; height: 180px; }
   .rwrap { overflow-x: auto; }
   .rtable .c-req, .rtable .c-tool { display: none; }
+  /* hero: shield centred on its own row, labels below */
+  .hero-art svg.shield-art { flex: 0 0 100%; height: 190px; }
+  /* KPIs as a 2x2 grid */
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: .6rem; margin: 1.2rem 0 1rem; }
+  .kpi { flex-direction: column; gap: .55rem; padding: .9rem; }
+  .kpi-icon { width: 38px; height: 38px; }
+  .kpi-num { font-size: 1.45rem; }
+  .kpi-label { font-size: .8rem; }
+  /* agent-mode cards: only as tall as their text */
+  .st-key-mode [role="radiogroup"] > div { min-height: 0; }
+  /* decision types: compact rows */
+  .dec { flex-direction: row; align-items: center; gap: .7rem; padding: .7rem .8rem; }
+  /* results: stolen and balance stay side by side */
+  [data-testid="stHorizontalBlock"]:has(.money):not(:has(.col-head)) { flex-wrap: nowrap !important; flex-direction: row !important; gap: .8rem; }
+  [data-testid="stHorizontalBlock"]:has(.money):not(:has(.col-head)) > [data-testid="stColumn"] { flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; }
+  .money { font-size: 1.6rem; }
+  /* audit metrics: 2 per row */
+  [data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) { flex-wrap: wrap !important; flex-direction: row !important; gap: .6rem; }
+  [data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) > [data-testid="stColumn"] {
+    flex: 1 1 calc(50% - .6rem) !important; min-width: calc(50% - .6rem) !important; width: auto !important; }
+  [data-testid="stMetricValue"] { font-size: 1.4rem; }
 }
 </style>
 """
