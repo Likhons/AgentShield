@@ -61,3 +61,15 @@ def test_every_page_renders(page) -> None:
     app = AppTest.from_file(APP, default_timeout=30).run()
     app.radio(key="nav_page").set_value(page).run()
     assert not app.exception
+
+
+
+
+def test_summary_banner_is_honest() -> None:
+    from dashboard.ui import summary_banner
+
+    assert "saved ৳ 4,500" in summary_banner("attack_bill_bn", 4500, 0)[1]
+    css, text = summary_banner("attack_email_bn", 0, 0)
+    assert css == "summary-neutral" and "ignored this attack" in text and "Normal task" not in text
+    assert "Normal task" in summary_banner("benign_inbox", 0, 0)[1]
+    assert summary_banner("attack_bill_bn", 4500, 4500) is None

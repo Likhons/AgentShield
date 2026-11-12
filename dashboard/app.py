@@ -326,13 +326,10 @@ def results(name: str, mode: str, approve: bool) -> None:
     without = run_safely(name, mode, shield=False)
     with_shield = run_safely(name, mode, shield=True, approve=approve)
     if without and with_shield:
-        saved = without.outcome.stolen - with_shield.outcome.stolen
-        if saved > 0:
-            st.markdown(f'<div class="summary">🛡️ AgentShield saved {taka(saved)} · AgentShield {taka(saved)} বাঁচিয়েছে</div>',
-                        unsafe_allow_html=True)
-        elif not without.outcome.stolen:
-            st.markdown('<div class="summary">✅ Normal task: AgentShield let it run · সাধারণ কাজ, AgentShield বাধা দেয়নি</div>',
-                        unsafe_allow_html=True)
+        banner = ui.summary_banner(name, without.outcome.stolen, with_shield.outcome.stolen)
+        if banner:
+            css, text = banner
+            st.markdown(f'<div class="summary {css}">{text}</div>', unsafe_allow_html=True)
     if mode == "mock":
         st.caption("Offline mode: a simulated naive agent. Not a real-model result.")
     col_without, col_with = st.columns(2, gap="large")
