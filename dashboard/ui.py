@@ -92,6 +92,9 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .st-key-nav [data-testid="stRadioOption"] { width: 100%; padding: .6rem .8rem; cursor: pointer; box-sizing: border-box; }
 .st-key-nav [data-testid="stRadioOption"] > div > div:first-child { display: none; }
 .st-key-nav [role="radiogroup"] > div:hover { background: rgba(113,56,255,.10); }
+.st-key-nav [role="radiogroup"] > div { position: relative; }
+.st-key-nav [data-testid="stRadioOption"] { position: static; }
+.st-key-nav [data-testid="stRadioOption"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 1; cursor: pointer; }
 .st-key-nav [role="radiogroup"] > div[data-selected="true"] {
   background: linear-gradient(90deg, rgba(113,56,255,.6), rgba(180,76,255,.35));
   border-color: rgba(180,76,255,.55); box-shadow: 0 0 18px rgba(113,56,255,.35); }
@@ -149,6 +152,11 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding-
 .st-key-mode [role="radiogroup"] > div { margin: 0; padding: .8rem .85rem; border-radius: 12px; background: var(--card2);
   border: 1px solid var(--line); transition: border-color .15s, box-shadow .15s, background .15s; min-height: 96px; cursor: pointer; }
 .st-key-mode [role="radiogroup"] > div:hover { border-color: var(--line2); }
+/* the whole card is clickable: the option's label is stretched over the card
+   (Streamlit renders the caption outside the label, so it was not clickable) */
+.st-key-mode [role="radiogroup"] > div { position: relative; }
+.st-key-mode [data-testid="stRadioOption"] { position: static; }
+.st-key-mode [data-testid="stRadioOption"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 1; cursor: pointer; }
 .st-key-mode [role="radiogroup"] > div[data-selected="true"] { border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent), 0 0 22px rgba(113,56,255,.35); background: rgba(113,56,255,.13); }
 .st-key-mode [data-testid="stRadioOption"] > div > div:first-child { display: none; }  /* selection shown by the card border */
