@@ -10,7 +10,7 @@
 - **What becomes visible:** the demo emails in `demo_agent/data/` (including the fake attack emails), the recordings and the benchmark tables.
 - **Team-written attack texts (`datasets/attacks.jsonl`).** `docs/ethics_impact.md` says they are shared with researchers on request, not published.
   - The React version keeps them private by default: counts are shown, texts and download are not (`SHOW_ATTACK_TEXTS=1` turns them on).
-  - The Streamlit Datasets page (since the 16 Nov redesign) shows a preview and a "Download JSONL" button for every file, attacks included. Decide whether that is intended.
+  - The Streamlit Datasets page does the same since 16 Nov: counts, languages and labels; no texts, no download.
   - A platform that publishes the repo's files (a public Hugging Face Space, a public GitHub repo) publishes the file itself, whatever the dashboard shows.
 - Record the stage demo first (`python -m demo_agent.run --all --compare --provider groq --record`) and commit `demo_agent/recordings/`.
 

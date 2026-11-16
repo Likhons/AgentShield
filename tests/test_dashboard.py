@@ -207,6 +207,36 @@ def test_datasets_page_renders_distribution_donut_and_file_filters() -> None:
     assert "<span>external.jsonl</span>" not in md_att
 
 
+def _open_dataset_file(file_name: str) -> AppTest:
+    app = AppTest.from_file(APP, default_timeout=30)
+    app.query_params["dfile"] = file_name
+    app.query_params["daction"] = "open"
+    app.run()
+    app.radio(key="nav_page").set_value("Datasets").run()
+    assert not app.exception
+    return app
+
+
+def test_attack_texts_stay_private_unless_enabled(monkeypatch) -> None:
+    """docs/ethics_impact.md: attack texts are shared on request, so the public dashboard shows counts only."""
+    monkeypatch.delenv("SHOW_ATTACK_TEXTS", raising=False)
+    app = _open_dataset_file("attacks.jsonl")
+    assert not app.get("download_button")  # the file's bytes never reach the page
+    assert any("not published" in i.value for i in app.info)
+    sample = app.dataframe[-1].value
+    assert len(sample) == 15 and set(sample["text"]) == {"hidden"}
+    assert set(sample["label"]) == {"attack"}  # metadata stays visible
+
+    benign = _open_dataset_file("benign.jsonl")  # other files are unchanged
+    assert benign.get("download_button")
+    assert "hidden" not in set(benign.dataframe[-1].value["text"])
+
+    monkeypatch.setenv("SHOW_ATTACK_TEXTS", "1")
+    shown = _open_dataset_file("attacks.jsonl")
+    assert shown.get("download_button")
+    assert "hidden" not in set(shown.dataframe[-1].value["text"])
+
+
 def test_benchmarks_page_renders_real_and_simulated_runs_with_outcomes() -> None:
     app = AppTest.from_file(APP, default_timeout=30).run()
     app.radio(key="nav_page").set_value("Benchmarks").run()
