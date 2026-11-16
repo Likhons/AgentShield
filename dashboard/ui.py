@@ -74,11 +74,30 @@ def esc(text: object) -> str:
     return html.escape(str(text))
 
 
+def lang_label(code: object) -> str:
+    """'bn' -> 'BN', 'banglish' -> 'Banglish', 'all' -> 'All': one spelling on every page."""
+    text = str(code)
+    return text.upper() if len(text) <= 2 else text.capitalize()
+
+
 # ---------------------------------------------------------------------------
 # Theme
 # ---------------------------------------------------------------------------
-CSS = """
-<style>
+# Bangla web font: Noto Sans Bengali (OFL, Google Fonts), one variable file for weights 100-900.
+# unicode-range limits it to Bangla characters, so English keeps its font. It is registered under our own
+# name AND under "Source Sans", Streamlit's font. Faces of one family combine by unicode-range only when
+# their descriptors match exactly, so weight/style mirror Streamlit's face ("100 900", normal).
+# size-adjust brings Bangla glyphs in line with the Latin text (unadjusted they looked oversized).
+_BANGLA_WOFF2 = ("https://fonts.gstatic.com/s/notosansbengali/v33/"
+                 "Cn-fJsCGWQxOjaGwMQ6fIiMywrNJIky6nvd8BjzVMvJx2mc4I3mYvNY.woff2")
+_BANGLA_FONT_FACES = "".join(
+    f'@font-face {{ font-family: "{family}"; font-style: normal; font-weight: 100 900; font-display: swap;\n'
+    f'  src: url({_BANGLA_WOFF2}) format("woff2"); size-adjust: 92%;\n'
+    f'  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+200C-200D, U+25CC; }}\n'
+    for family in ("AS Bangla", "Source Sans")
+)
+
+CSS = "<style>\n" + _BANGLA_FONT_FACES + """
 :root {
   --bg: #080B1C; --side: #060919; --card: #111733; --card2: #171E40;
   --accent: #9147FF; --accent2: #C044FF; --text: #F5F5FF; --muted: #A2ABD0;
@@ -87,7 +106,7 @@ CSS = """
   --radius: 14px;
 }
 html, body, .stApp, [class*="css"], .stMarkdown, button, input, textarea {
-  font-family: "Inter", "Segoe UI", "Nirmala UI", "Noto Sans Bengali", system-ui, sans-serif;
+  font-family: "AS Bangla", "Inter", "Segoe UI", "Nirmala UI", "Noto Sans Bengali", system-ui, sans-serif;
 }
 .stApp {
   background:
@@ -728,6 +747,9 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
 /* How-it-works sits beside the run card on wide screens. Once the columns stack it moves below the
    results, so on a phone the result appears right under the Run button. */
 .st-key-card_how_m { display: none; }
+/* auto-scroll target: leave room for the fixed mobile top bar; the helper iframe takes no space */
+#as-results { scroll-margin-top: 72px; }
+.st-key-as_scroll { position: absolute !important; width: 0; height: 0; overflow: hidden; pointer-events: none; }
 @media (max-width: 1200px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
@@ -1671,7 +1693,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
     gap: .45rem;
   }
   .ds-lrow-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
-  .ds-lrow-name { font-weight: 700; font-size: .92rem; color: #F5F6FF; text-transform: lowercase; }
+  .ds-lrow-name { font-weight: 700; font-size: .92rem; color: #F5F6FF; }
   .ds-lrow-tot { font-size: .82rem; color: #D5DCF6; font-weight: 600; font-variant-numeric: tabular-nums; }
   .ds-lrow-counts { display: flex; gap: .6rem; flex-wrap: wrap; font-size: .78rem; }
   .ds-lchip {
@@ -2258,7 +2280,7 @@ def dataset_lang_card_html(summary: dict[str, dict[str, int]]) -> str:
         bar_w = min(100.0, max(4.0, share * 1.6))
         rows_html.append(
             f'<tr>'
-            f'<td>{esc(lang)}</td>'
+            f'<td>{esc(lang_label(lang))}</td>'
             f'<td class="num">{att}</td>'
             f'<td class="num">{ben}</td>'
             f'<td class="num">{tot}</td>'
@@ -2271,7 +2293,7 @@ def dataset_lang_card_html(summary: dict[str, dict[str, int]]) -> str:
         mob_rows.append(
             f'<div class="ds-lrow">'
             f'<div class="ds-lrow-top">'
-            f'<span class="ds-lrow-name">{esc(lang)}</span>'
+            f'<span class="ds-lrow-name">{esc(lang_label(lang))}</span>'
             f'<span class="ds-lrow-tot">{tot} samples ({share:.1f}%)</span>'
             f'</div>'
             f'<div class="ds-lrow-counts">'
@@ -2438,7 +2460,7 @@ def benchmark_agent_section_html(
     for r in rows:
         trows_html.append(
             f'<tr>'
-            f'<td>{esc(r["language"])}</td>'
+            f'<td>{esc(lang_label(r["language"]))}</td>'
             f'<td>{esc(r["attack success WITHOUT AgentShield"])}</td>'
             f'<td><span class="bm-safe-pill">{esc(r["attack success WITH AgentShield"])}</span></td>'
             f'<td>{esc(r["benign task done WITHOUT"])}</td>'
@@ -2457,7 +2479,16 @@ def benchmark_agent_section_html(
 
         preferred_order = ["paid", "never tried", "blocked", "not attempted", "held for approval", "attacker paid"]
         ordered_keys = [k for k in preferred_order if k in totals] + [k for k in sorted(totals) if k not in preferred_order]
-        palette = ["#8B5CF6", "#A855F7", "#EC4899", "#C084FC", "#38BDF8", "#FF526F"]
+        # colour by meaning, not by position: good = green, attacker paid = red, AgentShield acted = purple/amber
+        outcome_colors = {
+            "paid": "#16C784",               # benign task done
+            "never tried": "#5B8CFF",        # attack: the agent did not try to pay
+            "blocked": "#9147FF",            # AgentShield blocked
+            "not attempted": "#7A86A8",      # benign: the agent did not try to pay
+            "held for approval": "#F5A623",  # AgentShield asked the user
+            "attacker paid": "#F04452",      # attack succeeded
+        }
+        fallback = ["#C084FC", "#38BDF8", "#EC4899"]
 
         circles_svg = []
         legend_rows = []
@@ -2465,7 +2496,7 @@ def benchmark_agent_section_html(
         for idx, k in enumerate(ordered_keys):
             cnt = totals[k]
             pct = (cnt / total_cases * 100.0) if total_cases else 0.0
-            color = palette[idx % len(palette)]
+            color = outcome_colors.get(k, fallback[idx % len(fallback)])
             circles_svg.append(
                 f'<circle cx="80" cy="80" r="58" fill="none" stroke="{color}" stroke-width="20" '
                 f'pathLength="100" stroke-dasharray="{pct:.2f} {100.0 - pct:.2f}" '
@@ -2488,7 +2519,7 @@ def benchmark_agent_section_html(
             ic_col = "#FF526F" if is_att else "#00D6A0"
             out_table_rows.append(
                 f'<tr>'
-                f'<td>{esc(o["language"])}</td>'
+                f'<td>{esc(lang_label(o["language"]))}</td>'
                 f'<td><span class="bm-item-pill"><span class="bm-item-ic {ic_cls}">{icon(ic_name, 13, ic_col, stroke=2.5)}</span>'
                 f'<span>{esc(o["item"])}</span></span></td>'
                 f'<td>{esc(o["outcomes with AgentShield"])}</td>'
@@ -2569,7 +2600,7 @@ def benchmark_detection_section_html(title: str, source_name: str, note: str, da
         trows_html.append(
             f'<tr>'
             f'<td><code>{esc(r["detector"])}</code></td>'
-            f'<td>{esc(r["language"])}</td>'
+            f'<td>{esc(lang_label(r["language"]))}</td>'
             f'<td><span class="bm-safe-pill">{esc(r["attacks flagged"])}</span></td>'
             f'<td>{esc(r["benign flagged"])}</td>'
             f'</tr>'

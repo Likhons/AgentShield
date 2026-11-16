@@ -30,6 +30,7 @@ from urllib.parse import urlencode
 import altair as alt
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -375,7 +376,25 @@ def show_result(result: ScenarioResult) -> None:
         st.write(result.run.final_answer)
 
 
+def scroll_to_results() -> None:
+    """Bring the result into view after Run: on a phone it starts below the fold. The nonce makes
+    Streamlit mount a fresh iframe each run, so the script also fires when Run is clicked twice."""
+    st.session_state["scroll_nonce"] = st.session_state.get("scroll_nonce", 0) + 1
+    with st.container(key="as_scroll"):
+        components.html(
+            f"<!-- run {st.session_state['scroll_nonce']} --><script>"
+            "const doc = window.parent.document; let tries = 0;"
+            "const smooth = !window.parent.matchMedia('(prefers-reduced-motion: reduce)').matches;"
+            "const t = setInterval(() => { const el = doc.getElementById('as-results');"
+            "  if (el || ++tries > 50) { clearInterval(t);"
+            "    if (el) el.scrollIntoView({behavior: smooth ? 'smooth' : 'auto', block: 'start'}); } }, 100);"
+            "</script>",
+            height=0,
+        )
+
+
 def results(name: str, mode: str, approve: bool) -> None:
+    st.markdown('<div id="as-results"></div>', unsafe_allow_html=True)
     without = run_safely(name, mode, shield=False)
     with_shield = run_safely(name, mode, shield=True, approve=approve)
     if without and with_shield:
@@ -406,6 +425,7 @@ def playground_page() -> None:
         how_it_works_card()
     if clicked:
         results(name, mode, approve)
+        scroll_to_results()
     how_it_works_card(key="card_how_m")  # CSS shows this copy only when columns stack (<=1100px)
     pipeline_card()
     recent_card()
