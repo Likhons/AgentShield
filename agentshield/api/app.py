@@ -48,7 +48,8 @@ def create_app(engine: Engine | None = None, audit: AuditLog | None = None, api_
     )
     guarded = [Depends(require_key)]
 
-    @app.get("/health")
+    # HEAD too: uptime monitors (e.g. UptimeRobot) check with HEAD and report 405 otherwise
+    @app.api_route("/health", methods=["GET", "HEAD"])
     def health() -> dict:
         return {"status": "ok"}
 

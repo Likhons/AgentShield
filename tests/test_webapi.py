@@ -214,4 +214,5 @@ def test_live_runs_are_capped_per_hour(monkeypatch):
 
 def test_gateway_endpoints_still_mounted(client):
     assert client.get("/health").json() == {"status": "ok"}
+    assert client.head("/health").status_code == 200  # uptime monitors use HEAD
     assert "total" in client.get("/v1/stats").json()
