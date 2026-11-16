@@ -179,6 +179,7 @@ def sidebar() -> str:
         body = "".join(f'<div class="status-row"><span>{ui.esc(k)}</span><b>{ui.esc(v)}</b></div>' for k, v in rows)
         st.markdown(f'<div class="status"><div class="status-head"><span class="dot"></span>Gateway Ready</div>{body}'
                     f'<div class="version">v{ui.esc(app_version())}</div></div>', unsafe_allow_html=True)
+    st.markdown(ui.mobile_nav_html(page, rows, app_version()), unsafe_allow_html=True)
     return page
 
 
@@ -300,8 +301,19 @@ def recent_card() -> None:
                 f'<td>{ui.badge(r.decision.value)}</td><td class="muted">{ui.esc(short(r.reason_en, 90))}</td>'
                 f'<td><a class="row-link" href="?page=Audit+Log" target="_self" title="Open in Audit Log">{ui.icon("external-link", 13)}</a></td></tr>'
                 for r in records)
+            mob_cards = "".join(
+                f'<div class="rmob-card">'
+                f'<div class="rmob-top"><span class="rmob-time">{r.timestamp.strftime("%b %d, %H:%M")} UTC</span>'
+                f'{ui.badge(r.decision.value)}</div>'
+                f'<div class="rmob-req">{ui.esc(short(r.user_request, 90))}</div>'
+                f'<div class="rmob-reason">{ui.esc(short(r.reason_en, 110))}</div>'
+                f'<div class="rmob-foot"><code class="tool-pill tool-{r.decision.value}">{ui.esc(r.tool_name)}</code>'
+                f'<a class="row-link" href="?page=Audit+Log" target="_self" title="Open in Audit Log">{ui.icon("external-link", 15)}</a></div>'
+                f'</div>'
+                for r in records)
             body = ('<div class="rwrap"><table class="rtable"><tr><th>Time (UTC)</th><th class="c-req">User Request</th><th class="c-tool">Tool</th>'
-                    f'<th>Decision</th><th>Reason</th><th>•••</th></tr>{rows}</table></div>')
+                    f'<th>Decision</th><th>Reason</th><th>•••</th></tr>{rows}</table></div>'
+                    f'<div class="rmob-list">{mob_cards}</div>')
         st.markdown(ui.panel_title("file-text", "Recent Evaluations", right=controls) + body, unsafe_allow_html=True)
 
 
@@ -500,43 +512,75 @@ def _render_audit_table(
     start_idx = (current_page - 1) * page_size + 1 if filtered_total > 0 else 0
     end_idx = min(current_page * page_size, filtered_total)
 
-    radios_html = ['<input type="checkbox" id="adrawer-close-chk" class="asel-radio">']
+    radios_html = [
+        '<input type="checkbox" id="adrawer-close-chk" class="asel-radio">',
+        f'<input type="radio" name="audit_mob_p{current_page}" id="amob-none" class="asel-radio">',
+    ]
     css_rules = []
+    mob_css_rules = []
     rows_html = []
+    mob_cards_html = []
     chk_svg = ui.icon("check", 12, "currentColor", stroke=3)
 
+    default_safe_id = re.sub(r"[^a-zA-Z0-9_-]", "", selected_id) if selected_id else ""
     for r in page_records:
         safe_id = re.sub(r"[^a-zA-Z0-9_-]", "", r.id)
-        is_sel = r.id == selected_id
-        checked_attr = " checked" if is_sel else ""
+        is_sel = safe_id == default_safe_id
         radios_html.append(
             f'<input type="radio" name="audit_sel_p{current_page}" id="asel-{safe_id}" '
-            f'class="asel-radio"{checked_attr}>'
+            f'class="asel-radio asel-pick">'
         )
+        fallback_row = (
+            f',[data-testid="stHorizontalBlock"]:not(:has(.asel-pick:checked)) tr.arow-{safe_id} td'
+            f',.audit-table-card:not(:has(.asel-pick:checked)) tr.arow-{safe_id} td'
+        ) if is_sel else ""
+        fallback_first = (
+            f',[data-testid="stHorizontalBlock"]:not(:has(.asel-pick:checked)) tr.arow-{safe_id} td:first-child'
+            f',.audit-table-card:not(:has(.asel-pick:checked)) tr.arow-{safe_id} td:first-child'
+        ) if is_sel else ""
+        fallback_last = (
+            f',[data-testid="stHorizontalBlock"]:not(:has(.asel-pick:checked)) tr.arow-{safe_id} td:last-child'
+            f',.audit-table-card:not(:has(.asel-pick:checked)) tr.arow-{safe_id} td:last-child'
+        ) if is_sel else ""
+        fallback_chk = (
+            f',[data-testid="stHorizontalBlock"]:not(:has(.asel-pick:checked)) tr.arow-{safe_id} .achk'
+            f',.audit-table-card:not(:has(.asel-pick:checked)) tr.arow-{safe_id} .achk'
+        ) if is_sel else ""
+        fallback_pane = (
+            f',[data-testid="stHorizontalBlock"]:not(:has(.asel-pick:checked)) .adrawer-pane-{safe_id}'
+        ) if is_sel else ""
         css_rules.append(
             f'[data-testid="stHorizontalBlock"]:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td,'
-            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td {{'
+            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td{fallback_row} {{'
             f'background:linear-gradient(90deg,rgba(145,71,255,.20),rgba(192,68,255,.10));'
             f'border-top-color:#9147FF;border-bottom-color:#9147FF;}}'
             f'[data-testid="stHorizontalBlock"]:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td:first-child,'
-            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td:first-child {{'
+            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td:first-child{fallback_first} {{'
             f'border-left-color:#9147FF;box-shadow:-4px 0 14px -4px rgba(145,71,255,.55);}}'
             f'[data-testid="stHorizontalBlock"]:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td:last-child,'
-            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td:last-child {{'
+            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} td:last-child{fallback_last} {{'
             f'border-right-color:#9147FF;box-shadow:4px 0 14px -4px rgba(145,71,255,.55);}}'
             f'[data-testid="stHorizontalBlock"]:has(#asel-{safe_id}:checked) tr.arow-{safe_id} .achk,'
-            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} .achk {{'
+            f'.audit-table-card:has(#asel-{safe_id}:checked) tr.arow-{safe_id} .achk{fallback_chk} {{'
             f'background:linear-gradient(135deg,#9147FF,#C044FF);border-color:#E2B8FF;color:#FFFFFF;'
             f'box-shadow:0 0 10px rgba(145,71,255,.55);}}'
-            f'[data-testid="stHorizontalBlock"]:has(#asel-{safe_id}:checked) .adrawer-pane-{safe_id} {{'
+            f'[data-testid="stHorizontalBlock"]:has(#asel-{safe_id}:checked) .adrawer-pane-{safe_id}{fallback_pane} {{'
             f'display:block;}}'
+        )
+        mob_css_rules.append(
+            f'[data-testid="stHorizontalBlock"]:has(#amob-{safe_id}:checked) .amob-card-{safe_id} {{'
+            f'background:linear-gradient(135deg,rgba(145,71,255,.22),rgba(192,68,255,.12));'
+            f'border-color:#9147FF;box-shadow:0 0 16px rgba(145,71,255,.35);}}'
+            f'[data-testid="stHorizontalBlock"]:has(#amob-{safe_id}:checked) .adrawer-pane-{safe_id} {{'
+            f'display:block !important;}}'
         )
 
         tool_ic = ui.icon(ui.audit_tool_icon(r.tool_name), 13, "#C9A6FF")
-        risk_str, risk_cls, _ = ui.audit_risk_level(r.risk_score, thresholds.ask_human_at, thresholds.block_at)
+        risk_str, risk_cls, risk_label = ui.audit_risk_level(r.risk_score, thresholds.ask_human_at, thresholds.block_at)
         args_json = json.dumps(r.arguments, ensure_ascii=False)
         args_preview = short(args_json, 56)
         lbl = f'for="asel-{safe_id}"'
+        mob_lbl = f'for="amob-{safe_id}"'
         rows_html.append(
             f'<tr class="arow arow-{safe_id}">'
             f'<td><label class="arow-link" {lbl} title="Select event {ui.esc(r.id)}">'
@@ -554,6 +598,22 @@ def _render_audit_table(
             f'{ui.icon("more-horizontal", 16)}</label></td>'
             f'</tr>'
         )
+        mob_cards_html.append(
+            f'<div class="amob-card amob-card-{safe_id}">'
+            f'<input type="radio" name="audit_mob_p{current_page}" id="amob-{safe_id}" '
+            f'class="amob-hit amob-radio" aria-label="Inspect {ui.esc(r.tool_name)} event {ui.esc(r.id)}">'
+            f'<div class="amob-top">'
+            f'<span class="amob-tool"><span class="atool-ic">{tool_ic}</span>{ui.esc(r.tool_name)}</span>'
+            f'{ui.audit_badge(r.decision.value)}'
+            f'</div>'
+            f'<div class="amob-meta">'
+            f'<span class="atime">{r.timestamp.strftime("%b %d, %H:%M:%S")} UTC</span>'
+            f'<span class="arisk arisk-{risk_cls}">Risk {ui.esc(risk_str)} · {ui.esc(risk_label)}</span>'
+            f'</div>'
+            f'<div class="amob-args">{ui.esc(short(args_json, 96))}</div>'
+            f'<div class="amob-cta"><span>Tap for full Audit Details &amp; Bangla reason</span><span>View →</span></div>'
+            f'</div>'
+        )
 
     page_links = []
     for item in ui.audit_page_items(current_page, total_pages):
@@ -563,13 +623,20 @@ def _render_audit_table(
             active_cls = " apage-active" if item == current_page else ""
             page_links.append(f'<span class="apage-btn{active_cls}">{item}</span>')
 
+    mob_style_block = (
+        "@media (max-width: 960px) {"
+        "[data-testid=\"stHorizontalBlock\"]:has(.amob-radio:checked) .adrawer-pane{display:none !important;}"
+        f'{"".join(mob_css_rules)}'
+        "}"
+    )
     table_html = (
-        f'<style>{"".join(css_rules)}</style>'
+        f'<style>{"".join(css_rules)}{mob_style_block}</style>'
         f'<div class="audit-table-card">{"".join(radios_html)}'
         f'<div class="audit-table-wrap"><table class="atable">'
         '<thead><tr><th class="col-chk"></th><th>Time (UTC)</th><th>Tool</th><th>Decision</th>'
         '<th>Risk</th><th>Arguments (Preview)</th><th class="col-more">Details</th></tr></thead>'
         f'<tbody>{"".join(rows_html)}</tbody></table></div>'
+        f'<div class="amob-list">{"".join(mob_cards_html)}</div>'
         f'<div class="audit-foot"><span>Showing {start_idx}–{end_idx} of {filtered_total}</span>'
         f'<div class="apager">{"".join(page_links)}</div></div></div>'
     )
@@ -602,6 +669,10 @@ def _build_drawer_pane_html(record: AuditRecord, thresholds: DecisionThresholds)
 
     return (
         f'<div class="adrawer-pane adrawer-pane-{safe_id}">'
+        f'<div class="adrawer-mob-bar">'
+        f'<label class="adrawer-back-mob" for="amob-none" tabindex="0">← Back to Audit Log</label>'
+        f'<label class="adrawer-close" for="amob-none" style="width:44px;height:44px" title="Close details" tabindex="0">{ui.icon("x", 18)}</label>'
+        f'</div>'
         f'<div class="adrawer-head">'
         f'<div class="adrawer-title">{ui.icon("file-text", 18, "#9147FF")}<span>Audit Details</span></div>'
         f'<label class="adrawer-close" for="adrawer-close-chk" title="Close drawer">{ui.icon("x", 16)}</label>'
