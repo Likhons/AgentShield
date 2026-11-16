@@ -134,3 +134,42 @@ def test_stats(log):
 
 def test_stats_empty(log):
     assert log.stats() == {"total": 0, "allow": 0, "ask_human": 0, "block": 0, "llm_calls": 0, "median_latency_ms": None}
+
+
+def test_query_filtering_search_and_pagination(log):
+    for i in range(10):
+        dec = Decision.BLOCK if i % 3 == 0 else (Decision.ASK_HUMAN if i % 3 == 1 else Decision.ALLOW)
+        tool = "send_money" if i % 2 == 0 else "read_email"
+        log.write(
+            make_record(
+                id=f"evt-{i:02d}",
+                request_id=f"req-{i:02d}",
+                tool_name=tool,
+                decision=dec,
+                risk_score=round(0.1 * i, 2),
+                arguments={"to": f"01000000{i:03d}", "amount": 100 * (i + 1)},
+                reason_bn="আটকানো হয়েছে" if dec == Decision.BLOCK else "অনুমতি দেওয়া হয়েছে",
+                timestamp=BASE_TIME + timedelta(minutes=i),
+            )
+        )
+
+    assert log.distinct_tools() == ["read_email", "send_money"]
+    assert log.get_by_id("evt-09").request_id == "req-09"
+    assert log.get_by_id("missing") is None
+
+    # Page 1 (8 items, newest first)
+    page1, total, counts = log.query(limit=8, offset=0)
+    assert total == 10
+    assert counts == {"allow": 3, "ask_human": 3, "block": 4, "total": 10}
+    assert [r.id for r in page1] == [f"evt-{i:02d}" for i in range(9, 1, -1)]
+
+    # Page 2 (remaining 2 items)
+    page2, total2, _ = log.query(limit=8, offset=8)
+    assert total2 == 10
+    assert [r.id for r in page2] == ["evt-01", "evt-00"]
+
+    # Combined filter: decision=block + search + min_risk
+    filtered, f_total, f_counts = log.query(decision="block", search="01000000009", min_risk=0.8)
+    assert f_total == 1
+    assert f_counts["block"] == 1
+    assert filtered[0].id == "evt-09"

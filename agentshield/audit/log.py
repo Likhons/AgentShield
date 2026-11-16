@@ -132,6 +132,91 @@ class AuditLog:
             "median_latency_ms": statistics.median(latencies) if latencies else None,
         }
 
+    def get_by_id(self, record_id: str) -> AuditRecord | None:
+        """Fetch a single AuditRecord by its primary key id."""
+        with self._lock:
+            row = self._conn.execute("SELECT * FROM audit WHERE id = ?", (record_id,)).fetchone()
+        return self._to_record(row) if row is not None else None
+
+    def distinct_tools(self) -> list[str]:
+        """Sorted list of distinct tool names present in the audit log."""
+        with self._lock:
+            rows = self._conn.execute("SELECT DISTINCT tool_name FROM audit ORDER BY tool_name ASC").fetchall()
+        return [row["tool_name"] for row in rows if row["tool_name"]]
+
+    def query(
+        self,
+        *,
+        decision: str | None = None,
+        search: str | None = None,
+        tool_name: str | None = None,
+        tainted: bool | None = None,
+        min_risk: float | None = None,
+        since_iso: str | None = None,
+        limit: int | None = 8,
+        offset: int = 0,
+        session_id: str | None = None,
+    ) -> tuple[list[AuditRecord], int, dict[str, int]]:
+        """Database-level filtered & paginated query (newest first).
+
+        Returns (page_records, filtered_total, decision_counts_before_decision_filter).
+        """
+        clauses: list[str] = []
+        params: list[Any] = []
+
+        if session_id is not None:
+            clauses.append("session_id = ?")
+            params.append(session_id)
+        if tool_name:
+            clauses.append("tool_name = ?")
+            params.append(tool_name)
+        if tainted is not None:
+            clauses.append("tainted = ?")
+            params.append(int(tainted))
+        if min_risk is not None and min_risk > 0:
+            clauses.append("risk_score >= ?")
+            params.append(float(min_risk))
+        if since_iso:
+            clauses.append("timestamp >= ?")
+            params.append(since_iso)
+        if search and search.strip():
+            q = f"%{search.strip().lower()}%"
+            clauses.append(
+                "(LOWER(tool_name) LIKE ? OR LOWER(arguments) LIKE ? OR LOWER(decision) LIKE ? "
+                "OR LOWER(reason_en) LIKE ? OR LOWER(reason_bn) LIKE ? OR LOWER(user_request) LIKE ? "
+                "OR LOWER(id) LIKE ?)"
+            )
+            params.extend([q] * 7)
+
+        base_where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
+        count_sql = f"SELECT decision, COUNT(*) AS cnt FROM audit{base_where} GROUP BY decision"
+
+        with self._lock:
+            grouped = self._conn.execute(count_sql, params).fetchall()
+            counts = {d.value: 0 for d in Decision}
+            for row in grouped:
+                counts[row["decision"]] = int(row["cnt"])
+            counts["total"] = sum(counts.values())
+
+            row_clauses = list(clauses)
+            row_params = list(params)
+            if decision in {d.value for d in Decision}:
+                row_clauses.append("decision = ?")
+                row_params.append(decision)
+
+            where_sql = f" WHERE {' AND '.join(row_clauses)}" if row_clauses else ""
+            total_row = self._conn.execute(f"SELECT COUNT(*) AS cnt FROM audit{where_sql}", row_params).fetchone()
+            filtered_total = int(total_row["cnt"]) if total_row else 0
+
+            data_sql = f"SELECT * FROM audit{where_sql} ORDER BY timestamp DESC, rowid DESC"
+            data_params = list(row_params)
+            if limit is not None:
+                data_sql += " LIMIT ? OFFSET ?"
+                data_params.extend([int(limit), max(0, int(offset))])
+            rows = self._conn.execute(data_sql, data_params).fetchall()
+
+        return [self._to_record(r) for r in rows], filtered_total, counts
+
     @staticmethod
     def _to_record(row: sqlite3.Row) -> AuditRecord:
         data = {key: row[key] for key in row.keys() if key != "llm_called"}
