@@ -1,0 +1,22 @@
+# Render Blueprint: the AgentShield dashboard API (webapi/) for the React frontend.
+# Render dashboard -> New -> Blueprint -> pick this repo. Steps and checks: docs/deploy.md, "React frontend".
+# Render builds from the private GitHub repo, so dataset files are not published; only the API is public.
+services:
+  - type: web
+    name: agentshield-api
+    runtime: python
+    plan: free            # sleeps after 15 min without requests; the next request waits ~1 min
+    region: singapore     # closest Render region to Bangladesh
+    branch: react-frontend
+    buildCommand: pip install -r requirements-api.txt
+    startCommand: uvicorn webapi.app:build_app --factory --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.16
+      - key: LLM_PROVIDER
+        value: mock       # offline simulated agent + recorded real runs; no API key on the server
+      - key: AGENTSHIELD_API_KEY
+        generateValue: true   # protects the raw gateway (/v1/*); the dashboard only uses /api/*
+      # SHOW_ATTACK_TEXTS is deliberately not set: attacks.jsonl texts stay private (docs/ethics_impact.md).

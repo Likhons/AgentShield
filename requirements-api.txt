@@ -1,0 +1,9 @@
+# Dashboard API only (webapi/ + agentshield core + demo agent + benchmark readers), for the server deploy.
+# No Streamlit, no torch: the heuristic detector and the mock/recorded modes need neither.
+# Pinned to the versions tested with Python 3.13.16 in a clean venv (16 Nov 2026).
+fastapi==0.163.1
+uvicorn==0.54.0
+pydantic==2.14.3
+pyyaml==6.0.3
+python-dotenv==1.2.4
+httpx==0.28.1
