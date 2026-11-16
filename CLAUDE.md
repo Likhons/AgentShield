@@ -2,7 +2,8 @@
 
 > Read this first. Keep it short and current; details live in PROGRESS.md and the code.
 
-## RESUME HERE (last updated 12 Nov 2026)
+## RESUME HERE (last updated 16 Nov 2026)
+- **React frontend (branch `react-frontend`, 16 Nov; `main` = Streamlit, untouched):** `webapi/` (FastAPI dashboard API: `uvicorn webapi.app:build_app --factory --port 8000`) + `web/` (Vite, React 19, TS, Tailwind 4; `npm run dev`). All 5 pages ported, responsive pass done (360–1920 px). Plan and breakpoints: `docs/react_frontend_plan.md`. Deploy prepared, **not pushed/deployed**: `render.yaml` (API on Render, from the private repo) + `web/vercel.json` (Vercel, `/api/*` rewrite); steps in `docs/deploy.md` → "React frontend"; clean-tree test on Python 3.13.16 passed. `attacks.jsonl` texts hidden by default (`SHOW_ATTACK_TEXTS=1` shows). **Open (user):** push the branch; Render/Vercel sign-in; whether the Streamlit Datasets page on `main` may keep showing/downloading `attacks.jsonl` (it does since the 16 Nov redesign).
 - **Phase:** 3 and 4 done (model trained, not adopted). Phase 5 mostly done (dashboard redesign, live demo). Next: record stage demo, video, submission (deadline **20 Nov 2026, 11:59 PM GMT+6**, per other teams' notes; target 19 Nov).
 - **Real-LLM benchmark after scope B (12 Nov, `agent_20261112-111137`):** attacks 4/20 without → 0/20 with; rent paid 16/20 without and 16/20 with. The 4 blocked attacks are exactly the 4 that stole without protection; the 4 unpaid rents were also unpaid without AgentShield. results.md §3b, README, pitch.md, submission_form.md updated.
 - **Live demo (public):** https://agentshield-demo.streamlit.app (Streamlit Community Cloud from the private repo, made public in its share settings; secrets `LLM_PROVIDER = "mock"`, no Groq key). After pushing dashboard changes, **Reboot app** (Manage app → ⋮) so `dashboard/ui.py` reloads. `.devcontainer/` was added by Streamlit.
