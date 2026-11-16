@@ -99,6 +99,18 @@
 .md th { @apply bg-card2 font-semibold text-ink; }
 .md hr { @apply my-5 border-line; }
 
+/* landing hero: the recorded run plays once, step by step (reduced motion shows it at once) */
+@keyframes step-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.landing-step { animation: step-in 0.55s var(--ease-out-soft) both; }
+/* faint measuring grid behind the landing hero, fading out towards the edges */
+.landing-grid {
+  background-image:
+    linear-gradient(rgb(145 71 255 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(145 71 255 / 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+}
+
 /* hero art: the shield floats, a light streak orbits its ring, the aura breathes (same as Streamlit) */
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes orbit { to { stroke-dashoffset: -1000; } }

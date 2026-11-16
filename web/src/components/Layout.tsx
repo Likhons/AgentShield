@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { ChartColumn, Database, FileText, Menu, PlayCircle, Scale, ShieldCheck, X, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
 
 interface NavItem {
@@ -14,7 +14,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Workspace',
     items: [
-      { to: '/', label: 'Playground', icon: PlayCircle },
+      { to: '/playground', label: 'Playground', icon: PlayCircle },
       { to: '/benchmarks', label: 'Benchmarks', icon: ChartColumn },
       { to: '/audit', label: 'Audit Log', icon: FileText },
     ],
@@ -31,7 +31,7 @@ const ALL_ITEMS = SECTIONS.flatMap((s) => s.items)
 
 function Brand() {
   return (
-    <div className="flex items-center gap-3">
+    <Link to="/" aria-label="AgentShield home" className="flex items-center gap-3">
       <span className="icon-tile h-10 w-10">
         <ShieldCheck size={21} className="text-[#E9D5FF]" aria-hidden />
       </span>
@@ -39,7 +39,7 @@ function Brand() {
         <div className="text-[1.15rem] font-extrabold tracking-tight">AgentShield</div>
         <div className="text-xs text-[#C9B6FF]">AI Agent Safety Platform</div>
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -54,7 +54,6 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
               <li key={to}>
                 <NavLink
                   to={to}
-                  end={to === '/'}
                   onClick={onNavigate}
                   className={({ isActive }) =>
                     `flex min-h-11 items-center gap-3 rounded-xl border px-3.5 text-[0.95rem] font-semibold transition-colors ${
@@ -111,7 +110,7 @@ export default function Layout() {
   const location = useLocation()
   const drawerRef = useRef<HTMLDivElement>(null)
   const menuButtonRef = useRef<HTMLButtonElement>(null)
-  const current = ALL_ITEMS.find((i) => (i.to === '/' ? location.pathname === '/' : location.pathname.startsWith(i.to)))
+  const current = ALL_ITEMS.find((i) => location.pathname.startsWith(i.to))
 
   // nav links close the drawer themselves; Escape closes it; focus moves in and back out
   useEffect(() => {
