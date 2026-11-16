@@ -5,7 +5,8 @@ import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, XAxis, YA
 import Donut from '../components/Donut'
 import Markdown from '../components/Markdown'
 import Modal from '../components/Modal'
-import { Card, ErrorNote, PageHeader, Spinner } from '../components/ui'
+import { Reveal } from '../components/Motion'
+import { Card, ErrorNote, PageHeader, PageSkeleton, Spinner } from '../components/ui'
 import { api, type AgentSection, type DetectionSection, type Rate } from '../lib/api'
 
 const DETECTORS: Record<string, { label: string; color: string; order: number }> = {
@@ -262,10 +263,12 @@ export default function Benchmarks() {
           </button>
         }
       />
-      {isPending && <Spinner />}
+      {isPending && <PageSkeleton cards={2} />}
       {error && <ErrorNote error={error} />}
       <div className="flex flex-col gap-10">
-        {data?.sections.map((s) => (s.kind === 'agent' ? <AgentBlock key={s.title} s={s} /> : <DetectionBlock key={s.title} s={s} />))}
+        {data?.sections.map((s) => (
+          <Reveal key={s.title}>{s.kind === 'agent' ? <AgentBlock s={s} /> : <DetectionBlock s={s} />}</Reveal>
+        ))}
       </div>
       {docOpen && (
         <Modal title="docs/results.md" onClose={() => setDocOpen(false)} wide>

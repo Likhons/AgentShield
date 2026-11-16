@@ -1,3 +1,5 @@
+import { CountUp } from './Motion'
+
 export interface Slice {
   label: string
   value: number
@@ -21,7 +23,7 @@ export default function Donut({ slices, centerLabel }: { slices: Slice[]; center
           ))}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[1.7rem] leading-none font-extrabold">{total}</span>
+          <span className="text-[1.7rem] leading-none font-extrabold"><CountUp to={total} /></span>
           <span className="mt-1 text-xs text-muted">{centerLabel}</span>
         </div>
       </div>

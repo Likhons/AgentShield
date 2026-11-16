@@ -3,6 +3,7 @@ import { ChartColumn, Database, FileText, Menu, PlayCircle, Scale, ShieldCheck, 
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
+import { lockScroll, scrollToTop, unlockScroll } from '../lib/motion'
 
 interface NavItem {
   to: string
@@ -112,18 +113,20 @@ export default function Layout() {
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const current = ALL_ITEMS.find((i) => location.pathname.startsWith(i.to))
 
+  useEffect(() => scrollToTop(), [location.pathname])
+
   // nav links close the drawer themselves; Escape closes it; focus moves in and back out
   useEffect(() => {
     if (!open) return
     const menuButton = menuButtonRef.current
-    drawerRef.current?.querySelector<HTMLElement>('a, button')?.focus()
+    drawerRef.current?.querySelector<HTMLElement>('a, button')?.focus({ preventScroll: true })
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
     document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
+    lockScroll()
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-      menuButton?.focus()
+      unlockScroll()
+      menuButton?.focus({ preventScroll: true })
     }
   }, [open])
 
@@ -134,7 +137,7 @@ export default function Layout() {
       </a>
 
       {/* desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-[280px] flex-col gap-6 overflow-y-auto border-r border-line bg-side/95 px-5 py-6 lg:flex">
+      <aside data-lenis-prevent className="fixed inset-y-0 left-0 hidden w-[280px] flex-col gap-6 overflow-y-auto border-r border-line bg-side/95 px-5 py-6 lg:flex">
         <Brand />
         <div className="h-px bg-line" />
         <NavList />
@@ -179,6 +182,7 @@ export default function Layout() {
         aria-modal="true"
         aria-label="Navigation"
         inert={!open}
+        data-lenis-prevent
         className={`fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col gap-6 overflow-y-auto border-r border-line2 bg-side px-5 py-5 transition-transform duration-300 ease-out-soft lg:hidden ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
@@ -201,7 +205,10 @@ export default function Layout() {
       </div>
 
       <main id="main" className="mx-auto w-full max-w-[1480px] px-4 py-5 sm:px-6 lg:px-9 lg:py-7">
-        <Outlet />
+        {/* each page fades in on navigation and starts at the top */}
+        <div key={location.pathname} className="page-enter">
+          <Outlet />
+        </div>
       </main>
     </div>
   )

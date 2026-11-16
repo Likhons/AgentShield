@@ -4,6 +4,7 @@ import {
 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import type { AuditRecord, Decision, Thresholds } from '../lib/api'
+import { useToast } from '../lib/toast'
 import { riskLevel, utcFull } from '../lib/audit'
 
 const BANNER: Record<Decision, { icon: LucideIcon; color: string; title: string; sub: string; cls: string }> = {
@@ -25,11 +26,13 @@ function Row({ icon: Icon, label, children }: { icon: LucideIcon; label: string;
 
 function CopyButton({ text, label }: { text: string; label: string }) {
   const [done, setDone] = useState(false)
+  const toast = useToast()
   return (
     <button
       type="button"
       onClick={() => {
         void navigator.clipboard?.writeText(text).then(() => {
+          toast(`${label.replace('Copy ', '')[0].toUpperCase()}${label.replace('Copy ', '').slice(1)} copied`)
           setDone(true)
           setTimeout(() => setDone(false), 1500)
         })

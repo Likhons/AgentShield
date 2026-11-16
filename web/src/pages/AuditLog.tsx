@@ -4,13 +4,17 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import AuditDetail from '../components/AuditDetail'
 import ToolIcon from '../components/ToolIcon'
-import { Card, DecisionBadge, ErrorNote, PageHeader, Spinner } from '../components/ui'
+import { AnimatedValue } from '../components/Motion'
+import { Card, DecisionBadge, ErrorNote, PageHeader, PageSkeleton } from '../components/ui'
 import { api, type AuditRecord, type Decision, type Thresholds } from '../lib/api'
 import { riskLevel, utcFull } from '../lib/audit'
 import { short } from '../lib/format'
+import { lockScroll, stagger, unlockScroll } from '../lib/motion'
+import { useToast } from '../lib/toast'
 
 const DATE_RANGES: Record<string, number | null> = {
   'All time': null,
@@ -38,7 +42,7 @@ function Kpi({ icon: Icon, tint, label, value, note, wide = false }: { icon: Luc
       </span>
       <div className="min-w-0">
         <div className="text-[0.8rem] text-muted">{label}</div>
-        <div className="text-[1.45rem] leading-tight font-extrabold">{value}</div>
+        <div className="text-[1.45rem] leading-tight font-extrabold"><AnimatedValue value={value} /></div>
         <div className="text-[0.74rem] font-semibold" style={{ color: tint }}>{note}</div>
       </div>
     </div>
@@ -57,10 +61,10 @@ function pageList(current: number, total: number): (number | '…')[] {
   return out
 }
 
-function RecordCard({ r, thresholds, onOpen }: { r: AuditRecord; thresholds: Thresholds; onOpen: () => void }) {
+function RecordCard({ r, thresholds, onOpen, index }: { r: AuditRecord; thresholds: Thresholds; onOpen: () => void; index: number }) {
   const risk = riskLevel(r.risk_score, thresholds)
   return (
-    <li>
+    <li className="stagger-item" style={stagger(index)}>
       <button type="button" onClick={onOpen} className="flex w-full flex-col gap-2 rounded-xl border border-line2/50 bg-card2/50 px-3.5 py-3 text-left transition hover:border-line2">
         <span className="flex w-full items-center justify-between gap-2">
           <span className="flex items-center gap-2 font-bold">
@@ -84,6 +88,7 @@ function RecordCard({ r, thresholds, onOpen }: { r: AuditRecord; thresholds: Thr
 }
 
 export default function AuditLog() {
+  const toast = useToast()
   const [params, setParams] = useSearchParams()
   const selectedId = params.get('id')
   const [decision, setDecision] = useState<Decision | 'all'>('all')
@@ -149,10 +154,10 @@ export default function AuditLog() {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && select(null)
     document.addEventListener('keydown', onKey)
     const narrow = window.matchMedia('(max-width: 1279px)').matches
-    if (narrow) document.body.style.overflow = 'hidden'
+    if (narrow) lockScroll()
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
+      if (narrow) unlockScroll()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.id])
@@ -194,6 +199,7 @@ export default function AuditLog() {
       <a
         href={api.auditCsvUrl(filters)}
         download
+        onClick={() => toast(`Downloading ${data?.total ?? ''} audit records as CSV`.replace('  ', ' '), 'info')}
         className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line2 bg-card2/80 px-4 text-sm font-semibold hover:bg-accent/12"
       >
         <Download size={16} aria-hidden /> Export (CSV)
@@ -214,7 +220,7 @@ export default function AuditLog() {
       <PageHeader icon={FileText} title="Audit Log" sub="Every AgentShield decision, newest first (SQLite, path from AUDIT_DB_PATH)." right={headerRight} />
 
       {error && <ErrorNote error={error} />}
-      {isPending && <Spinner />}
+      {isPending && <PageSkeleton cards={5} />}
 
       {stats && (
         <>
@@ -338,14 +344,15 @@ export default function AuditLog() {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.records.map((r) => {
+                      {data.records.map((r, i) => {
                         const risk = riskLevel(r.risk_score, thresholds)
                         const active = r.id === selectedId
                         return (
                           <tr
                             key={r.id}
                             onClick={() => select(r.id)}
-                            className={`cursor-pointer transition [&>td]:py-2.5 [&>td]:first:rounded-l-lg [&>td]:last:rounded-r-lg ${
+                            style={stagger(i)}
+                            className={`stagger-item cursor-pointer transition [&>td]:py-2.5 [&>td]:first:rounded-l-lg [&>td]:last:rounded-r-lg ${
                               active ? '[&>td]:bg-accent/18' : '[&>td]:bg-card2/40 hover:[&>td]:bg-accent/8'
                             }`}
                           >
@@ -368,8 +375,8 @@ export default function AuditLog() {
                   </table>
                 </div>
                 <ul className="flex flex-col gap-2.5 md:hidden">
-                  {data.records.map((r) => (
-                    <RecordCard key={r.id} r={r} thresholds={thresholds} onOpen={() => select(r.id)} />
+                  {data.records.map((r, i) => (
+                    <RecordCard key={r.id} r={r} index={i} thresholds={thresholds} onOpen={() => select(r.id)} />
                   ))}
                 </ul>
               </>
@@ -408,22 +415,24 @@ export default function AuditLog() {
 
           {/* detail: side panel on wide screens */}
           {selected && (
-            <aside className="card sticky top-6 hidden max-h-[calc(100dvh-3rem)] min-w-0 overflow-y-auto p-4 xl:block">
+            <aside key={selected.id} data-lenis-prevent className="card modal-in sticky top-6 hidden max-h-[calc(100dvh-3rem)] min-w-0 overflow-y-auto p-4 xl:block">
               <AuditDetail record={selected} thresholds={thresholds} onClose={() => select(null)} />
             </aside>
           )}
         </div>
       )}
 
-      {/* detail: full-screen sheet on phones and tablets */}
-      {selected && (
-        <div role="dialog" aria-modal="true" aria-label="Audit details" className="fixed inset-0 z-50 overflow-y-auto bg-bg/95 px-4 py-4 backdrop-blur-md animate-rise xl:hidden">
+      {/* detail: full-screen sheet on phones and tablets (portal: fixed stays fixed under animated ancestors) */}
+      {selected &&
+        createPortal(
+        <div role="dialog" aria-modal="true" aria-label="Audit details" data-lenis-prevent className="sheet-in fixed inset-0 z-50 overflow-y-auto bg-bg/95 px-4 py-4 backdrop-blur-md xl:hidden">
           <button type="button" onClick={() => select(null)} className="mb-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line2 bg-accent/18 px-4 text-sm font-semibold">
             ← Back to Audit Log
           </button>
           <AuditDetail record={selected} thresholds={thresholds} onClose={() => select(null)} />
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </>
   )
 }

@@ -2,8 +2,11 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Braces, CircleHelp, Copy, Info, Layers, MessageSquare, Plus, Scale, Search, ShieldX, type LucideIcon } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import Modal from '../components/Modal'
-import { DecisionBadge, ErrorNote, PageHeader, Spinner } from '../components/ui'
+import { CountUp } from '../components/Motion'
+import { DecisionBadge, ErrorNote, PageHeader, PageSkeleton } from '../components/ui'
 import { api, type Decision, type PolicyRule } from '../lib/api'
+import { stagger } from '../lib/motion'
+import { useToast } from '../lib/toast'
 
 type View = 'yaml' | 'inspect' | 'details'
 
@@ -22,7 +25,7 @@ function Kpi({ icon: Icon, tint, value, label }: { icon: LucideIcon; tint: strin
         <Icon size={20} color={tint} aria-hidden />
       </span>
       <div>
-        <div className="text-[1.3rem] leading-none font-extrabold sm:text-[1.75rem]">{value}</div>
+        <div className="text-[1.3rem] leading-none font-extrabold sm:text-[1.75rem]"><CountUp to={value} /></div>
         <div className="mt-1 text-[0.74rem] text-muted sm:text-[0.83rem]">{label}</div>
       </div>
     </div>
@@ -31,8 +34,9 @@ function Kpi({ icon: Icon, tint, value, label }: { icon: LucideIcon; tint: strin
 
 function CopyText({ text }: { text: string }) {
   const [done, setDone] = useState(false)
+  const toast = useToast()
   return (
-    <button type="button" onClick={() => void navigator.clipboard?.writeText(text).then(() => { setDone(true); setTimeout(() => setDone(false), 1500) })}
+    <button type="button" onClick={() => void navigator.clipboard?.writeText(text).then(() => { toast('Copied'); setDone(true); setTimeout(() => setDone(false), 1500) })}
       className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-semibold hover:border-line2">
       <Copy size={13} aria-hidden /> {done ? 'Copied' : 'Copy'}
     </button>
@@ -99,7 +103,9 @@ const DEFAULT_FORM = {
 function AddPolicy({ file }: { file: string }) {
   const [f, setF] = useState(DEFAULT_FORM)
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((x) => ({ ...x, [k]: v }))
+  const toast = useToast()
   const validate = useMutation({
+    onSuccess: (r) => toast(r.valid ? 'Rule is valid: YAML ready to copy' : 'The rule has errors, see below', r.valid ? 'ok' : 'error'),
     mutationFn: () => {
       const when: Record<string, unknown> = {}
       if (f.tainted) when.tainted = true
@@ -179,7 +185,7 @@ export default function Policies() {
   return (
     <>
       <PageHeader icon={Scale} title="Policies" sub="Deterministic rules from default.yaml. If several match, the most severe decision wins (block > ask > allow)." />
-      {isPending && <Spinner />}
+      {isPending && <PageSkeleton cards={3} />}
       {error && <ErrorNote error={error} />}
       {data && (
         <>
@@ -220,7 +226,11 @@ export default function Policies() {
             <p className="card px-4 py-5 text-sm text-muted">No policy rules match your current search or filter.</p>
           ) : (
             <div className="flex flex-col gap-3">
-              {shown.map((r) => <RuleCard key={r.id} rule={r} onOpen={(view) => setOpen({ id: r.id, view })} />)}
+              {shown.map((r, i) => (
+                <div key={r.id} className="stagger-item" style={stagger(i)}>
+                  <RuleCard rule={r} onOpen={(view) => setOpen({ id: r.id, view })} />
+                </div>
+              ))}
             </div>
           )}
         </>

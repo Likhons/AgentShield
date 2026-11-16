@@ -74,3 +74,21 @@ export function ErrorNote({ error }: { error: unknown }) {
     </div>
   )
 }
+
+/** Placeholder block with a slow shimmer, shown while data loads (keeps the layout from jumping). */
+export function Skeleton({ className = '' }: { className?: string }) {
+  return <div className={`skeleton rounded-xl ${className}`} aria-hidden />
+}
+
+/** Page-shaped placeholder: a row of stat cards and two content blocks. */
+export function PageSkeleton({ cards = 4 }: { cards?: number }) {
+  return (
+    <div role="status" aria-label="Loading" className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 md:gap-4">
+        {Array.from({ length: cards }, (_, i) => <Skeleton key={i} className="h-24" />)}
+      </div>
+      <Skeleton className="h-12" />
+      <Skeleton className="h-72" />
+    </div>
+  )
+}

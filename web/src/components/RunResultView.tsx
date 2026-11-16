@@ -1,6 +1,8 @@
 import { ChevronRight, CircleX, ShieldCheck } from 'lucide-react'
 import type { RunResult, RunSide, Step, Verdict } from '../lib/api'
 import { taka } from '../lib/format'
+import { stagger } from '../lib/motion'
+import { CountUp } from './Motion'
 import { DecisionBadge } from './ui'
 
 const STEP_BADGE = { allow: '✅ ALLOW', ask_human: '✋ ASK HUMAN', block: '🛑 BLOCK' } as const
@@ -11,7 +13,7 @@ function checkLine(v: Verdict): string {
     .join(' · ')
 }
 
-function StepItem({ step }: { step: Step }) {
+function StepItem({ step, index }: { step: Step; index: number }) {
   const v = step.verdict
   const isMoney = step.tool === 'send_money'
   const stopped = v !== null && v.decision !== 'allow'
@@ -19,7 +21,7 @@ function StepItem({ step }: { step: Step }) {
   if (v?.decision === 'ask_human') badge += step.stopped_by_shield ? ' → not approved' : ' → 👍 approved'
 
   return (
-    <details open={isMoney || stopped} className="group rounded-xl border border-line bg-card">
+    <details open={isMoney || stopped} style={stagger(index + 3)} className="stagger-item group rounded-xl border border-line bg-card">
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-3.5 py-2 text-sm font-semibold [&::-webkit-details-marker]:hidden">
         <ChevronRight size={15} className="shrink-0 transition-transform group-open:rotate-90" aria-hidden />
         <span>{isMoney ? '💸' : '🔧'} Step {step.number}:</span>
@@ -67,12 +69,12 @@ function Side({ side, title, safe }: { side: RunSide; title: string; safe: boole
         <div>
           <div className="text-xs text-muted">Stolen / চুরি হয়েছে</div>
           <div className={`text-[1.55rem] leading-tight font-extrabold sm:text-[2.1rem] ${lost ? 'text-[#FF6B78]' : 'text-ok'}`}>
-            {lost ? `−${taka(lost)}` : '৳ 0'}
+            {lost ? <CountUp to={lost} format={(n) => `−${taka(n)}`} /> : '৳ 0'}
           </div>
         </div>
         <div>
           <div className="text-xs text-muted">Balance / ব্যালান্স</div>
-          <div className="text-[1.55rem] leading-tight font-extrabold sm:text-[2.1rem]">{taka(side.end_balance)}</div>
+          <div className="text-[1.55rem] leading-tight font-extrabold sm:text-[2.1rem]"><CountUp to={side.end_balance} format={taka} /></div>
         </div>
       </div>
       {lost ? (
@@ -88,8 +90,8 @@ function Side({ side, title, safe }: { side: RunSide; title: string; safe: boole
         <b>User:</b> {side.task}
       </div>
       <div className="flex flex-col gap-2">
-        {side.steps.map((s) => (
-          <StepItem key={s.number} step={s} />
+        {side.steps.map((s, i) => (
+          <StepItem key={s.number} step={s} index={i} />
         ))}
       </div>
       <details className="group rounded-xl border border-line bg-card">

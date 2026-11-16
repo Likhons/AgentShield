@@ -1,23 +1,12 @@
-import Lenis from 'lenis'
-import 'lenis/dist/lenis.css'
 import { ChartColumn, Check, Mail, PlayCircle, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
+import { CountUp, Reveal } from '../components/Motion'
+import { reducedMotion, useInView } from '../lib/motion'
 
 // Everything shown here is real: the transcript and the four check results are the recorded run
 // demo_agent/recordings/groq/attack_bill_bn_with.json (qwen/qwen3.8-27b via Groq, 13 Nov 2026);
 // the numbers come from benchmark run agent_20261112-111137.
-
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-/** Smooth wheel scrolling on the landing page only (the app pages keep native scrolling). */
-function useSmoothScroll() {
-  useEffect(() => {
-    if (reducedMotion()) return
-    const lenis = new Lenis({ autoRaf: true, anchors: { offset: -80 }, lerp: 0.12 })
-    return () => lenis.destroy()
-  }, [])
-}
 
 /** Writes how far the element has scrolled out of view (0..1) into the CSS variable --p. No re-renders. */
 function useScrollProgress<T extends HTMLElement>(ref: RefObject<T | null>) {
@@ -35,48 +24,6 @@ function useScrollProgress<T extends HTMLElement>(ref: RefObject<T | null>) {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
   }, [ref])
-}
-
-/** True once the element has scrolled into view (stays true). */
-function useInView<T extends Element>(threshold = 0.35) {
-  const ref = useRef<T>(null)
-  // no animation to wait for: show the final state straight away
-  const [seen, setSeen] = useState(() => reducedMotion() || !('IntersectionObserver' in window))
-  useEffect(() => {
-    const el = ref.current
-    if (!el || seen) return
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect() } }, { threshold })
-    io.observe(el)
-    return () => io.disconnect()
-  }, [seen, threshold])
-  return [ref, seen] as const
-}
-
-/** Section text rises into place once, the first time it is seen. */
-function Reveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
-  const [ref, seen] = useInView<HTMLDivElement>(0.2)
-  return (
-    <div ref={ref} className={`reveal min-w-0 ${seen ? 'is-in' : ''} ${className}`} style={{ transitionDelay: `${delay}s` }}>
-      {children}
-    </div>
-  )
-}
-
-function CountUp({ to, run }: { to: number; run: boolean }) {
-  const [n, setN] = useState(() => (reducedMotion() ? to : 0))
-  useEffect(() => {
-    if (!run || reducedMotion()) return
-    let frame = 0
-    const start = performance.now()
-    const tick = (t: number) => {
-      const k = Math.min(1, (t - start) / 900)
-      setN(Math.round(to * (1 - Math.pow(1 - k, 3))))
-      if (k < 1) frame = requestAnimationFrame(tick)
-    }
-    frame = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(frame)
-  }, [run, to])
-  return <>{n}</>
 }
 
 // ---------------------------------------------------------------------------
@@ -404,7 +351,6 @@ const SNIPPET = `curl -X POST https://<your-gateway>/v1/check \\
 # returns {"decision": "block", "risk_score": 0.95, "reason_bn": "আটকানো হয়েছে। …", ...}`
 
 export default function Landing() {
-  useSmoothScroll()
   return (
     <div className="min-h-dvh">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-3 focus:py-2">
@@ -412,14 +358,14 @@ export default function Landing() {
       </a>
       <header className="fixed inset-x-0 top-3 z-30 px-3 sm:px-6">
         <nav aria-label="Main" className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl border border-line2/70 bg-bg/70 px-3 shadow-[0_12px_40px_-18px_rgba(0,0,0,.9)] backdrop-blur-xl sm:px-4">
-          <Link to="/" className="flex items-center gap-2.5">
+          <Link to="/" className="flex min-h-11 items-center gap-2.5">
             <span className="icon-tile h-9 w-9"><ShieldCheck size={19} className="text-[#E9D5FF]" aria-hidden /></span>
             <span className="text-[1.1rem] font-extrabold tracking-tight">AgentShield</span>
           </Link>
           <div className="hidden items-center gap-6 text-sm text-[#D5DCF6] md:flex">
-            <a href="#how" className="transition hover:text-white">How it works</a>
-            <a href="#results" className="transition hover:text-white">Results</a>
-            <a href="#builders" className="transition hover:text-white">For developers</a>
+            <a href="#how" className="inline-flex min-h-11 items-center transition hover:text-white">How it works</a>
+            <a href="#results" className="inline-flex min-h-11 items-center transition hover:text-white">Results</a>
+            <a href="#builders" className="inline-flex min-h-11 items-center transition hover:text-white">For developers</a>
           </div>
           <Link to="/playground" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent2 px-4 text-sm font-bold text-white">
             <PlayCircle size={16} aria-hidden /> Open the demo
@@ -453,9 +399,9 @@ export default function Landing() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>Built for the International AI Builders Congress 2026. Demo data is fake: numbers start with 010, domains end in .example.</p>
           <div className="flex gap-5">
-            <Link to="/playground" className="transition hover:text-white">Demo</Link>
-            <Link to="/benchmarks" className="transition hover:text-white">Benchmarks</Link>
-            <Link to="/policies" className="transition hover:text-white">Policies</Link>
+            <Link to="/playground" className="inline-flex min-h-11 min-w-11 items-center justify-center transition hover:text-white">Demo</Link>
+            <Link to="/benchmarks" className="inline-flex min-h-11 items-center transition hover:text-white">Benchmarks</Link>
+            <Link to="/policies" className="inline-flex min-h-11 items-center transition hover:text-white">Policies</Link>
           </div>
         </div>
       </footer>

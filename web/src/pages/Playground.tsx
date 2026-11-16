@@ -7,9 +7,12 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import HeroArt from '../components/HeroArt'
 import RunResultView from '../components/RunResultView'
-import { Card, DecisionBadge, ErrorNote, PanelTitle, Spinner } from '../components/ui'
+import { AnimatedValue } from '../components/Motion'
+import { Card, DecisionBadge, ErrorNote, PanelTitle, Skeleton } from '../components/ui'
 import { api, type RunMode, type RunResult, type Scenario } from '../lib/api'
-import { langLabel, short, utcTime } from '../lib/format'
+import { langLabel, short, taka, utcTime } from '../lib/format'
+import { smoothScrollTo, stagger } from '../lib/motion'
+import { useToast } from '../lib/toast'
 
 // ---------------------------------------------------------------------------
 function Hero() {
@@ -58,7 +61,7 @@ function Kpi({ icon: Icon, tint, num, label, note }: { icon: LucideIcon; tint: s
         <Icon size={22} color={tint} aria-hidden />
       </span>
       <div className="min-w-0">
-        <div className="text-[1.45rem] leading-none font-extrabold sm:text-[1.7rem]">{num}</div>
+        <div className="text-[1.45rem] leading-none font-extrabold sm:text-[1.7rem]"><AnimatedValue value={num} /></div>
         <div className="mt-1 text-[0.8rem] font-semibold sm:text-sm">{label}</div>
         <div className="mt-0.5 text-[0.72rem] text-muted sm:text-xs">{note}</div>
       </div>
@@ -68,7 +71,12 @@ function Kpi({ icon: Icon, tint, num, label, note }: { icon: LucideIcon; tint: s
 
 function Kpis() {
   const { data } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
-  if (!data) return <div className="h-[118px]" />
+  if (!data)
+    return (
+      <div className="my-6 grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-4" aria-hidden>
+        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-[118px]" />)}
+      </div>
+    )
   const byLang = Object.entries(data.attack_samples.by_language).sort(([a], [b]) => a.localeCompare(b))
   const real = data.real_llm
   return (
@@ -299,7 +307,7 @@ function RecentEvaluations() {
   return (
     <Card>
       <PanelTitle icon={FileText} title="Recent Evaluations" right={auditLink} />
-      {isPending && <Spinner />}
+      {isPending && <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12" />)}</div>}
       {error && <ErrorNote error={error} />}
       {data && data.records.length === 0 && (
         <p className="py-3 text-sm text-muted">No decisions yet. Run a scenario to see AgentShield's first verdict here.</p>
@@ -319,8 +327,8 @@ function RecentEvaluations() {
                 </tr>
               </thead>
               <tbody>
-                {data.records.map((r) => (
-                  <tr key={r.id} className="border-b border-line/60 transition hover:bg-accent/6">
+                {data.records.map((r, i) => (
+                  <tr key={r.id} style={stagger(i)} className="stagger-item border-b border-line/60 transition hover:bg-accent/6">
                     <td className="py-2.5 pr-3 whitespace-nowrap text-muted">{utcTime(r.timestamp)}</td>
                     <td className="py-2.5 pr-3">{short(r.user_request, 48)}</td>
                     <td className="py-2.5 pr-3"><code className="font-mono text-[0.8rem] text-[#4BE0A8]">{r.tool_name}</code></td>
@@ -337,8 +345,8 @@ function RecentEvaluations() {
             </table>
           </div>
           <ul className="flex flex-col gap-2.5 md:hidden">
-            {data.records.map((r) => (
-              <li key={r.id} className="flex flex-col gap-1.5 rounded-xl border border-line2/50 bg-card2/50 px-3.5 py-3">
+            {data.records.map((r, i) => (
+              <li key={r.id} style={stagger(i)} className="stagger-item flex flex-col gap-1.5 rounded-xl border border-line2/50 bg-card2/50 px-3.5 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs text-muted">{utcTime(r.timestamp)} UTC</span>
                   <DecisionBadge decision={r.decision} />
@@ -363,6 +371,7 @@ function RecentEvaluations() {
 // ---------------------------------------------------------------------------
 export default function Playground() {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const overview = useQuery({ queryKey: ['overview'], queryFn: api.overview })
   const scenarios = useQuery({ queryKey: ['scenarios'], queryFn: api.scenarios, staleTime: Infinity })
   const resultsRef = useRef<HTMLDivElement>(null)
@@ -370,7 +379,9 @@ export default function Playground() {
 
   const run = useMutation<RunResult, Error, { name: string; mode: RunMode; approve: boolean }>({
     mutationFn: ({ name, mode, approve }) => api.run(name, mode, approve),
-    onSuccess: () => {
+    onSuccess: (result) => {
+      const saved = result.without.stolen - result.with.stolen
+      toast(saved > 0 ? `Run finished: AgentShield kept ${taka(saved)} in the account` : 'Run finished')
       setRunId((n) => n + 1)
       void queryClient.invalidateQueries({ queryKey: ['audit'] })
       void queryClient.invalidateQueries({ queryKey: ['overview'] })
@@ -380,8 +391,7 @@ export default function Playground() {
   // bring the result into view: on a phone it would start below the fold
   useEffect(() => {
     if (!runId) return
-    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    resultsRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
+    if (resultsRef.current) smoothScrollTo(resultsRef.current)
   }, [runId])
 
   const scenarioList = useMemo(() => scenarios.data ?? [], [scenarios.data])
@@ -404,7 +414,7 @@ export default function Playground() {
             onRun={(name, mode, approve) => run.mutate({ name, mode, approve })}
           />
         ) : (
-          <Card><Spinner label="Loading scenarios…" /></Card>
+          <Skeleton className="h-[420px]" />
         )}
         {/* beside the run card on wide screens; below the results once columns stack */}
         <div className="hidden xl:block">

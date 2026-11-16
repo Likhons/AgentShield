@@ -1,5 +1,7 @@
 import { X } from 'lucide-react'
 import { useEffect, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
+import { lockScroll, unlockScroll } from '../lib/motion'
 
 /** Accessible dialog: Escape and backdrop close it, focus moves in and back, background does not scroll.
  *  Full screen on phones, a centred panel from the sm breakpoint up. */
@@ -12,25 +14,26 @@ export default function Modal({ title, onClose, children, wide = false }: { titl
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
-    panel.current?.focus()
+    panel.current?.focus({ preventScroll: true })
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current()
     document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
+    lockScroll()
     return () => {
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
-      previous?.focus()
+      unlockScroll()
+      previous?.focus({ preventScroll: true })
     }
   }, [])
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/65 backdrop-blur-sm sm:items-center sm:p-6" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+  // rendered into <body> so no transformed ancestor can turn 'fixed' into 'scrolls with the page'
+  return createPortal(
+    <div className="fade-in fixed inset-0 z-50 flex items-stretch justify-center bg-black/65 backdrop-blur-sm sm:items-center sm:p-6" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={panel}
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
-        className={`card flex w-full flex-col rounded-none animate-rise outline-none sm:max-h-[86dvh] sm:rounded-card ${wide ? 'sm:max-w-5xl' : 'sm:max-w-2xl'}`}
+        className={`card modal-in flex w-full flex-col rounded-none outline-none sm:max-h-[86dvh] sm:rounded-card ${wide ? 'sm:max-w-5xl' : 'sm:max-w-2xl'}`}
       >
         <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
           <h2 className="min-w-0 text-base font-bold break-words">{title}</h2>
@@ -38,8 +41,9 @@ export default function Modal({ title, onClose, children, wide = false }: { titl
             <X size={17} aria-hidden />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">{children}</div>
+        <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

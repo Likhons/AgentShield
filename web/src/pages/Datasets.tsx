@@ -4,8 +4,10 @@ import { useState } from 'react'
 import Donut from '../components/Donut'
 import Markdown from '../components/Markdown'
 import Modal from '../components/Modal'
-import { Card, ErrorNote, PageHeader, Spinner } from '../components/ui'
+import { Card, ErrorNote, PageHeader, PageSkeleton, Skeleton, Spinner } from '../components/ui'
 import { api, type Datasets as DatasetsData } from '../lib/api'
+import { stagger } from '../lib/motion'
+import { useToast } from '../lib/toast'
 
 type FileInfo = DatasetsData['files'][number]
 type Action = 'preview' | 'open'
@@ -31,6 +33,7 @@ function Progress({ pct }: { pct: number }) {
 }
 
 function FileModal({ file, action, onClose }: { file: FileInfo; action: Action; onClose: () => void }) {
+  const toast = useToast()
   const { data, error, isPending } = useQuery({ queryKey: ['dataset', file.file], queryFn: () => api.datasetPreview(file.file) })
   const cols = ['id', 'language', 'label', 'attack_type', 'source', 'notes', 'text'] as const
   return (
@@ -41,13 +44,13 @@ function FileModal({ file, action, onClose }: { file: FileInfo; action: Action; 
             Reviewed <b className="text-ink">{file.reviewed} / {file.items}</b> · Sources: <b className="text-ink">{file.sources.join(', ')}</b>
           </p>
           {file.texts_public && (
-            <a href={api.datasetDownloadUrl(file.file)} download={file.file}
+            <a href={api.datasetDownloadUrl(file.file)} download={file.file} onClick={() => toast(`Downloading ${file.file}`, 'info')}
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line2 bg-accent/15 px-3.5 text-sm font-semibold">
               <Download size={15} aria-hidden /> Download JSONL
             </a>
           )}
         </div>
-        {isPending && <Spinner />}
+        {isPending && <div className="flex flex-col gap-2">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-10" />)}</div>}
         {error && <ErrorNote error={error} />}
         {data?.note && (
           <p className="flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-3.5 py-2.5 text-sm text-warn">
@@ -139,7 +142,7 @@ export default function Datasets() {
   return (
     <>
       <PageHeader icon={Database} title="Datasets" sub="Labeled texts used by the benchmark and for training. Fake data only (numbers start with 010, domains end in .example)." right={headerRight} />
-      {isPending && <Spinner />}
+      {isPending && <PageSkeleton cards={3} />}
       {error && <ErrorNote error={error} />}
       {data && (
         <div className="flex flex-col gap-4">
@@ -235,8 +238,8 @@ export default function Datasets() {
                       </tr>
                     </thead>
                     <tbody>
-                      {files.map((f) => (
-                        <tr key={f.file} className="border-b border-line/50 hover:bg-accent/5">
+                      {files.map((f, i) => (
+                        <tr key={f.file} style={stagger(i)} className="stagger-item border-b border-line/50 hover:bg-accent/5">
                           <td className="px-2 py-3"><span className="inline-flex items-center gap-2 font-semibold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-[#D8B4FE]">{'{}'}</span>{f.file}</span></td>
                           <td className="px-2 py-3 tabular-nums">{f.items}</td>
                           <td className="px-2 py-3 whitespace-nowrap tabular-nums">{f.reviewed} / {f.items}</td>
@@ -254,8 +257,8 @@ export default function Datasets() {
                   </table>
                 </div>
                 <ul className="flex flex-col gap-2.5 md:hidden">
-                  {files.map((f) => (
-                    <li key={f.file} className="flex flex-col gap-2.5 rounded-xl border border-line bg-card2/50 p-3.5">
+                  {files.map((f, i) => (
+                    <li key={f.file} style={stagger(i)} className="stagger-item flex flex-col gap-2.5 rounded-xl border border-line bg-card2/50 p-3.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="inline-flex items-center gap-2 font-bold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-[#D8B4FE]">{'{}'}</span>{f.file}</span>
                         <SourcePill sources={f.sources} />
