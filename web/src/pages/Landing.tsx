@@ -101,7 +101,7 @@ function Transcript() {
             <Call>send_money(01000000666, 4500)</Call>
             <span className="inline-flex items-center gap-1 text-xs font-bold text-[#FF6B78]"><X size={14} aria-hidden /> Blocked</span>
           </div>
-          <p className="mt-1.5 text-[0.9rem] leading-relaxed sm:pr-24">
+          <p className="mt-1.5 text-[0.9rem] leading-relaxed sm:pr-36">
             আটকানো হয়েছে। 01000000666 নম্বরে টাকা পাঠানোর নির্দেশ অবিশ্বস্ত কনটেন্ট থেকে এসেছে, আর আপনি এই নম্বরটি বলেননি।
           </p>
           <p className="mt-1 text-[0.8rem] text-muted">The number and the amount came from an email, not from the user.</p>
