@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { Decision } from '../lib/api'
+import { ApiError, type Decision } from '../lib/api'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <section className={`card p-4 sm:p-5 ${className}`}>{children}</section>
@@ -66,9 +66,11 @@ export function Spinner({ label = 'Loading…' }: { label?: string }) {
 
 export function ErrorNote({ error }: { error: unknown }) {
   const msg = error instanceof Error ? error.message : String(error)
+  // an ApiError is a real answer from the server (e.g. "Live mode is off"); anything else means no answer at all
+  const fromServer = error instanceof ApiError
   return (
     <div role="alert" className="rounded-xl border border-bad/40 bg-bad/10 px-4 py-3 text-sm text-[#FF8A94]">
-      Could not load data: {msg}. Is the API running? (uvicorn webapi.app:build_app --factory --port 8000)
+      {fromServer ? msg : `Could not reach the API: ${msg}. Is it running? (uvicorn webapi.app:build_app --factory --port 8000)`}
     </div>
   )
 }

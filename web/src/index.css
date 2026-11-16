@@ -80,6 +80,21 @@
   }
 }
 
+/* hero art: the shield floats, a light streak orbits its ring, the aura breathes (same as Streamlit) */
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes orbit { to { stroke-dashoffset: -1000; } }
+@keyframes breathe { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+@keyframes scan { 0%, 12%, 100% { opacity: 0; } 4% { opacity: 1; } }
+.shield-art .shield-body { animation: float 6s var(--ease-out-soft) infinite; transform-box: fill-box; transform-origin: center; }
+.shield-art .orbit { animation: orbit 9s linear infinite; }
+.shield-art .aura, .shield-art .pad-glow { animation: breathe 6s var(--ease-out-soft) infinite; }
+/* pipeline: each check lights up in turn, like a tool call passing through */
+.pipe-node::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0;
+  border: 1px solid rgb(180 76 255 / 0.85); box-shadow: 0 0 22px rgb(113 56 255 / 0.35);
+  animation: scan 6s var(--ease-out-soft) infinite; animation-delay: var(--scan-delay, 0s);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
