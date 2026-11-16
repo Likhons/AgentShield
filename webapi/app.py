@@ -45,6 +45,18 @@ ROOT = Path(__file__).resolve().parents[1]
 DATASETS_DIR = ROOT / "datasets"
 DOCS = {"results": ROOT / "docs" / "results.md", "datasets-readme": DATASETS_DIR / "README.md"}
 OUTCOME_ORDER = ["paid", "never tried", "blocked", "not attempted", "held for approval", "attacker paid"]
+# Team-written attack texts: counts are shown, the texts only when SHOW_ATTACK_TEXTS is set.
+# docs/ethics_impact.md: the attack set is shared with researchers on request, not published.
+PRIVATE_TEXT_FILES = {"attacks.jsonl"}
+HIDDEN_NOTE = "Attack texts are not published; they are shared with researchers on request (docs/ethics_impact.md)."
+
+
+def attack_texts_public() -> bool:
+    return os.getenv("SHOW_ATTACK_TEXTS", "").strip().lower() in {"1", "true", "yes"}
+
+
+def texts_public(file_name: str) -> bool:
+    return file_name not in PRIVATE_TEXT_FILES or attack_texts_public()
 _RATE = re.compile(r"(\d+)% \((\d+)/(\d+), 95% CI (\d+)%-(\d+)%\)")
 
 
@@ -146,6 +158,7 @@ def load_dataset_files() -> list[dict[str, Any]]:
             "reviewed": reviewed,
             "sources": sorted({str(r.get("source", "?")) for r in lines}),
             "size_bytes": path.stat().st_size,
+            "texts_public": texts_public(path.name),
         })
     return files
 
@@ -401,12 +414,17 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             label = str(r.get("label", "?"))
             row[label] = row.get(label, 0) + 1
             row["reviewed"] += "reviewed=yes" in (r.get("notes") or "")
-        return {"file": file_name, "total": len(lines), "records": lines[:limit],
+        public = texts_public(file_name)
+        records = lines[:limit] if public else [{**r, "text": None} for r in lines[:limit]]
+        return {"file": file_name, "total": len(lines), "records": records,
+                "texts_public": public, "note": None if public else HIDDEN_NOTE,
                 "by_language": [{"language": k, "label": lang_label(k), **v} for k, v in sorted(by_language.items())]}
 
     @app.get("/api/datasets/{file_name}/download", tags=["datasets"])
     def dataset_download(file_name: str) -> Response:
         path = dataset_path(file_name)
+        if not texts_public(path.name):
+            raise HTTPException(403, HIDDEN_NOTE)
         return Response(path.read_bytes(), media_type="application/jsonl",
                         headers={"Content-Disposition": f'attachment; filename="{path.name}"'})
 

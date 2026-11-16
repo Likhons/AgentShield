@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChartColumn, Database, Download, ExternalLink, Eye, FileText, Globe, Laptop, RefreshCw, Search } from 'lucide-react'
+import { ChartColumn, Database, Download, ExternalLink, Eye, FileText, Globe, Laptop, Lock, RefreshCw, Search } from 'lucide-react'
 import { useState } from 'react'
 import Donut from '../components/Donut'
 import Markdown from '../components/Markdown'
@@ -40,13 +40,20 @@ function FileModal({ file, action, onClose }: { file: FileInfo; action: Action; 
           <p className="text-sm text-muted">
             Reviewed <b className="text-ink">{file.reviewed} / {file.items}</b> · Sources: <b className="text-ink">{file.sources.join(', ')}</b>
           </p>
-          <a href={api.datasetDownloadUrl(file.file)} download={file.file}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line2 bg-accent/15 px-3.5 text-sm font-semibold">
-            <Download size={15} aria-hidden /> Download JSONL
-          </a>
+          {file.texts_public && (
+            <a href={api.datasetDownloadUrl(file.file)} download={file.file}
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line2 bg-accent/15 px-3.5 text-sm font-semibold">
+              <Download size={15} aria-hidden /> Download JSONL
+            </a>
+          )}
         </div>
         {isPending && <Spinner />}
         {error && <ErrorNote error={error} />}
+        {data?.note && (
+          <p className="flex items-start gap-2 rounded-xl border border-warn/40 bg-warn/10 px-3.5 py-2.5 text-sm text-warn">
+            <Lock size={15} className="mt-0.5 shrink-0" aria-hidden /> {data.note}
+          </p>
+        )}
         {data && action === 'open' && (
           <div>
             <p className="mb-2 text-sm text-muted">Per-language breakdown in this file:</p>
@@ -82,7 +89,7 @@ function FileModal({ file, action, onClose }: { file: FileInfo; action: Action; 
                     <tr key={String(r.id ?? i)} className="border-t border-line/60 align-top">
                       {cols.map((c) => (
                         <td key={c} className={`px-3 py-2 ${c === 'text' ? 'min-w-[280px]' : 'whitespace-nowrap'} ${c === 'id' ? 'font-mono text-[#C9B6FF]' : ''}`}>
-                          {String(r[c] ?? (c === 'attack_type' ? '–' : ''))}
+                          {c === 'text' && !data.texts_public ? <span className="text-muted italic">hidden</span> : String(r[c] ?? (c === 'attack_type' ? '–' : ''))}
                         </td>
                       ))}
                     </tr>

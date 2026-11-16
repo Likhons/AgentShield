@@ -191,12 +191,14 @@ export interface DatasetPreview {
   file: string
   total: number
   records: Record<string, unknown>[]
+  texts_public: boolean
+  note: string | null
   by_language: { language: string; label: string; attack: number; benign: number; reviewed: number }[]
 }
 
 export interface Datasets {
   languages: { language: string; label: string; attack: number; benign: number }[]
-  files: { file: string; items: number; reviewed: number; sources: string[]; size_bytes: number }[]
+  files: { file: string; items: number; reviewed: number; sources: string[]; size_bytes: number; texts_public: boolean }[]
 }
 
 export class ApiError extends Error {

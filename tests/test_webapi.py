@@ -157,6 +157,24 @@ def test_docs_preview_breakdown_and_download(client):
     assert raw.status_code == 200 and len(raw.content.decode("utf-8").strip().splitlines()) == 135
 
 
+def test_attack_texts_hidden_unless_enabled(client, monkeypatch):
+    monkeypatch.delenv("SHOW_ATTACK_TEXTS", raising=False)
+    files = {f["file"]: f for f in client.get("/api/datasets").json()["files"]}
+    assert files["attacks.jsonl"]["texts_public"] is False and files["attacks.jsonl"]["items"] > 0
+    assert files["benign.jsonl"]["texts_public"] is True
+
+    prev = client.get("/api/datasets/attacks.jsonl").json()
+    assert prev["texts_public"] is False and prev["note"]
+    assert prev["records"] and all(r["text"] is None for r in prev["records"])
+    assert sum(r["attack"] for r in prev["by_language"]) == prev["total"]  # counts stay
+    assert client.get("/api/datasets/attacks.jsonl/download").status_code == 403
+
+    monkeypatch.setenv("SHOW_ATTACK_TEXTS", "1")
+    shown = client.get("/api/datasets/attacks.jsonl", params={"limit": 2}).json()
+    assert shown["texts_public"] and all(r["text"] for r in shown["records"])
+    assert client.get("/api/datasets/attacks.jsonl/download").status_code == 200
+
+
 def test_gateway_endpoints_still_mounted(client):
     assert client.get("/health").json() == {"status": "ok"}
     assert "total" in client.get("/v1/stats").json()
