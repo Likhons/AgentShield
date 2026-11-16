@@ -87,7 +87,7 @@ function Kpis() {
 // ---------------------------------------------------------------------------
 const MODES: { id: RunMode; label: string; caption: string; icon: LucideIcon }[] = [
   { id: 'mock', label: 'Offline (simulated)', caption: 'Simulated naive agent. Works offline.', icon: Bot },
-  { id: 'groq', label: 'Live (Groq)', caption: 'Real model via Groq, same tools.', icon: Radio },
+  { id: 'groq', label: 'Live (Groq)', caption: 'Real model via Groq, same tools. Can take up to a minute.', icon: Radio },
   { id: 'recorded', label: 'Recorded Run', caption: 'Instant replay of a saved real run.', icon: PlayCircle },
 ]
 

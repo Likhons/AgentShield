@@ -175,6 +175,43 @@ def test_attack_texts_hidden_unless_enabled(client, monkeypatch):
     assert client.get("/api/datasets/attacks.jsonl/download").status_code == 200
 
 
+def _live_client(monkeypatch, key="test-key", model="test-model", per_hour=None):
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("GROQ_API_KEY", key)
+    monkeypatch.setenv("LLM_MODEL", model)  # set even when empty, so a local .env cannot fill it in
+    if per_hour is not None:
+        monkeypatch.setenv("LIVE_RUNS_PER_HOUR", str(per_hour))
+    return TestClient(build_app(audit=AuditLog()))
+
+
+def test_live_mode_needs_key_and_model(monkeypatch):
+    no_model = _live_client(monkeypatch, model="")
+    assert no_model.get("/api/overview").json()["live_mode_available"] is False
+    assert no_model.post("/api/scenarios/attack_email_bn/run", json={"mode": "groq"}).status_code == 400
+    assert _live_client(monkeypatch, per_hour=0).get("/api/overview").json()["live_mode_available"] is False
+    assert _live_client(monkeypatch, per_hour=20).get("/api/overview").json()["live_mode_available"] is True
+
+
+def test_live_runs_are_capped_per_hour(monkeypatch):
+    """Protects the free Groq quota on a public server; no real Groq call is made here."""
+    import webapi.app as webapi_app
+    from agentshield.llm import LLMError
+
+    real_run = webapi_app.run_scenario
+
+    def fake_run(name, provider=None, **kwargs):
+        if provider == "groq":
+            raise LLMError("no network in tests")
+        return real_run(name, provider=provider, **kwargs)
+
+    monkeypatch.setattr(webapi_app, "run_scenario", fake_run)
+    client = _live_client(monkeypatch, per_hour=2)
+    codes = [client.post("/api/scenarios/benign_balance/run", json={"mode": "groq"}).status_code for _ in range(3)]
+    assert codes == [502, 502, 429]
+    assert "Recorded Run" in client.post("/api/scenarios/benign_balance/run", json={"mode": "groq"}).json()["detail"]
+    assert client.post("/api/scenarios/benign_balance/run", json={"mode": "mock"}).status_code == 200  # offline unaffected
+
+
 def test_gateway_endpoints_still_mounted(client):
     assert client.get("/health").json() == {"status": "ok"}
     assert "total" in client.get("/v1/stats").json()

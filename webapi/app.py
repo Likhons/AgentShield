@@ -17,7 +17,10 @@ import io
 import json
 import os
 import re
+import threading
+import time
 import tomllib
+from collections import deque
 from datetime import timezone
 from functools import lru_cache
 from pathlib import Path
@@ -184,6 +187,24 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
     origins = [o.strip() for o in os.getenv("WEB_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
     app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["*"])
 
+    # Live (Groq) runs spend the account's free-tier quota and hit per-minute limits, so a public server
+    # allows one live run at a time and at most LIVE_RUNS_PER_HOUR per rolling hour (0 = live off).
+    live_available = bool(settings.groq_api_key and settings.llm_model)
+    live_per_hour = int(os.getenv("LIVE_RUNS_PER_HOUR", "20"))
+    live_started: deque[float] = deque()
+    live_count_lock = threading.Lock()
+    live_run_lock = threading.Lock()
+
+    def claim_live_slot() -> None:
+        now = time.monotonic()
+        with live_count_lock:
+            while live_started and now - live_started[0] > 3600:
+                live_started.popleft()
+            if len(live_started) >= live_per_hour:
+                raise HTTPException(429, f"The live demo is limited to {live_per_hour} runs per hour to protect the free "
+                                         "Groq quota. Try again later, or use Recorded Run (a saved real Groq run).")
+            live_started.append(now)
+
     @lru_cache(maxsize=1)
     def version() -> str:
         try:
@@ -217,7 +238,7 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             "decisions_logged": audit.stats()["total"],
             "attack_samples": {"total": sum(attacks.values()), "by_language": attacks},
             "real_llm": real,
-            "live_mode_available": bool(settings.groq_api_key),
+            "live_mode_available": live_available and live_per_hour > 0,
         }
 
     # -- playground ------------------------------------------------------------
@@ -244,13 +265,21 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
                 raise HTTPException(404, "no recording for this scenario yet")
             (without, recorded_utc), (with_shield, _) = without, with_shield
         else:
-            if body.mode == "groq" and not settings.groq_api_key:
+            live = body.mode == "groq"
+            if live and (not live_available or live_per_hour <= 0):
                 raise HTTPException(400, "Live mode is off on this server (no Groq key). Use mock or recorded.")
+            if live and not live_run_lock.acquire(blocking=False):
+                raise HTTPException(429, "Another live run is in progress. Try again in a minute, or use Recorded Run.")
             try:
+                if live:
+                    claim_live_slot()
                 without = run_scenario(name, provider=body.mode, shield=False)
                 with_shield = run_scenario(name, provider=body.mode, shield=True, audit=audit, approve=body.approve)
             except LLMError as exc:
                 raise HTTPException(502, f"LLM error: {exc}") from exc
+            finally:
+                if live:
+                    live_run_lock.release()
         return {
             "scenario": name,
             "mode": body.mode,

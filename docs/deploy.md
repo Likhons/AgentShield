@@ -77,6 +77,6 @@ Check each platform's current free-tier terms when you sign up (limits, and whet
 ### Good to know
 - **Sleep:** the free Render service sleeps after 15 minutes without requests; the next request waits about a minute, and the first page load may show an error until it is awake. Before a demo, open the site (or `/health`) two minutes early.
 - **Audit log resets** when Render restarts or redeploys (no disk on the free plan), like Streamlit Cloud.
-- **Live (Groq)** is off on this server (no key). Adding `GROQ_API_KEY` in Render would let every visitor spend the free-tier quota.
+- **Live (Groq)** turns on when `GROQ_API_KEY` is set in Render → *Environment* (the key never goes into a file; `render.yaml` sets the models). Visitors then spend the account's free-tier quota, so the API allows one live run at a time and `LIVE_RUNS_PER_HOUR` (20) per hour; above that it asks for Recorded Run. A real-model run can take up to a minute.
 - **Raw gateway:** `/v1/check`, `/v1/audit`, `/v1/stats` need the `X-API-Key` header; the key is under Render → *Environment*. Interactive API docs: `https://agentshield-api.onrender.com/docs`.
 - **Rollback:** the Streamlit demo on `main` stays online and unchanged; deleting the two projects removes the React version.

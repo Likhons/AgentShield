@@ -16,7 +16,17 @@ services:
       - key: PYTHON_VERSION
         value: 3.13.16
       - key: LLM_PROVIDER
-        value: mock       # offline simulated agent + recorded real runs; no API key on the server
+        value: mock       # default for the raw gateway; the Playground picks Offline / Live / Recorded per run
+      # Live (Groq) mode in the Playground: models as in the benchmark; the key is set in the Render dashboard
+      # (Environment), never in this file. Without the key the Live button stays off.
+      - key: LLM_MODEL
+        value: qwen/qwen3.8-27b
+      - key: JUDGE_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_API_KEY
+        sync: false       # value entered in the dashboard only
+      - key: LIVE_RUNS_PER_HOUR
+        value: "20"       # protects the free Groq quota: at most 20 live runs per hour, one at a time
       - key: AGENTSHIELD_API_KEY
         generateValue: true   # protects the raw gateway (/v1/*); the dashboard only uses /api/*
       # SHOW_ATTACK_TEXTS is deliberately not set: attacks.jsonl texts stay private (docs/ethics_impact.md).
