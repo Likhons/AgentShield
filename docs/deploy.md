@@ -1,7 +1,7 @@
 # Putting the dashboard online (free)
 
 > Status (16 Nov 2026): the Streamlit dashboard is live at https://agentshield-demo.streamlit.app (from `main`).
-> The React frontend (branch `react-frontend`) is not deployed yet: see "React frontend" below.
+> React frontend (branch `react-frontend`): API live at https://agentshield-api-k60w.onrender.com (Render, free, Singapore, since 16 Nov); Vercel frontend not deployed yet. See "React frontend" below.
 > Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
 
 ## Before you publish
@@ -50,7 +50,7 @@ Check each platform's current free-tier terms when you sign up (limits, and whet
 |---|---|
 | `render.yaml` | Render Blueprint: free web service `agentshield-api`, Singapore, branch `react-frontend`, `LLM_PROVIDER=mock`, a generated `AGENTSHIELD_API_KEY` for the raw gateway (`/v1/*`) |
 | `requirements-api.txt` | Only the API's packages (no Streamlit, no torch), pinned to versions tested on Python 3.13.16 |
-| `web/vercel.json` | Rewrites `/api/*` and `/health` to `https://agentshield-api.onrender.com`; every other path serves the React app |
+| `web/vercel.json` | Rewrites `/api/*` and `/health` to the Render service (https://agentshield-api-k60w.onrender.com); every other path serves the React app |
 
 ### 1. Backend on Render
 1. The branch must be on GitHub first (`git push -u origin react-frontend`).
