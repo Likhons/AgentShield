@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* Bangla: Noto Sans Bengali (OFL) for Bangla characters only; English stays in Source Sans 3.
+   size-adjust lines Bangla up with the Latin text (same choice as the Streamlit dashboard). */
+@font-face {
+  font-family: "AS Bangla";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/notosansbengali/v33/Cn-fJsCGWQxOjaGwMQ6fIiMywrNJIky6nvd8BjzVMvJx2mc4I3mYvNY.woff2) format("woff2");
+  size-adjust: 92%;
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+200C-200D, U+25CC;
+}
+
+/* Design tokens: the same palette as dashboard/ui.py */
+@theme {
+  --font-sans: "AS Bangla", "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+
+  --color-bg: #080b1c;
+  --color-side: #060919;
+  --color-card: #111733;
+  --color-card2: #171e40;
+  --color-ink: #f5f5ff;
+  --color-muted: #a2abd0;
+  --color-accent: #9147ff;
+  --color-accent2: #c044ff;
+  --color-ok: #16c784;
+  --color-warn: #f5a623;
+  --color-bad: #f04452;
+  --color-line: rgb(145 71 255 / 0.19);
+  --color-line2: rgb(192 68 255 / 0.36);
+
+  --radius-card: 14px;
+
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --animate-rise: rise 0.5s var(--ease-out-soft) both;
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@layer base {
+  html { color-scheme: dark; -webkit-text-size-adjust: 100%; }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    min-height: 100dvh;
+    background:
+      radial-gradient(640px 320px at 94% 3%, rgb(192 68 255 / 0.17), transparent 68%),
+      radial-gradient(960px 460px at 78% -4%, rgb(145 71 255 / 0.2), transparent 65%),
+      radial-gradient(620px 360px at 24% 0%, rgb(145 71 255 / 0.1), transparent 60%),
+      radial-gradient(540px 310px at 4% 96%, rgb(145 71 255 / 0.15), transparent 66%),
+      var(--color-bg);
+    background-attachment: fixed;
+  }
+  ::selection { background: rgb(145 71 255 / 0.45); }
+  :focus-visible { outline: 2px solid var(--color-accent2); outline-offset: 2px; }
+  * { scrollbar-width: thin; scrollbar-color: rgb(145 71 255 / 0.35) transparent; }
+}
+
+@layer components {
+  /* the card every panel sits on */
+  .card {
+    @apply rounded-card border border-line;
+    background: linear-gradient(180deg, rgb(21 28 62 / 0.78), rgb(15 20 46 / 0.94));
+    box-shadow: 0 10px 28px -14px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  }
+  .icon-tile {
+    @apply inline-flex shrink-0 items-center justify-center rounded-xl border;
+    background: linear-gradient(135deg, rgb(145 71 255 / 0.32), rgb(192 68 255 / 0.16));
+    border-color: rgb(192 68 255 / 0.52);
+    box-shadow: 0 0 24px rgb(145 71 255 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.15);
+  }
+  .grad-text {
+    background-image: linear-gradient(90deg, #c06cff, #8b5cff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
