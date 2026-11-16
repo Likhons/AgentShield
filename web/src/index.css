@@ -80,6 +80,25 @@
   }
 }
 
+/* Markdown documents (results.md, datasets/README.md) */
+.md h1 { @apply mt-1 mb-3 text-xl font-extrabold text-ink; }
+.md h2 { @apply mt-6 mb-2 text-lg font-bold text-ink; }
+.md h3 { @apply mt-5 mb-2 text-base font-bold text-ink; }
+.md p, .md ul, .md ol, .md blockquote { @apply my-2.5; }
+.md ul { @apply list-disc pl-5; }
+.md ol { @apply list-decimal pl-5; }
+.md li { @apply my-1; }
+.md a { @apply text-[#C9A6FF] underline; }
+.md strong { @apply text-ink; }
+.md code { @apply rounded bg-bg px-1 py-0.5 font-mono text-[0.82em] text-[#C9B6FF]; }
+.md pre { @apply my-3 overflow-x-auto rounded-lg border border-line bg-bg p-3; }
+.md pre code { @apply bg-transparent p-0; }
+.md blockquote { @apply border-l-2 border-accent pl-3 text-muted; }
+.md table { @apply my-3 block w-full overflow-x-auto border-collapse text-[0.84rem]; }
+.md th, .md td { @apply border border-line px-2.5 py-1.5 text-left align-top; }
+.md th { @apply bg-card2 font-semibold text-ink; }
+.md hr { @apply my-5 border-line; }
+
 /* hero art: the shield floats, a light streak orbits its ring, the aura breathes (same as Streamlit) */
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes orbit { to { stroke-dashoffset: -1000; } }

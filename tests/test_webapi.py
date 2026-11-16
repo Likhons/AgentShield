@@ -133,6 +133,30 @@ def test_policies_and_datasets(client):
     assert client.get("/api/datasets/bad name.jsonl").status_code == 400
 
 
+def test_policy_yaml_and_validation(client):
+    pol = client.get("/api/policies").json()
+    assert set(pol["yaml"]) == {r["id"] for r in pol["rules"]}
+    good = {"id": "x", "tools": ["send_money"], "when": {"argument_gt": {"argument": "amount", "value": 5000}},
+            "decision": "ask_human", "risk": 0.7, "reason_en": "e", "reason_bn": "বা"}
+    ok = client.post("/api/policies/validate", json=good).json()
+    assert ok["valid"] and "argument_gt" in ok["yaml"] and "বা" in ok["yaml"]
+    bad = client.post("/api/policies/validate", json={**good, "decision": "allow"}).json()
+    assert not bad["valid"] and "decision" in bad["error"]
+
+
+def test_docs_preview_breakdown_and_download(client):
+    doc = client.get("/api/docs/results").json()
+    assert doc["file"] == "docs/results.md" and doc["markdown"].strip()
+    assert client.get("/api/docs/secrets").status_code == 422  # only the listed documents
+
+    prev = client.get("/api/datasets/benign.jsonl").json()
+    assert len(prev["records"]) == 15
+    assert sum(r["benign"] for r in prev["by_language"]) == 135
+
+    raw = client.get("/api/datasets/benign.jsonl/download")
+    assert raw.status_code == 200 and len(raw.content.decode("utf-8").strip().splitlines()) == 135
+
+
 def test_gateway_endpoints_still_mounted(client):
     assert client.get("/health").json() == {"status": "ok"}
     assert "total" in client.get("/v1/stats").json()

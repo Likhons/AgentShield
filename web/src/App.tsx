@@ -1,19 +1,28 @@
-import { ChartColumn, Database, FileText, Scale } from 'lucide-react'
+import { FileText } from 'lucide-react'
+import { lazy, Suspense, type ReactNode } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
+import { Spinner } from './components/ui'
 import Placeholder from './pages/Placeholder'
-import AuditLog from './pages/AuditLog'
 import Playground from './pages/Playground'
+
+// Playground is the landing page and loads with the app; the rest (charts, Markdown) load when opened.
+const AuditLog = lazy(() => import('./pages/AuditLog'))
+const Benchmarks = lazy(() => import('./pages/Benchmarks'))
+const Datasets = lazy(() => import('./pages/Datasets'))
+const Policies = lazy(() => import('./pages/Policies'))
+
+const page = (el: ReactNode) => <Suspense fallback={<Spinner />}>{el}</Suspense>
 
 export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Playground />} />
-        <Route path="benchmarks" element={<Placeholder icon={ChartColumn} title="Benchmarks" sub="Numbers come only from saved runs in benchmark/results/." />} />
-        <Route path="audit" element={<AuditLog />} />
-        <Route path="policies" element={<Placeholder icon={Scale} title="Policies" sub="Deterministic rules from default.yaml." />} />
-        <Route path="datasets" element={<Placeholder icon={Database} title="Datasets" sub="Labeled texts used by the benchmark and for training." />} />
+        <Route path="benchmarks" element={page(<Benchmarks />)} />
+        <Route path="audit" element={page(<AuditLog />)} />
+        <Route path="policies" element={page(<Policies />)} />
+        <Route path="datasets" element={page(<Datasets />)} />
         <Route path="*" element={<Placeholder icon={FileText} title="Not found" sub="This page does not exist." />} />
       </Route>
     </Routes>

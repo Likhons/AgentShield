@@ -27,11 +27,11 @@ import yaml
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from agentshield.api.app import create_app
 from agentshield.audit.log import AuditLog
-from agentshield.checks.policy import DEFAULT_POLICY_PATH
+from agentshield.checks.policy import DEFAULT_POLICY_PATH, PolicyRule
 from agentshield.config import get_settings
 from agentshield.core.models import AuditRecord, CheckName, DecisionThresholds
 from agentshield.llm import LLMError
@@ -43,6 +43,7 @@ from demo_agent.scenarios import load_scenarios
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASETS_DIR = ROOT / "datasets"
+DOCS = {"results": ROOT / "docs" / "results.md", "datasets-readme": DATASETS_DIR / "README.md"}
 OUTCOME_ORDER = ["paid", "never tried", "blocked", "not attempted", "held for approval", "attacker paid"]
 _RATE = re.compile(r"(\d+)% \((\d+)/(\d+), 95% CI (\d+)%-(\d+)%\)")
 
@@ -346,10 +347,42 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
     # -- policies -----------------------------------------------------------------
     @app.get("/api/policies", tags=["policies"])
     def policies() -> dict[str, Any]:
-        return {"file": Path(DEFAULT_POLICY_PATH).name, "rules": policy_rules(),
+        rules = policy_rules()
+        return {"file": Path(DEFAULT_POLICY_PATH).name, "rules": rules,
+                "yaml": {r["id"]: yaml.safe_dump([r], allow_unicode=True, sort_keys=False) for r in rules},
                 "thresholds": DecisionThresholds().model_dump()}
 
+    @app.post("/api/policies/validate", tags=["policies"])
+    def validate_policy(rule: dict[str, Any]) -> dict[str, Any]:
+        """Check a rule against PolicyRule and return it as YAML. Nothing is written: default.yaml stays
+        read-only at runtime (same as the Streamlit 'Add Policy' form)."""
+        try:
+            validated = PolicyRule.model_validate(rule)
+        except ValidationError as exc:
+            return {"valid": False, "error": "; ".join(f"{'.'.join(map(str, e['loc'])) or 'rule'}: {e['msg']}"
+                                                         for e in exc.errors())}
+        return {"valid": True, "yaml": yaml.safe_dump([validated.model_dump(mode="json", exclude_none=True)],
+                                                      allow_unicode=True, sort_keys=False)}
+
+    # -- documents shown in the UI --------------------------------------------------
+    @app.get("/api/docs/{name}", tags=["docs"])
+    def document(name: Literal["results", "datasets-readme"]) -> dict[str, str]:
+        path = DOCS[name]
+        if not path.is_file():
+            raise HTTPException(404, f"{path.name} not found")
+        return {"name": name, "file": str(path.relative_to(ROOT)).replace("\\", "/"),
+                "markdown": path.read_text(encoding="utf-8")}
+
     # -- datasets -----------------------------------------------------------------
+    def dataset_path(file_name: str) -> Path:
+        # only plain .jsonl names inside datasets/ (no paths)
+        if not re.fullmatch(r"[\w.-]+\.jsonl", file_name):
+            raise HTTPException(400, "bad file name")
+        path = DATASETS_DIR / file_name
+        if not path.is_file():
+            raise HTTPException(404, "file not found")
+        return path
+
     @app.get("/api/datasets", tags=["datasets"])
     def datasets() -> dict[str, Any]:
         summary = summarize(load_dataset())
@@ -360,14 +393,21 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
         }
 
     @app.get("/api/datasets/{file_name}", tags=["datasets"])
-    def dataset_preview(file_name: str, limit: int = Query(20, ge=1, le=200)) -> dict[str, Any]:
-        # only plain .jsonl names inside datasets/ (no paths)
-        if not re.fullmatch(r"[\w.-]+\.jsonl", file_name):
-            raise HTTPException(400, "bad file name")
-        path = DATASETS_DIR / file_name
-        if not path.is_file():
-            raise HTTPException(404, "file not found")
-        lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-        return {"file": file_name, "total": len(lines), "records": [json.loads(x) for x in lines[:limit]]}
+    def dataset_preview(file_name: str, limit: int = Query(15, ge=1, le=200)) -> dict[str, Any]:
+        lines = [json.loads(x) for x in dataset_path(file_name).read_text(encoding="utf-8").splitlines() if x.strip()]
+        by_language: dict[str, dict[str, int]] = {}
+        for r in lines:
+            row = by_language.setdefault(str(r.get("language", "?")), {"attack": 0, "benign": 0, "reviewed": 0})
+            label = str(r.get("label", "?"))
+            row[label] = row.get(label, 0) + 1
+            row["reviewed"] += "reviewed=yes" in (r.get("notes") or "")
+        return {"file": file_name, "total": len(lines), "records": lines[:limit],
+                "by_language": [{"language": k, "label": lang_label(k), **v} for k, v in sorted(by_language.items())]}
+
+    @app.get("/api/datasets/{file_name}/download", tags=["datasets"])
+    def dataset_download(file_name: str) -> Response:
+        path = dataset_path(file_name)
+        return Response(path.read_bytes(), media_type="application/jsonl",
+                        headers={"Content-Disposition": f'attachment; filename="{path.name}"'})
 
     return app

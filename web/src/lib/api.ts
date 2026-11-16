@@ -175,8 +175,23 @@ export interface PolicyRule {
   tools?: string[]
   when?: Record<string, unknown>
   decision: Decision
+  risk?: number
   reason_en?: string
   reason_bn?: string
+}
+
+export interface Policies {
+  file: string
+  rules: PolicyRule[]
+  yaml: Record<string, string>
+  thresholds: Thresholds
+}
+
+export interface DatasetPreview {
+  file: string
+  total: number
+  records: Record<string, unknown>[]
+  by_language: { language: string; label: string; attack: number; benign: number; reviewed: number }[]
 }
 
 export interface Datasets {
@@ -226,10 +241,12 @@ export const api = {
   auditRecord: (id: string) => request<AuditRecord>(`/api/audit/${encodeURIComponent(id)}`),
   auditCsvUrl: (f: Omit<AuditFilters, 'limit' | 'offset'>) => `/api/audit.csv${query({ ...f })}`,
   benchmarks: () => request<{ sections: BenchmarkSection[] }>('/api/benchmarks'),
-  policies: () => request<{ file: string; rules: PolicyRule[]; thresholds: Thresholds }>('/api/policies'),
+  policies: () => request<Policies>('/api/policies'),
+  validatePolicy: (rule: Record<string, unknown>) =>
+    request<{ valid: boolean; yaml?: string; error?: string }>('/api/policies/validate', { method: 'POST', body: JSON.stringify(rule) }),
+  doc: (name: 'results' | 'datasets-readme') => request<{ name: string; file: string; markdown: string }>(`/api/docs/${name}`),
   datasets: () => request<Datasets>('/api/datasets'),
-  datasetPreview: (file: string, limit = 20) =>
-    request<{ file: string; total: number; records: Record<string, unknown>[] }>(
-      `/api/datasets/${encodeURIComponent(file)}${query({ limit })}`,
-    ),
+  datasetPreview: (file: string, limit = 15) =>
+    request<DatasetPreview>(`/api/datasets/${encodeURIComponent(file)}${query({ limit })}`),
+  datasetDownloadUrl: (file: string) => `/api/datasets/${encodeURIComponent(file)}/download`,
 }
