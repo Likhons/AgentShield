@@ -1,11 +1,11 @@
 # Putting the dashboard online (free)
 
-> Status (12 Nov 2026): not deployed yet. The preliminary submission form asks for a live demo URL, so deploy before submitting. Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
+> Status (16 Nov 2026): live at https://agentshield-demo.streamlit.app (Streamlit Community Cloud, from `main`). The preliminary submission form asks for a live demo URL, so deploy before submitting. Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
 
 ## Before you publish
 - **Secrets never go into the repo.** API keys (`GROQ_API_KEY`) go into the platform's secret settings. Without a key the dashboard still works in `mock` and `recorded (groq)` mode.
 - **Default to offline modes.** For a public link, use `LLM_PROVIDER=mock` and the recorded real runs; a live `groq` button would spend the free-tier quota for every visitor.
-- **What becomes visible:** the demo emails in `demo_agent/data/` (including the fake attack emails), the recordings and the benchmark tables. The team-written attack dataset (`datasets/attacks.jsonl`) is not shown by the dashboard, but it is in the repo: if the platform needs a public repo, decide whether to remove it from that copy (see `docs/ethics_impact.md`, misuse section).
+- **What becomes visible:** the demo emails in `demo_agent/data/` (including the fake attack emails), the recordings and the benchmark tables. The team-written attack dataset (`datasets/attacks.jsonl`): the Datasets page shows its counts, languages and labels but not the texts, and offers no download (`SHOW_ATTACK_TEXTS=1` would change that). The file is still in the repo: if the platform needs a public repo, decide whether to remove it from that copy (see `docs/ethics_impact.md`, misuse section).
 - Record the stage demo first (`python -m demo_agent.run --all --compare --provider groq --record`) and commit `demo_agent/recordings/`.
 
 ## Option 1: Streamlit Community Cloud

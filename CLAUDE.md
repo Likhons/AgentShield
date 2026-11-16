@@ -2,7 +2,8 @@
 
 > Read this first. Keep it short and current; details live in PROGRESS.md and the code.
 
-## RESUME HERE (last updated 12 Nov 2026)
+## RESUME HERE (last updated 16 Nov 2026)
+- **16 Nov:** Streamlit Datasets page no longer shows or downloads `attacks.jsonl` texts (counts only; `SHOW_ATTACK_TEXTS=1` shows them), matching docs/ethics_impact.md. React frontend + deploy prep live on branch `react-frontend` (pushed); its own CLAUDE.md has the status.
 - **Phase:** 3 and 4 done (model trained, not adopted). Phase 5 mostly done (dashboard redesign, live demo). Next: record stage demo, video, submission (deadline **20 Nov 2026, 11:59 PM GMT+6**, per other teams' notes; target 19 Nov).
 - **Real-LLM benchmark after scope B (12 Nov, `agent_20261112-111137`):** attacks 4/20 without → 0/20 with; rent paid 16/20 without and 16/20 with. The 4 blocked attacks are exactly the 4 that stole without protection; the 4 unpaid rents were also unpaid without AgentShield. results.md §3b, README, pitch.md, submission_form.md updated.
 - **Live demo (public):** https://agentshield-demo.streamlit.app (Streamlit Community Cloud from the private repo, made public in its share settings; secrets `LLM_PROVIDER = "mock"`, no Groq key). After pushing dashboard changes, **Reboot app** (Manage app → ⋮) so `dashboard/ui.py` reloads. `.devcontainer/` was added by Streamlit.
@@ -13,7 +14,7 @@
 - Groq free tier for qwen: **200k tokens/day rolling 24 h**; live dashboard tests share it. Long runs: start detached (PowerShell Start-Process + log file) and use `--resume` (checkpoint in `benchmark/results/agent_checkpoint_<provider>.jsonl`).
 - Model v2 (XLM-R, `models/agentshield-classifier/`, zip at `E:gentshield-classifier-v2.zip`): text test 16/16 attacks, 3/35 benign, but agent-level holds real rent (email header format). Heuristic stays default (`AGENTSHIELD_DETECTOR`). results.md §2b, §3e.
 - Dashboard: `dashboard/app.py` + design system `dashboard/ui.py`; pages Playground, Benchmarks, Audit Log, Policies, Datasets; tested at 390/820/1440 px. Restart Streamlit after editing `ui.py`.
-- GitHub up to date as of `a1d33dc` (12 Nov). Ask the user before pushing again.
+- GitHub: `main` and `react-frontend` pushed on 16 Nov. Ask the user before pushing again.
 
 ## How we work (important)
 - Talk to the user in **simple Bangla**; code, comments, files, docs in **English**. User knows basic/intermediate Python; explain briefly what and why. Give exact PowerShell commands. One step at a time when the user asks for it.

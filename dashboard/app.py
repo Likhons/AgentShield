@@ -20,6 +20,7 @@ import importlib
 import io
 import json
 import math
+import os
 import re
 import sys
 import tomllib
@@ -1477,6 +1478,18 @@ def policies_page() -> None:
                 )
 
 
+# Team-written attack texts: counts are shown, the texts only when SHOW_ATTACK_TEXTS is set.
+# docs/ethics_impact.md: the attack set is shared with researchers on request, not published.
+PRIVATE_TEXT_FILES = {"attacks.jsonl"}
+HIDDEN_NOTE = "Attack texts are not published; they are shared with researchers on request (docs/ethics_impact.md)."
+
+
+def texts_public(file_name: str) -> bool:
+    if file_name not in PRIVATE_TEXT_FILES:
+        return True
+    return os.getenv("SHOW_ATTACK_TEXTS", "").strip().lower() in {"1", "true", "yes"}
+
+
 def _load_dataset_files() -> tuple[list[dict], list[str]]:
     files: list[dict] = []
     all_sources: set[str] = set()
@@ -1494,6 +1507,7 @@ def _load_dataset_files() -> tuple[list[dict], list[str]]:
             "sources_set": set(file_sources),
             "sources": ", ".join(file_sources),
             "records": lines,
+            "texts_public": texts_public(path.name),
         })
     return files, sorted(all_sources)
 
@@ -1590,15 +1604,18 @@ def datasets_page() -> None:
                 f"**`{target_file['file']}`** — {target_file['items']} items · "
                 f"Reviewed `{target_file['reviewed']}` · Sources: `{target_file['sources']}`"
             )
-            dh2.download_button(
-                "Download JSONL",
-                data=target_file["path"].read_bytes(),
-                file_name=target_file["file"],
-                mime="application/jsonl",
-                icon=":material/download:",
-                key="dataset_download_jsonl",
-                width="stretch",
-            )
+            if target_file["texts_public"]:
+                dh2.download_button(
+                    "Download JSONL",
+                    data=target_file["path"].read_bytes(),
+                    file_name=target_file["file"],
+                    mime="application/jsonl",
+                    icon=":material/download:",
+                    key="dataset_download_jsonl",
+                    width="stretch",
+                )
+            else:  # no bytes reach the page at all
+                dh2.caption(":material/lock: Texts not published")
             if dh3.button("Close", key="dataset_close_preview", width="stretch"):
                 del st.query_params["dfile"]
                 if "daction" in st.query_params:
@@ -1606,6 +1623,8 @@ def datasets_page() -> None:
                 st.rerun()
 
             recs = target_file["records"]
+            if not target_file["texts_public"]:
+                st.info(HIDDEN_NOTE, icon=":material/lock:")
             if selected_daction == "open":
                 by_lang: dict[str, dict[str, int]] = {}
                 for r in recs:
@@ -1631,7 +1650,7 @@ def datasets_page() -> None:
                         "attack_type": r.get("attack_type") or "–",
                         "source": r.get("source", ""),
                         "notes": r.get("notes", ""),
-                        "text": r.get("text", ""),
+                        "text": r.get("text", "") if target_file["texts_public"] else "hidden",
                     }
                     for r in recs[:15]
                 ],
