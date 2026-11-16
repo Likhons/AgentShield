@@ -6,6 +6,7 @@ import Donut from '../components/Donut'
 import Markdown from '../components/Markdown'
 import Modal from '../components/Modal'
 import { Reveal } from '../components/Motion'
+import { reducedMotion, useInView } from '../lib/motion'
 import { Card, ErrorNote, PageHeader, PageSkeleton, Spinner } from '../components/ui'
 import { api, type AgentSection, type DetectionSection, type Rate } from '../lib/api'
 
@@ -177,6 +178,9 @@ function DetectionChart({ s }: { s: DetectionSection }) {
     return point
   })
   const max = Math.max(10, ...rows.map((r) => exactPct(r.attacks_flagged)))
+  // mount the chart when it scrolls into view, so its bars grow while someone is looking
+  const [chartRef, seen] = useInView<HTMLDivElement>(0.25)
+  const animate = !reducedMotion()
   if (!data.length) return null
   return (
     <Card>
@@ -197,20 +201,21 @@ function DetectionChart({ s }: { s: DetectionSection }) {
           ))}
         </div>
       </div>
-      <div style={{ height: languages.length * (detectors.length * 22 + 26) + 50 }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div ref={chartRef} style={{ height: languages.length * (detectors.length * 22 + 26) + 50 }}>
+        {seen && <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ top: 4, right: 48, bottom: 18, left: 4 }} barGap={2} barCategoryGap={14}>
             <CartesianGrid horizontal={false} stroke="rgba(60,80,66,.5)" strokeDasharray="3 4" />
             <XAxis type="number" domain={[0, Math.ceil(max / 10) * 10]} tickFormatter={(v) => `${v}%`} tick={{ fill: '#9DAAA2', fontSize: 12 }} axisLine={false} tickLine={false}
               label={{ value: 'Attacks Flagged (%)', position: 'insideBottom', offset: -10, fill: '#9DAAA2', fontSize: 12 }} />
             <YAxis type="category" dataKey="label" width={70} tick={{ fill: '#EDF3EE', fontSize: 13, fontWeight: 700 }} axisLine={false} tickLine={false} />
-            {detectors.map((d) => (
-              <Bar key={d} dataKey={d} name={detectorMeta(d).label} fill={detectorMeta(d).color} radius={[0, 5, 5, 0]} barSize={18} minPointSize={3} isAnimationActive={false}>
+            {detectors.map((d, i) => (
+              <Bar key={d} dataKey={d} name={detectorMeta(d).label} fill={detectorMeta(d).color} radius={[0, 5, 5, 0]} barSize={18} minPointSize={3}
+                isAnimationActive={animate} animationBegin={i * 160} animationDuration={1000} animationEasing="ease-out">
                 <LabelList dataKey={d} position="right" formatter={(v: unknown) => `${Number(v)}%`} fill="#DDE6DF" fontSize={12} fontWeight={600} />
               </Bar>
             ))}
           </BarChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>}
       </div>
     </Card>
   )

@@ -41,3 +41,15 @@ export function AnimatedValue({ value }: { value: string }) {
   )
 }
 
+
+/** The filled part of a progress/share bar: grows from 0 the first time it is seen, then a light sweeps over it once. */
+export function GrowBar({ pct, className = '', delay = 0 }: { pct: number; className?: string; delay?: number }) {
+  const [ref, seen] = useInView<HTMLDivElement>(0.1)
+  return (
+    <div
+      ref={ref}
+      className={`grow-bar h-full rounded-full ${seen ? 'is-in' : ''} ${className}`}
+      style={{ width: seen ? `${pct}%` : '0%', transitionDelay: `${delay}ms`, ['--sweep-delay' as string]: `${delay + 900}ms` }}
+    />
+  )
+}

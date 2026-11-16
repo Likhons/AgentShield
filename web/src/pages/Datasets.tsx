@@ -6,6 +6,7 @@ import Markdown from '../components/Markdown'
 import Modal from '../components/Modal'
 import { Card, ErrorNote, PageHeader, PageSkeleton, Skeleton, Spinner } from '../components/ui'
 import { api, type Datasets as DatasetsData } from '../lib/api'
+import { GrowBar } from '../components/Motion'
 import { stagger } from '../lib/motion'
 import { useToast } from '../lib/toast'
 
@@ -21,11 +22,11 @@ function SourcePill({ sources }: { sources: string[] }) {
   )
 }
 
-function Progress({ pct }: { pct: number }) {
+function Progress({ pct, delay = 0 }: { pct: number; delay?: number }) {
   return (
     <div className="flex items-center gap-2.5">
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#1B231E]" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <div className="h-full rounded-full bg-gradient-to-r from-ok to-[#2EE59D]" style={{ width: `${pct}%` }} />
+        <GrowBar pct={pct} delay={delay} className="bg-gradient-to-r from-ok to-[#2EE59D]" />
       </div>
       <span className="w-10 text-right text-xs text-muted tabular-nums">{pct}%</span>
     </div>
@@ -162,7 +163,7 @@ export default function Datasets() {
                   </tr>
                 </thead>
                 <tbody>
-                  {langs.map((l) => {
+                  {langs.map((l, i) => {
                     const tot = l.attack + l.benign
                     const share = grand ? (tot / grand) * 100 : 0
                     return (
@@ -174,7 +175,7 @@ export default function Datasets() {
                         <td className="w-[40%] py-3">
                           <div className="flex items-center gap-2">
                             <span className="w-12 text-xs text-muted tabular-nums">{share.toFixed(1)}%</span>
-                            <div className="h-2 flex-1 rounded-full bg-[#1B231E]"><div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(100, Math.max(4, share * 1.6))}%` }} /></div>
+                            <div className="h-2 flex-1 rounded-full bg-[#1B231E]"><GrowBar pct={Math.min(100, Math.max(4, share * 1.6))} className="bg-accent" delay={i * 110} /></div>
                           </div>
                         </td>
                       </tr>
@@ -243,7 +244,7 @@ export default function Datasets() {
                           <td className="px-2 py-3"><span className="inline-flex items-center gap-2 font-semibold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-soft">{'{}'}</span>{f.file}</span></td>
                           <td className="px-2 py-3 tabular-nums">{f.items}</td>
                           <td className="px-2 py-3 whitespace-nowrap tabular-nums">{f.reviewed} / {f.items}</td>
-                          <td className="min-w-[160px] px-2 py-3"><Progress pct={f.items ? Math.round((f.reviewed / f.items) * 100) : 0} /></td>
+                          <td className="min-w-[160px] px-2 py-3"><Progress pct={f.items ? Math.round((f.reviewed / f.items) * 100) : 0} delay={i * 110} /></td>
                           <td className="px-2 py-3"><SourcePill sources={f.sources} /></td>
                           <td className="px-2 py-3">
                             <div className="flex gap-1.5">
@@ -264,7 +265,7 @@ export default function Datasets() {
                         <SourcePill sources={f.sources} />
                       </div>
                       <div className="flex justify-between text-[0.82rem]"><span>Items: <b>{f.items}</b></span><span>Reviewed: <b>{f.reviewed} / {f.items}</b></span></div>
-                      <Progress pct={f.items ? Math.round((f.reviewed / f.items) * 100) : 0} />
+                      <Progress pct={f.items ? Math.round((f.reviewed / f.items) * 100) : 0} delay={i * 110} />
                       <div className="grid grid-cols-2 gap-2">
                         <button type="button" onClick={() => setOpen({ file: f, action: 'preview' })} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line text-sm font-semibold"><Eye size={15} aria-hidden /> Preview</button>
                         <button type="button" onClick={() => setOpen({ file: f, action: 'open' })} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line text-sm font-semibold"><ExternalLink size={15} aria-hidden /> Inspect</button>
