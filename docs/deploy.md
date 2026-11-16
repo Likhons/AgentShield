@@ -1,7 +1,7 @@
 # Putting the dashboard online (free)
 
 > Status (16 Nov 2026): the Streamlit dashboard is live at https://agentshield-demo.streamlit.app (from `main`).
-> React frontend (branch `react-frontend`): API live at https://agentshield-api-k60w.onrender.com (Render, free, Singapore, since 16 Nov); Vercel frontend not deployed yet. See "React frontend" below.
+> React frontend (branch `react-frontend`): live at https://agent-shield-azure.vercel.app (Vercel) with the API at https://agentshield-api-k60w.onrender.com (Render, free, Singapore), since 16 Nov. See "React frontend" below.
 > Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
 
 ## Before you publish
@@ -67,6 +67,7 @@ Check each platform's current free-tier terms when you sign up (limits, and whet
 3. `main` has no `web/` folder, so a build from `main` fails. Before (or right after) the first deploy: *Settings* → *Git* → *Production Branch* = `react-frontend`, then *Deployments* → *Redeploy*.
    (Branch preview addresses may be login-protected; the production address is the public one.)
 4. The production address looks like `https://agentshield-….vercel.app`. A nicer free name can be set under *Settings* → *Domains* if it is free.
+5. What actually happened on 16 Nov: the Root Directory picker only lists `main`'s folders (no `web/`). Import with preset **Vite** and root `./` (the first build fails), then *Settings* → *Build and Deployment* → Root Directory `web`, *Environments* → *Production* → Branch Tracking `react-frontend`, and push any commit to the branch. If the address asks for a Vercel login, turn off *Settings* → *Deployment Protection* → *Vercel Authentication* for production.
 
 ### 3. Check (private browser window and a phone)
 - Playground: run the Bangla email attack in *Offline* (5,000 vs 0), then the Bangla fake bill in *Recorded Run* (4,500 vs 0, rent 8,000 allowed).

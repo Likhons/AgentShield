@@ -108,5 +108,6 @@
 - [ ] Optional: deploy to HF Spaces; one stretch feature
 - [x] 16 Nov (main): Streamlit mobile fixes (results under Run, benchmark tables on phones, policy stats), polish (auto-scroll, Bangla font, outcome colours, language labels); Datasets page hides `attacks.jsonl` texts and download (live)
 - [x] 16 Nov (branch `react-frontend`): React frontend (`web/`) + dashboard API (`webapi/`), all 5 pages, responsive pass 360–1920 px; API live on Render https://agentshield-api-k60w.onrender.com (smoke test 16/16)
-- [ ] Vercel frontend (root `web`, production branch `react-frontend`), then decide: merge into `main` or keep Streamlit
+- [x] 16 Nov: Vercel frontend live at https://agent-shield-azure.vercel.app (root `web`, production branch `react-frontend`); live browser check passed
+- [ ] Decide which live link goes into the submission; later merge `react-frontend` into `main` or keep both
 - [ ] Final commit
