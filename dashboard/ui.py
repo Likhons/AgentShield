@@ -472,7 +472,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
 
 /* Streamlit bordered containers become our cards */
 [data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"]) { border-radius: var(--radius); }
-.st-key-card_run, .st-key-card_how, .st-key-card_pipe, .st-key-card_recent, .st-key-card_dec {
+.st-key-card_run, .st-key-card_how, .st-key-card_how_m, .st-key-card_pipe, .st-key-card_recent, .st-key-card_dec {
   background: linear-gradient(180deg, rgba(21,28,62,.78), rgba(15,20,46,.94));
   border: 1px solid var(--line); border-radius: var(--radius); padding: 1.15rem 1.25rem;
   box-sizing: border-box;
@@ -671,7 +671,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
 .feat:hover { border-color: rgba(180,76,255,.75); background: rgba(34,26,80,.95); transform: translateY(-1px); }
 
 /* cards: a quiet lift and a brighter edge on hover */
-.kpi, .node, .dec, .pnode, .rule, .status, .st-key-card_run, .st-key-card_how, .st-key-card_pipe, .st-key-card_recent {
+.kpi, .node, .dec, .pnode, .rule, .status, .st-key-card_run, .st-key-card_how, .st-key-card_how_m, .st-key-card_pipe, .st-key-card_recent {
   transition: transform .28s var(--ease), border-color .28s var(--ease), box-shadow .28s var(--ease), background .28s; }
 .kpi:hover, .rule:hover { transform: translateY(-2px); border-color: var(--line2);
   box-shadow: 0 10px 30px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(140,120,255,.12); }
@@ -679,7 +679,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
 .kpi:hover .kpi-icon { transform: scale(1.06); box-shadow: 0 0 18px rgba(113,56,255,.25); }
 .kpi { animation: rise .55s var(--ease) backwards; }
 .kpis .kpi:nth-child(2) { animation-delay: .06s; } .kpis .kpi:nth-child(3) { animation-delay: .12s; } .kpis .kpi:nth-child(4) { animation-delay: .18s; }
-.st-key-card_how:hover, .st-key-card_pipe:hover, .st-key-card_recent:hover { border-color: var(--line2); }
+.st-key-card_how:hover, .st-key-card_how_m:hover, .st-key-card_pipe:hover, .st-key-card_recent:hover { border-color: var(--line2); }
 .node:hover, .dec:hover { transform: translateY(-2px); }
 .node-shield { position: relative; }
 .node-shield::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
@@ -725,6 +725,9 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
 
 /* ---------- responsive ---------- */
 .rmob-list { display: none; }
+/* How-it-works sits beside the run card on wide screens. Once the columns stack it moves below the
+   results, so on a phone the result appears right under the Run button. */
+.st-key-card_how_m { display: none; }
 @media (max-width: 1200px) {
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pipe { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
@@ -738,6 +741,8 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
   [data-testid="stHorizontalBlock"]:has(.hero) > [data-testid="stColumn"],
   [data-testid="stHorizontalBlock"]:has(.col-head) > [data-testid="stColumn"] { flex: 1 1 100% !important; min-width: 100% !important; width: 100% !important; }
   [data-testid="stHorizontalBlock"]:has(.hero) { gap: .6rem; }
+  [data-testid="stHorizontalBlock"]:has(.st-key-card_run) > [data-testid="stColumn"]:has(.st-key-card_how) { display: none !important; }
+  .st-key-card_how_m { display: flex; margin: .25rem 0; }
 }
 @media (max-width: 820px) {
   .st-key-mode [role="radiogroup"] { grid-template-columns: 1fr; }
@@ -776,7 +781,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
   .kpi-num { font-size: 1.45rem; }
   .kpi-label { font-size: .8rem; }
   .panel-head { align-items: center; }
-  .st-key-card_run, .st-key-card_how, .st-key-card_pipe, .st-key-card_recent { padding: 1rem .95rem !important; }
+  .st-key-card_run, .st-key-card_how, .st-key-card_how_m, .st-key-card_pipe, .st-key-card_recent { padding: 1rem .95rem !important; }
   [data-testid="stHorizontalBlock"]:has(.money):not(:has(.col-head)) { flex-wrap: nowrap !important; flex-direction: row !important; gap: .8rem; }
   [data-testid="stHorizontalBlock"]:has(.money):not(:has(.col-head)) > [data-testid="stColumn"] { flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; }
   .money { font-size: 1.55rem; }
@@ -1238,7 +1243,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
   }
   .adrawer-head { display: none; }
   .st-key-audit_drawer_card .stButton > button { min-height: 44px !important; }
-  .audit-table-wrap { display: none; }
+  .audit-table-wrap:has(> .atable) { display: none; }  /* only the Audit Log table; benchmark tables stay */
   .amob-list {
     display: flex !important;
     flex-direction: column;
@@ -1456,6 +1461,13 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
   .pcard-actions { width: 100%; justify-content: flex-start; }
 }
 @media (max-width: 480px) {
+  /* keep the three counts on one row: stacked full-width tiles cost a whole phone screen */
+  .policy-kpi { padding: .7rem .65rem; gap: .4rem; }
+  .policy-kpi-ic { width: 32px; height: 32px; }
+  .policy-kpi-num { font-size: 1.3rem; }
+  .policy-kpi-label { font-size: .74rem; line-height: 1.25; }
+}
+@media (max-width: 359px) {
   .policy-kpis { grid-template-columns: 1fr; gap: .55rem; }
   .policy-kpi { flex-direction: row; align-items: center; padding: .85rem 1rem; }
 }

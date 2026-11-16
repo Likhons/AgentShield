@@ -272,8 +272,8 @@ def scenario_card() -> tuple[str, str, bool, bool]:
     return name, mode, approve, clicked
 
 
-def how_it_works_card() -> None:
-    with st.container(key="card_how"):
+def how_it_works_card(key: str = "card_how") -> None:
+    with st.container(key=key):
         st.markdown(ui.panel_title("workflow", "How AgentShield Works") + ui.HOW_IT_WORKS
                     + '<div style="height:.9rem"></div>' + ui.panel_title("chart", "Decision Types") + ui.DECISIONS,
                     unsafe_allow_html=True)
@@ -406,6 +406,7 @@ def playground_page() -> None:
         how_it_works_card()
     if clicked:
         results(name, mode, approve)
+    how_it_works_card(key="card_how_m")  # CSS shows this copy only when columns stack (<=1100px)
     pipeline_card()
     recent_card()
 
@@ -1197,13 +1198,27 @@ def _build_detection_chart(rows: list[dict]) -> tuple[alt.LayerChart, list[tuple
     return chart, legend_items
 
 
+def dataset_label(dataset) -> str:
+    """{'bn': {'attack': 12, 'benign': 45}, ...} -> 'BN 12 attack / 45 benign · ...' (raw dicts read badly)."""
+    if not isinstance(dataset, dict):
+        return str(dataset)
+    parts = []
+    for lang, counts in sorted(dataset.items()):
+        name = lang.upper() if len(lang) <= 2 else lang.capitalize()
+        if isinstance(counts, dict):
+            parts.append(f"{name} {counts.get('attack', 0)} attack / {counts.get('benign', 0)} benign")
+        else:
+            parts.append(f"{name} {counts}")
+    return " · ".join(parts)
+
+
 def detection_section(title: str, found, note: str) -> None:
     if found is None:
         return
     name, data = found
     rows = detection_rows(data)
     st.markdown(
-        ui.benchmark_detection_section_html(title, name, note, str(data.get("dataset", "")), rows),
+        ui.benchmark_detection_section_html(title, name, note, dataset_label(data.get("dataset", "")), rows),
         unsafe_allow_html=True,
     )
     built = _build_detection_chart(rows)

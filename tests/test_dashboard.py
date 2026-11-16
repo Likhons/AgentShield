@@ -120,7 +120,8 @@ def test_audit_log_console_filters_pagination_drawer_and_csv(tmp_path, monkeypat
     assert "Checked Calls" in joined_md and "10" in joined_md
     assert "Showing 1–8 of 10" in joined_md
     assert "আটকানো হয়েছে। অবিশ্বস্ত কনটেন্ট থেকে টাকা পাঠানোর নির্দেশ এসেছে।" in joined_md
-    assert '"to": "01000000666"' in joined_md
+    # args are HTML-escaped in the drawer (the browser shows plain quotes)
+    assert '"to": "01000000666"' in joined_md or "&quot;to&quot;: &quot;01000000666&quot;" in joined_md
 
     # Copy actions in drawer
     app.button(key="audit_copy_args").click().run()
@@ -193,16 +194,17 @@ def test_datasets_page_renders_distribution_donut_and_file_filters() -> None:
     app.selectbox(key="dataset_source_filter").set_value("external").run()
     assert not app.exception
     md_ext = "\n".join(m.value for m in app.markdown)
-    assert "external.jsonl" in md_ext
-    assert "benign_own.jsonl" not in md_ext
+    # check the file list only (the README expander mentions every file by name)
+    assert "<span>external.jsonl</span>" in md_ext
+    assert "<span>benign_own.jsonl</span>" not in md_ext
 
     # Reset source filter and search for "attacks"
     app.selectbox(key="dataset_source_filter").set_value("All Sources").run()
     app.text_input(key="dataset_search").set_value("attacks").run()
     assert not app.exception
     md_att = "\n".join(m.value for m in app.markdown)
-    assert "attacks.jsonl" in md_att
-    assert "external.jsonl" not in md_att
+    assert "<span>attacks.jsonl</span>" in md_att
+    assert "<span>external.jsonl</span>" not in md_att
 
 
 def test_benchmarks_page_renders_real_and_simulated_runs_with_outcomes() -> None:
