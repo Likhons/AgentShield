@@ -5,6 +5,10 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { ToastProvider } from './components/Toast'
 import { startSmoothScroll } from './lib/motion'
+import '@fontsource-variable/instrument-sans/wdth.css'
+import '@fontsource-variable/bricolage-grotesque/standard.css'
+import '@fontsource-variable/anek-bangla/wdth.css'
+import '@fontsource-variable/geist-mono/wght.css'
 import './index.css'
 
 startSmoothScroll()

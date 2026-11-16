@@ -42,7 +42,7 @@ function Kpi({ icon: Icon, tint, label, value, note, wide = false }: { icon: Luc
       </span>
       <div className="min-w-0">
         <div className="text-[0.8rem] text-muted">{label}</div>
-        <div className="text-[1.45rem] leading-tight font-extrabold"><AnimatedValue value={value} /></div>
+        <div className="text-[1.45rem] leading-tight font-display font-bold tabular-nums"><AnimatedValue value={value} /></div>
         <div className="text-[0.74rem] font-semibold" style={{ color: tint }}>{note}</div>
       </div>
     </div>

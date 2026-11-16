@@ -22,7 +22,7 @@ function Hero() {
         <span className="inline-flex items-center gap-1.5 rounded-full border border-line2 bg-accent/15 px-3 py-1 text-xs font-semibold text-[#E9D5FF]">
           <Play size={10} fill="#C084FC" className="text-[#C084FC]" aria-hidden /> Playground
         </span>
-        <h1 className="mt-4 text-[clamp(1.62rem,6.2vw,2.05rem)] leading-[1.15] font-extrabold tracking-tight lg:text-[2.6rem]">
+        <h1 className="mt-4 text-[clamp(1.62rem,6.2vw,2.05rem)] leading-[1.15] font-bold tracking-tight lg:text-[2.6rem]">
           <span className="block">Stop AI Agents from Acting&nbsp;on</span>
           <span className="grad-text">Hidden Instructions</span>
         </h1>
@@ -61,7 +61,7 @@ function Kpi({ icon: Icon, tint, num, label, note }: { icon: LucideIcon; tint: s
         <Icon size={22} color={tint} aria-hidden />
       </span>
       <div className="min-w-0">
-        <div className="text-[1.45rem] leading-none font-extrabold sm:text-[1.7rem]"><AnimatedValue value={num} /></div>
+        <div className="text-[1.45rem] leading-none font-display font-bold tabular-nums sm:text-[1.7rem]"><AnimatedValue value={num} /></div>
         <div className="mt-1 text-[0.8rem] font-semibold sm:text-sm">{label}</div>
         <div className="mt-0.5 text-[0.72rem] text-muted sm:text-xs">{note}</div>
       </div>

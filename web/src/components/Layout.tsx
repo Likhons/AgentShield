@@ -37,7 +37,7 @@ function Brand() {
         <ShieldCheck size={21} className="text-[#E9D5FF]" aria-hidden />
       </span>
       <div className="leading-tight">
-        <div className="text-[1.15rem] font-extrabold tracking-tight">AgentShield</div>
+        <div className="text-[1.15rem] font-display font-bold tracking-tight">AgentShield</div>
         <div className="text-xs text-[#C9B6FF]">AI Agent Safety Platform</div>
       </div>
     </Link>

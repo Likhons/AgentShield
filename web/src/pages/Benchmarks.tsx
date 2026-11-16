@@ -91,7 +91,7 @@ function AgentBlock({ s }: { s: AgentSection }) {
               <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border ${ring}`}><Icon size={19} aria-hidden /></span>
               <div>
                 <div className="text-sm font-bold">{label} <span className="block text-xs font-normal text-muted">(WITH AgentShield)</span></div>
-                <div className="text-[2rem] leading-tight font-extrabold">{rate?.pct != null ? `${rate.pct}%` : '–'}</div>
+                <div className="text-[2rem] leading-tight font-display font-bold tabular-nums">{rate?.pct != null ? `${rate.pct}%` : '–'}</div>
                 <div className="text-xs text-muted">{rate?.hits != null ? `(${rate.hits}/${rate.total}) overall` : ''}</div>
               </div>
             </div>

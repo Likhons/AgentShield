@@ -14,7 +14,7 @@ export function PageHeader({ icon: Icon, title, sub, right }: { icon: LucideIcon
           <Icon size={24} className="text-[#D8B4FE]" aria-hidden />
         </span>
         <div className="min-w-0">
-          <h1 className="text-[1.7rem] leading-tight font-extrabold tracking-tight">{title}</h1>
+          <h1 className="text-[1.7rem] leading-tight font-bold tracking-tight">{title}</h1>
           <p className="mt-0.5 text-sm text-muted">{sub}</p>
         </div>
       </div>

@@ -37,7 +37,7 @@ const HEADLINE_WORDS = HEADLINE.map((line, i) => ({
 
 function Headline() {
   return (
-    <h1 className="text-[clamp(2.1rem,6vw,3.6rem)] leading-[1.05] font-extrabold tracking-[-0.025em]" aria-label={HEADLINE.join(' ')}>
+    <h1 className="text-[clamp(2.1rem,6vw,3.6rem)] leading-[1.05] font-bold tracking-[-0.015em]" aria-label={HEADLINE.join(' ')}>
       {HEADLINE_WORDS.map(({ line, words }, i) => (
         <span key={line} className="hero-line block" style={{ ['--dir' as string]: i % 2 ? '1' : '-1' }} aria-hidden>
           {words.map(({ word, index }) => (
@@ -240,7 +240,7 @@ function HowItWorks() {
     <section id="how" className="scroll-mt-20 border-t border-line bg-side/60">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <Reveal>
-          <h2 className="max-w-[28ch] text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight font-extrabold tracking-tight">
+          <h2 className="max-w-[28ch] text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight font-bold tracking-tight">
             Four checks run before every action, in about a millisecond.
           </h2>
           <p className="mt-3 max-w-[62ch] text-[#C3CAE6]">
@@ -305,7 +305,7 @@ function Results() {
     <section id="results" className="scroll-mt-20 mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
       <div className="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
         <Reveal>
-          <h2 className="text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight font-extrabold tracking-tight">
+          <h2 className="text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight font-bold tracking-tight">
             Attacks stopped. Real bills still paid.
           </h2>
           <p className="mt-3 max-w-[54ch] text-[#C3CAE6]">
@@ -360,7 +360,7 @@ export default function Landing() {
         <nav aria-label="Main" className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl border border-line2/70 bg-bg/70 px-3 shadow-[0_12px_40px_-18px_rgba(0,0,0,.9)] backdrop-blur-xl sm:px-4">
           <Link to="/" className="flex min-h-11 items-center gap-2.5">
             <span className="icon-tile h-9 w-9"><ShieldCheck size={19} className="text-[#E9D5FF]" aria-hidden /></span>
-            <span className="text-[1.1rem] font-extrabold tracking-tight">AgentShield</span>
+            <span className="text-[1.1rem] font-display font-bold tracking-tight">AgentShield</span>
           </Link>
           <div className="hidden items-center gap-6 text-sm text-[#D5DCF6] md:flex">
             <a href="#how" className="inline-flex min-h-11 items-center transition hover:text-white">How it works</a>
@@ -380,7 +380,7 @@ export default function Landing() {
         <section id="builders" className="scroll-mt-20 border-t border-line bg-side/60">
           <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.4fr] lg:items-center lg:py-24">
             <Reveal>
-              <h2 className="text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight font-extrabold tracking-tight">
+              <h2 className="text-[clamp(1.6rem,3.4vw,2.3rem)] leading-tight font-bold tracking-tight">
                 One call before each tool runs.
               </h2>
               <p className="mt-3 max-w-[50ch] text-[#C3CAE6]">

@@ -230,7 +230,7 @@ export default function Datasets() {
               <p className="py-4 text-sm text-muted">No dataset files match your current search or source filter.</p>
             ) : (
               <>
-                <div className="hidden overflow-x-auto md:block">
+                <div className="hidden overflow-x-auto xl:block">
                   <table className="w-full text-sm">
                     <thead className="text-xs text-muted">
                       <tr className="border-b border-line">
@@ -256,7 +256,7 @@ export default function Datasets() {
                     </tbody>
                   </table>
                 </div>
-                <ul className="flex flex-col gap-2.5 md:hidden">
+                <ul className="flex flex-col gap-2.5 xl:hidden">
                   {files.map((f, i) => (
                     <li key={f.file} style={stagger(i)} className="stagger-item flex flex-col gap-2.5 rounded-xl border border-line bg-card2/50 p-3.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">

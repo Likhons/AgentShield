@@ -25,7 +25,7 @@ function Kpi({ icon: Icon, tint, value, label }: { icon: LucideIcon; tint: strin
         <Icon size={20} color={tint} aria-hidden />
       </span>
       <div>
-        <div className="text-[1.3rem] leading-none font-extrabold sm:text-[1.75rem]"><CountUp to={value} /></div>
+        <div className="text-[1.3rem] leading-none font-display font-bold tabular-nums sm:text-[1.75rem]"><CountUp to={value} /></div>
         <div className="mt-1 text-[0.74rem] text-muted sm:text-[0.83rem]">{label}</div>
       </div>
     </div>

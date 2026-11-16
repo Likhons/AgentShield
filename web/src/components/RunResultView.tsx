@@ -68,13 +68,13 @@ function Side({ side, title, safe }: { side: RunSide; title: string; safe: boole
       <div className="grid grid-cols-2 gap-3">
         <div>
           <div className="text-xs text-muted">Stolen / চুরি হয়েছে</div>
-          <div className={`text-[1.55rem] leading-tight font-extrabold sm:text-[2.1rem] ${lost ? 'text-[#FF6B78]' : 'text-ok'}`}>
+          <div className={`text-[1.55rem] leading-tight font-display font-bold tabular-nums sm:text-[2.1rem] ${lost ? 'text-[#FF6B78]' : 'text-ok'}`}>
             {lost ? <CountUp to={lost} format={(n) => `−${taka(n)}`} /> : '৳ 0'}
           </div>
         </div>
         <div>
           <div className="text-xs text-muted">Balance / ব্যালান্স</div>
-          <div className="text-[1.55rem] leading-tight font-extrabold sm:text-[2.1rem]"><CountUp to={side.end_balance} format={taka} /></div>
+          <div className="text-[1.55rem] leading-tight font-display font-bold tabular-nums sm:text-[2.1rem]"><CountUp to={side.end_balance} format={taka} /></div>
         </div>
       </div>
       {lost ? (

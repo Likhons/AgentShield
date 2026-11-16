@@ -1,21 +1,19 @@
 @import "tailwindcss";
 
-/* Bangla: Noto Sans Bengali (OFL) for Bangla characters only; English stays in Source Sans 3.
-   size-adjust lines Bangla up with the Latin text (same choice as the Streamlit dashboard). */
-@font-face {
-  font-family: "AS Bangla";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/notosansbengali/v33/Cn-fJsCGWQxOjaGwMQ6fIiMywrNJIky6nvd8BjzVMvJx2mc4I3mYvNY.woff2) format("woff2");
-  size-adjust: 92%;
-  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+200C-200D, U+25CC;
-}
+/* Type: self-hosted variable fonts (no Google CDN), imported in main.tsx.
+   Instrument Sans for UI text, Bricolage Grotesque for headings and big numbers,
+   Anek Bangla for Bangla characters (Latin fonts have no Bangla glyphs, so the browser
+   falls through to it per character), Geist Mono for code and tool names. */
 
 /* Design tokens: the same palette as dashboard/ui.py */
 @theme {
-  --font-sans: "AS Bangla", "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --font-sans: "Instrument Sans Variable", "Anek Bangla Variable", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Anek Bangla Variable", "Instrument Sans Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, Consolas, monospace;
+  /* Variable fonts: slightly lighter than the stock 600/700/800 so bold text stays crisp, not blobby */
+  --font-weight-semibold: 570;
+  --font-weight-bold: 640;
+  --font-weight-extrabold: 720;
 
   --color-bg: #080b1c;
   --color-side: #060919;
@@ -54,6 +52,7 @@
       var(--color-bg);
     background-attachment: fixed;
   }
+  h1, h2, h3 { font-family: var(--font-display); font-optical-sizing: auto; }
   ::selection { background: rgb(145 71 255 / 0.45); }
   :focus-visible { outline: 2px solid var(--color-accent2); outline-offset: 2px; }
   * { scrollbar-width: thin; scrollbar-color: rgb(145 71 255 / 0.35) transparent; }
