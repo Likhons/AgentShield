@@ -232,13 +232,13 @@ export default function Datasets() {
                         <tr key={f.file} className="border-b border-line/50 hover:bg-accent/5">
                           <td className="px-2 py-3"><span className="inline-flex items-center gap-2 font-semibold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-[#D8B4FE]">{'{}'}</span>{f.file}</span></td>
                           <td className="px-2 py-3 tabular-nums">{f.items}</td>
-                          <td className="px-2 py-3 tabular-nums">{f.reviewed} / {f.items}</td>
+                          <td className="px-2 py-3 whitespace-nowrap tabular-nums">{f.reviewed} / {f.items}</td>
                           <td className="min-w-[160px] px-2 py-3"><Progress pct={f.items ? Math.round((f.reviewed / f.items) * 100) : 0} /></td>
                           <td className="px-2 py-3"><SourcePill sources={f.sources} /></td>
                           <td className="px-2 py-3">
                             <div className="flex gap-1.5">
-                              <button type="button" aria-label={`Preview ${f.file}`} title="Preview" onClick={() => setOpen({ file: f, action: 'preview' })} className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line hover:border-line2"><Eye size={15} aria-hidden /></button>
-                              <button type="button" aria-label={`Inspect ${f.file}`} title="Inspect & download" onClick={() => setOpen({ file: f, action: 'open' })} className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line hover:border-line2"><ExternalLink size={15} aria-hidden /></button>
+                              <button type="button" aria-label={`Preview ${f.file}`} title="Preview" onClick={() => setOpen({ file: f, action: 'preview' })} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line hover:border-line2"><Eye size={15} aria-hidden /></button>
+                              <button type="button" aria-label={`Inspect ${f.file}`} title="Inspect & download" onClick={() => setOpen({ file: f, action: 'open' })} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line hover:border-line2"><ExternalLink size={15} aria-hidden /></button>
                             </div>
                           </td>
                         </tr>

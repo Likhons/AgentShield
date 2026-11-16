@@ -133,7 +133,7 @@ function AddPolicy({ file }: { file: string }) {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Risk score: {f.risk.toFixed(2)}
-          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="mt-2 accent-[#9147FF]" />
+          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="h-10 cursor-pointer accent-[#9147FF]" />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Amount greater than (0 = none)
           <input type="number" min={0} step={1000} className={input} value={f.amountGt} onChange={(e) => set('amountGt', Math.max(0, Number(e.target.value)))} />
@@ -202,6 +202,7 @@ export default function Policies() {
                 </button>
               ))}
             </div>
+            <div className="flex flex-1 flex-col gap-2.5 sm:flex-row">
             <label className="relative flex-1">
               <span className="sr-only">Search policies</span>
               <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" aria-hidden />
@@ -212,6 +213,7 @@ export default function Policies() {
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent2 px-5 text-sm font-bold text-white">
               <Plus size={16} aria-hidden /> Add Policy
             </button>
+            </div>
           </div>
 
           {shown.length === 0 ? (

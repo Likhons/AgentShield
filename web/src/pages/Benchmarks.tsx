@@ -53,7 +53,7 @@ function SectionBanner({ icon: Icon, title, children }: { icon: typeof Shield; t
 function TableCard({ hint, children }: { hint: string; children: ReactNode }) {
   return (
     <div className="card overflow-hidden">
-      <div className="border-b border-accent/25 bg-accent/10 px-3.5 py-1.5 text-[0.73rem] font-semibold text-[#C9A6FF] lg:hidden">← {hint} →</div>
+      <div className="border-b border-accent/25 bg-accent/10 px-3.5 py-1.5 text-[0.73rem] font-semibold text-[#C9A6FF] md:hidden">← {hint} →</div>
       <div className="overflow-x-auto">{children}</div>
     </div>
   )

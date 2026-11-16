@@ -46,14 +46,23 @@ library itself must not depend on.
 Numbers come only from the same sources as Streamlit (`benchmark/results/`, audit DB, datasets).
 
 ## Steps (one commit each)
-1. `webapi/` with the endpoints above + tests.
-2. Scaffold `web/` (Vite, TS, Tailwind, Router, Query), theme tokens, layout (sidebar, mobile drawer).
-3. Playground (hero, KPIs, scenario runner, side-by-side result, pipeline, recent evaluations).
-4. Audit Log (filters, pagination, drawer, CSV).
-5. Benchmarks, Policies, Datasets.
-6. Responsive pass at 390 / 820 / 1440 px (Playwright screenshots).
+1. ✓ `webapi/` with the endpoints above + tests.
+2. ✓ Scaffold `web/` (Vite, TS, Tailwind, Router, Query), theme tokens, layout (sidebar, mobile drawer).
+3. ✓ Playground (hero, KPIs, scenario runner, side-by-side result, pipeline, recent evaluations).
+4. ✓ Audit Log (filters, pagination, drawer, CSV).
+5. ✓ Benchmarks, Policies, Datasets. Also: `/api/docs/*`, policy validation, dataset download.
+6. ✓ Responsive pass: 9 states (all pages, run result, audit detail, modals, drawer) at 360 / 390 / 820 /
+   1024 / 1280 / 1440 px, plus landscape 844×390 and 667×375. Automated checks: no horizontal page scroll,
+   nothing outside the viewport, no clipped text, tap targets ≥ 40 px, text ≥ 11.5 px; screenshots reviewed.
 7. Deploy: backend first, then Vercel with `/api/*` rewrite to the backend.
 8. Decide: merge into `main` and switch the live link, or keep Streamlit.
+
+## Breakpoints used
+- `< lg` (1024): top bar + slide-in drawer instead of the sidebar.
+- Audit Log: detail opens as a full-screen sheet below `xl` (1280), as a side panel from `xl`; table columns drop
+  out as width shrinks (Reason from `xl`; with the panel open, Arguments from 1700 px and Reason from 1880 px).
+- Two-column layouts (hero, run card + how-it-works, without/with results) from `xl`.
+- Wide tables keep their width and scroll inside their card; the swipe hint shows below `md`.
 
 ## Open points for the user
 - Datasets preview shows record text, including `attacks.jsonl`. The Streamlit live demo already does this;

@@ -163,7 +163,7 @@ function RunCard({
                   {id === 'groq' && !liveAvailable ? 'Off on this server (no API key).' : id === 'recorded' && off ? 'No recording for this scenario.' : caption}
                 </span>
                 {active && (
-                  <span className="absolute top-2.5 right-2.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent2 text-[0.7rem] text-white" aria-hidden>
+                  <span className="absolute top-2.5 right-2.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent2 text-[0.75rem] text-white" aria-hidden>
                     ✓
                   </span>
                 )}
@@ -327,7 +327,7 @@ function RecentEvaluations() {
                     <td className="py-2.5 pr-3"><DecisionBadge decision={r.decision} /></td>
                     <td className="py-2.5 pr-3 text-muted">{short(r.reason_en, 90)}</td>
                     <td className="py-2.5">
-                      <Link to={`/audit?id=${r.id}`} aria-label="Open in Audit Log" className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line hover:border-line2">
+                      <Link to={`/audit?id=${r.id}`} aria-label="Open in Audit Log" className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line hover:border-line2">
                         <ExternalLink size={13} aria-hidden />
                       </Link>
                     </td>

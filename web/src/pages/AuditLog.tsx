@@ -32,7 +32,7 @@ function useDebounced<T>(value: T, ms = 300): T {
 
 function Kpi({ icon: Icon, tint, label, value, note, wide = false }: { icon: LucideIcon; tint: string; label: string; value: string; note: string; wide?: boolean }) {
   return (
-    <div className={`card flex items-center gap-3.5 p-4 ${wide ? 'col-span-2 lg:col-span-1' : ''}`}>
+    <div className={`card flex items-center gap-3.5 p-4 ${wide ? 'col-span-2 md:col-span-1' : ''}`}>
       <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full" style={{ background: `${tint}22`, border: `1px solid ${tint}55` }}>
         <Icon size={20} color={tint} aria-hidden />
       </span>
@@ -148,7 +148,7 @@ export default function AuditLog() {
     if (!selected) return
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && select(null)
     document.addEventListener('keydown', onKey)
-    const narrow = window.matchMedia('(max-width: 1023px)').matches
+    const narrow = window.matchMedia('(max-width: 1279px)').matches
     if (narrow) document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', onKey)
@@ -218,7 +218,7 @@ export default function AuditLog() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-5 lg:gap-4">
+          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5 xl:gap-4">
             <Kpi wide icon={Layers} tint="#9147FF" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
             <Kpi icon={CircleCheck} tint="#00D6A0" label="Allowed" value={String(stats.allow)} note={pct(stats.allow)} />
             <Kpi icon={CircleHelp} tint="#FFB547" label="Asked Human" value={String(stats.ask_human)} note={pct(stats.ask_human, 1)} />
@@ -233,7 +233,7 @@ export default function AuditLog() {
       )}
 
       {/* toolbar */}
-      <div className="my-4 flex flex-col gap-2.5 lg:flex-row lg:items-center">
+      <div className="my-4 flex flex-col gap-2.5 xl:flex-row xl:items-center">
         <div role="radiogroup" aria-label="Decision filter" className="flex shrink-0 gap-1 overflow-x-auto rounded-xl border border-line bg-card/70 p-1">
           {chips.map((c) => (
             <button
@@ -250,6 +250,7 @@ export default function AuditLog() {
             </button>
           ))}
         </div>
+        <div className="flex flex-1 flex-col gap-2.5 sm:flex-row">
         <label className="relative flex-1">
           <span className="sr-only">Search audit log</span>
           <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" aria-hidden />
@@ -262,7 +263,7 @@ export default function AuditLog() {
           />
         </label>
         <div className="flex gap-2">
-          <div ref={filtersRef} className="relative flex-1 lg:flex-none">
+          <div ref={filtersRef} className="relative flex-1 sm:flex-none">
             <button
               type="button"
               aria-expanded={filtersOpen}
@@ -290,7 +291,7 @@ export default function AuditLog() {
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Minimum risk score: {minRisk.toFixed(2)}
-                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="accent-[#9147FF]" />
+                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="h-10 cursor-pointer accent-[#9147FF]" />
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Rows per page
@@ -310,11 +311,12 @@ export default function AuditLog() {
             </button>
           )}
         </div>
+        </div>
       </div>
 
       {data && (
-        <div className={`grid items-start gap-4 ${selected ? 'lg:grid-cols-[1.85fr_1fr]' : ''}`}>
-          <Card className={`p-2! sm:p-3! transition-opacity ${isFetching ? 'opacity-70' : ''}`}>
+        <div className={`grid items-start gap-4 ${selected ? 'xl:grid-cols-[1.85fr_1fr]' : ''}`}>
+          <Card className={`min-w-0 p-2! sm:p-3! transition-opacity ${isFetching ? 'opacity-70' : ''}`}>
             {data.records.length === 0 ? (
               <p className="px-3 py-6 text-sm text-muted">
                 No audit events match these filters.{' '}
@@ -324,14 +326,15 @@ export default function AuditLog() {
               <>
                 <div className="hidden overflow-x-auto md:block">
                   <table className="w-full border-separate border-spacing-y-1 text-left text-sm">
+                    {/* columns drop out as space shrinks; with the detail panel open the panel shows arguments and reason */}
                     <thead className="text-xs text-muted">
                       <tr>
                         <th className="px-3 py-2 font-medium">Time (UTC)</th>
                         <th className="px-3 py-2 font-medium">Tool</th>
-                        <th className="px-3 py-2 font-medium">Arguments</th>
+                        <th className={`px-3 py-2 font-medium ${selected ? 'hidden min-[1700px]:table-cell' : ''}`}>Arguments</th>
                         <th className="px-3 py-2 font-medium">Risk</th>
                         <th className="px-3 py-2 font-medium">Decision</th>
-                        <th className={`px-3 py-2 font-medium ${selected ? 'hidden 2xl:table-cell' : ''}`}>Reason</th>
+                        <th className={`hidden px-3 py-2 font-medium ${selected ? 'min-[1880px]:table-cell' : 'xl:table-cell'}`}>Reason</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -350,14 +353,14 @@ export default function AuditLog() {
                               {utcFull(r.timestamp)}
                             </td>
                             <td className="px-3">
-                              <button type="button" onClick={(e) => { e.stopPropagation(); select(r.id) }} className="flex items-center gap-2 font-semibold whitespace-nowrap" aria-label={`Inspect ${r.tool_name} event`}>
+                              <button type="button" onClick={(e) => { e.stopPropagation(); select(r.id) }} className="-my-2.5 flex items-center gap-2 py-2.5 font-semibold whitespace-nowrap" aria-label={`Inspect ${r.tool_name} event`}>
                                 <ToolIcon tool={r.tool_name} size={14} className="text-[#C9B6FF]" aria-hidden /> {r.tool_name}
                               </button>
                             </td>
-                            <td className="max-w-[220px] px-3"><code className="block truncate font-mono text-[0.78rem] text-[#C9B6FF]">{JSON.stringify(r.arguments)}</code></td>
+                            <td className={`max-w-[180px] px-3 xl:max-w-[220px] ${selected ? 'hidden min-[1700px]:table-cell' : ''}`}><code className="block truncate font-mono text-[0.78rem] text-[#C9B6FF]">{JSON.stringify(r.arguments)}</code></td>
                             <td className="px-3 whitespace-nowrap"><span className={`rounded-md border px-2 py-0.5 text-xs font-bold ${risk.cls}`}>{r.risk_score.toFixed(2)} · {risk.label}</span></td>
                             <td className="px-3"><DecisionBadge decision={r.decision} /></td>
-                            <td className={`px-3 text-muted ${selected ? 'hidden 2xl:table-cell' : ''}`}>{short(r.reason_en, selected ? 60 : 90)}</td>
+                            <td className={`hidden px-3 text-muted ${selected ? 'min-[1880px]:table-cell' : 'xl:table-cell'}`}>{short(r.reason_en, selected ? 60 : 90)}</td>
                           </tr>
                         )
                       })}
@@ -405,7 +408,7 @@ export default function AuditLog() {
 
           {/* detail: side panel on wide screens */}
           {selected && (
-            <aside className="card sticky top-6 hidden max-h-[calc(100dvh-3rem)] overflow-y-auto p-4 lg:block">
+            <aside className="card sticky top-6 hidden max-h-[calc(100dvh-3rem)] min-w-0 overflow-y-auto p-4 xl:block">
               <AuditDetail record={selected} thresholds={thresholds} onClose={() => select(null)} />
             </aside>
           )}
@@ -414,7 +417,7 @@ export default function AuditLog() {
 
       {/* detail: full-screen sheet on phones and tablets */}
       {selected && (
-        <div role="dialog" aria-modal="true" aria-label="Audit details" className="fixed inset-0 z-50 overflow-y-auto bg-bg/95 px-4 py-4 backdrop-blur-md animate-rise lg:hidden">
+        <div role="dialog" aria-modal="true" aria-label="Audit details" className="fixed inset-0 z-50 overflow-y-auto bg-bg/95 px-4 py-4 backdrop-blur-md animate-rise xl:hidden">
           <button type="button" onClick={() => select(null)} className="mb-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line2 bg-accent/18 px-4 text-sm font-semibold">
             ← Back to Audit Log
           </button>

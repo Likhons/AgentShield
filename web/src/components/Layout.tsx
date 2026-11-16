@@ -48,7 +48,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
     <nav aria-label="Main" className="flex flex-col gap-5">
       {SECTIONS.map((section) => (
         <div key={section.title}>
-          <div className="mb-2 px-2 text-[0.7rem] font-semibold tracking-[0.14em] text-muted uppercase">{section.title}</div>
+          <div className="mb-2 px-2 text-[0.72rem] font-semibold tracking-[0.14em] text-muted uppercase">{section.title}</div>
           <ul className="flex flex-col gap-1">
             {section.items.map(({ to, label, icon: Icon }) => (
               <li key={to}>
