@@ -400,7 +400,7 @@ export default function Landing() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>Built for the International AI Builders Congress 2026. Demo data is fake: numbers start with 010, domains end in .example.</p>
           <div className="flex gap-5">
-            <Link to="/playground" className="inline-flex min-h-11 min-w-11 items-center justify-center transition hover:text-accent">Demo</Link>
+            <Link to="/playground" className="inline-flex min-h-11 min-w-11 items-center transition hover:text-accent">Demo</Link>
             <Link to="/benchmarks" className="inline-flex min-h-11 items-center transition hover:text-accent">Benchmarks</Link>
             <Link to="/policies" className="inline-flex min-h-11 items-center transition hover:text-accent">Policies</Link>
           </div>

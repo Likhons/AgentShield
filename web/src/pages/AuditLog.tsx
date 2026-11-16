@@ -184,12 +184,12 @@ export default function AuditLog() {
   const total = data?.total ?? 0
   const pages = Math.max(1, Math.ceil(total / pageSize))
   const pct = (n: number, digits = 0) => (stats?.total ? `${((n / stats.total) * 100).toFixed(digits)}% of total` : '0% of total')
-  const chips: { id: Decision | 'all'; label: string }[] = useMemo(
+  const chips: { id: Decision | 'all'; name: string; count: number }[] = useMemo(
     () => [
-      { id: 'all', label: `All (${counts?.total ?? 0})` },
-      { id: 'allow', label: `Allow (${counts?.allow ?? 0})` },
-      { id: 'ask_human', label: `Ask (${counts?.ask_human ?? 0})` },
-      { id: 'block', label: `Block (${counts?.block ?? 0})` },
+      { id: 'all', name: 'All', count: counts?.total ?? 0 },
+      { id: 'allow', name: 'Allow', count: counts?.allow ?? 0 },
+      { id: 'ask_human', name: 'Ask', count: counts?.ask_human ?? 0 },
+      { id: 'block', name: 'Block', count: counts?.block ?? 0 },
     ],
     [counts],
   )
@@ -240,7 +240,7 @@ export default function AuditLog() {
 
       {/* toolbar */}
       <div className="my-4 flex flex-col gap-2.5 xl:flex-row xl:items-center">
-        <div role="radiogroup" aria-label="Decision filter" className="flex shrink-0 gap-1 overflow-x-auto rounded-xl border border-line bg-card/70 p-1">
+        <div role="radiogroup" aria-label="Decision filter" className="grid shrink-0 grid-cols-4 gap-1 rounded-xl border border-line bg-card/70 p-1 sm:flex">
           {chips.map((c) => (
             <button
               key={c.id}
@@ -248,11 +248,12 @@ export default function AuditLog() {
               role="radio"
               aria-checked={decision === c.id}
               onClick={() => setDecision(c.id)}
-              className={`min-h-10 shrink-0 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap transition ${
+              className={`flex min-h-11 flex-col items-center justify-center rounded-lg px-1 text-[0.84rem] leading-tight font-semibold whitespace-nowrap transition sm:min-h-10 sm:flex-row sm:gap-1 sm:px-3.5 sm:text-sm ${
                 decision === c.id ? 'btn-primary' : 'text-[#D6E0D9] hover:bg-white/5'
               }`}
             >
-              {c.label}
+              {c.name}
+              <span className="text-[0.72rem] font-medium tabular-nums opacity-75 sm:text-sm sm:font-semibold sm:opacity-100">({c.count})</span>
             </button>
           ))}
         </div>

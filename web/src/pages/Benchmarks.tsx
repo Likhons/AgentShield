@@ -237,7 +237,7 @@ function DetectionBlock({ s }: { s: DetectionSection }) {
           <tbody>
             {s.rows.map((r) => (
               <tr key={`${r.detector}-${r.language}`} className="hover:bg-accent/5">
-                <td className={td}><code className="font-mono text-[0.78rem] text-soft">{r.detector}</code></td>
+                <td className={td}><code className="font-mono text-[0.78rem] whitespace-nowrap text-soft">{r.detector}</code></td>
                 <td className={td}>{r.label}</td>
                 <td className={td}><SafePill rate={r.attacks_flagged} /></td>
                 <td className={td}>{r.benign_flagged.text}</td>
