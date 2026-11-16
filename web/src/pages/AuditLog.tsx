@@ -77,8 +77,8 @@ function RecordCard({ r, thresholds, onOpen, index }: { r: AuditRecord; threshol
           <span className="text-muted">{utcFull(r.timestamp)} UTC</span>
           <span className={`font-bold ${risk.text}`}>Risk {r.risk_score.toFixed(2)} · {risk.label}</span>
         </span>
-        <code className="w-full truncate rounded-lg border border-line bg-bg px-2.5 py-1.5 font-mono text-[0.78rem] text-[#C9B6FF]">{JSON.stringify(r.arguments)}</code>
-        <span className="flex w-full items-center justify-between text-xs font-semibold text-[#C9A6FF]">
+        <code className="w-full truncate rounded-lg border border-line bg-bg px-2.5 py-1.5 font-mono text-[0.78rem] text-soft">{JSON.stringify(r.arguments)}</code>
+        <span className="flex w-full items-center justify-between text-xs font-semibold text-soft">
           <span>Tap for full Audit Details & Bangla reason</span>
           <span>View →</span>
         </span>
@@ -225,11 +225,11 @@ export default function AuditLog() {
       {stats && (
         <>
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5 xl:gap-4">
-            <Kpi wide icon={Layers} tint="#9147FF" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
+            <Kpi wide icon={Layers} tint="#C6FF3D" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
             <Kpi icon={CircleCheck} tint="#00D6A0" label="Allowed" value={String(stats.allow)} note={pct(stats.allow)} />
             <Kpi icon={CircleHelp} tint="#FFB547" label="Asked Human" value={String(stats.ask_human)} note={pct(stats.ask_human, 1)} />
             <Kpi icon={CircleX} tint="#FF526F" label="Blocked" value={String(stats.block)} note={pct(stats.block)} />
-            <Kpi icon={Zap} tint="#C044FF" label="Median Latency" value={stats.median_latency_ms == null ? '–' : `${stats.median_latency_ms.toFixed(1)} ms`} note={`LLM judge: ${stats.llm_calls}/${stats.total}`} />
+            <Kpi icon={Zap} tint="#38D6F5" label="Median Latency" value={stats.median_latency_ms == null ? '–' : `${stats.median_latency_ms.toFixed(1)} ms`} note={`LLM judge: ${stats.llm_calls}/${stats.total}`} />
           </div>
           <p className="mt-3 inline-flex items-center gap-2 rounded-lg border border-line bg-card/70 px-3 py-1.5 text-[0.82rem] text-muted">
             <Activity size={14} className="text-accent" aria-hidden />
@@ -249,7 +249,7 @@ export default function AuditLog() {
               aria-checked={decision === c.id}
               onClick={() => setDecision(c.id)}
               className={`min-h-10 shrink-0 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap transition ${
-                decision === c.id ? 'bg-gradient-to-r from-accent to-accent2 text-white shadow-[0_6px_18px_-8px_rgba(145,71,255,.9)]' : 'text-[#D5DCF6] hover:bg-white/5'
+                decision === c.id ? 'btn-primary' : 'text-[#D6E0D9] hover:bg-white/5'
               }`}
             >
               {c.label}
@@ -297,7 +297,7 @@ export default function AuditLog() {
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Minimum risk score: {minRisk.toFixed(2)}
-                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="h-10 cursor-pointer accent-[#9147FF]" />
+                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="h-10 cursor-pointer accent-[#C6FF3D]" />
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Rows per page
@@ -326,7 +326,7 @@ export default function AuditLog() {
             {data.records.length === 0 ? (
               <p className="px-3 py-6 text-sm text-muted">
                 No audit events match these filters.{' '}
-                {anyActive && <button type="button" onClick={clearAll} className="font-semibold text-[#C9A6FF] underline">Clear filters</button>}
+                {anyActive && <button type="button" onClick={clearAll} className="font-semibold text-soft underline">Clear filters</button>}
               </p>
             ) : (
               <>
@@ -361,10 +361,10 @@ export default function AuditLog() {
                             </td>
                             <td className="px-3">
                               <button type="button" onClick={(e) => { e.stopPropagation(); select(r.id) }} className="-my-2.5 flex items-center gap-2 py-2.5 font-semibold whitespace-nowrap" aria-label={`Inspect ${r.tool_name} event`}>
-                                <ToolIcon tool={r.tool_name} size={14} className="text-[#C9B6FF]" aria-hidden /> {r.tool_name}
+                                <ToolIcon tool={r.tool_name} size={14} className="text-soft" aria-hidden /> {r.tool_name}
                               </button>
                             </td>
-                            <td className={`max-w-[180px] px-3 xl:max-w-[220px] ${selected ? 'hidden min-[1700px]:table-cell' : ''}`}><code className="block truncate font-mono text-[0.78rem] text-[#C9B6FF]">{JSON.stringify(r.arguments)}</code></td>
+                            <td className={`max-w-[180px] px-3 xl:max-w-[220px] ${selected ? 'hidden min-[1700px]:table-cell' : ''}`}><code className="block truncate font-mono text-[0.78rem] text-soft">{JSON.stringify(r.arguments)}</code></td>
                             <td className="px-3 whitespace-nowrap"><span className={`rounded-md border px-2 py-0.5 text-xs font-bold ${risk.cls}`}>{r.risk_score.toFixed(2)} · {risk.label}</span></td>
                             <td className="px-3"><DecisionBadge decision={r.decision} /></td>
                             <td className={`hidden px-3 text-muted ${selected ? 'min-[1880px]:table-cell' : 'xl:table-cell'}`}>{short(r.reason_en, selected ? 60 : 90)}</td>
@@ -400,7 +400,7 @@ export default function AuditLog() {
                       type="button"
                       aria-current={p === page ? 'page' : undefined}
                       onClick={() => setPage(p)}
-                      className={`h-10 min-w-10 rounded-lg px-2 text-sm font-semibold ${p === page ? 'bg-gradient-to-r from-accent to-accent2 text-white' : 'hover:bg-white/5'}`}
+                      className={`h-10 min-w-10 rounded-lg px-2 text-sm font-semibold ${p === page ? 'btn-primary' : 'hover:bg-white/5'}`}
                     >
                       {p}
                     </button>

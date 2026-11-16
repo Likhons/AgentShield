@@ -29,7 +29,7 @@ function StepItem({ step, index }: { step: Step; index: number }) {
         <span className="text-[0.82rem]">{badge}</span>
       </summary>
       <div className="flex flex-col gap-2.5 border-t border-line px-3.5 pt-3 pb-3.5">
-        <div className="rounded-lg border border-line bg-bg px-3 py-2.5 font-mono text-[0.82rem] break-words whitespace-pre-wrap text-[#C9B6FF]">
+        <div className="rounded-lg border border-line bg-bg px-3 py-2.5 font-mono text-[0.82rem] break-words whitespace-pre-wrap text-soft">
           {JSON.stringify(step.args)}
         </div>
         {v && (
@@ -47,7 +47,7 @@ function StepItem({ step, index }: { step: Step; index: number }) {
             <p className="text-[0.8rem] text-muted">Checks: {checkLine(v)}</p>
           </>
         )}
-        {!step.stopped_by_shield && <p className="text-sm break-words whitespace-pre-wrap text-[#D5DCF6]">{step.result}</p>}
+        {!step.stopped_by_shield && <p className="text-sm break-words whitespace-pre-wrap text-[#D6E0D9]">{step.result}</p>}
       </div>
     </details>
   )
@@ -110,10 +110,10 @@ export default function RunResultView({ result }: { result: RunResult }) {
     <div className="flex flex-col gap-3">
       {result.banner && (
         <div
-          className={`relative overflow-hidden rounded-card border px-5 py-4 text-[1.1rem] font-bold text-white animate-rise ${
+          className={`relative overflow-hidden rounded-card border px-5 py-4 text-[1.1rem] font-bold animate-rise ${
             result.banner.tone === 'saved'
-              ? 'border-ok/60 bg-gradient-to-r from-ok/85 to-[#0F766E]/85'
-              : 'border-[#8CA0FF]/60 bg-gradient-to-r from-[#5B8CFF]/55 to-accent/45'
+              ? 'border-ok/45 bg-ok/10 text-ok'
+              : 'border-[#38D6F5]/45 bg-[#38D6F5]/10 text-[#8BEBFF]'
           }`}
         >
           {result.banner.text}

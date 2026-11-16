@@ -19,23 +19,23 @@ function Hero() {
   return (
     <div className="grid items-center gap-4 xl:grid-cols-[1.15fr_1fr]">
       <div className="animate-rise">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-line2 bg-accent/15 px-3 py-1 text-xs font-semibold text-[#E9D5FF]">
-          <Play size={10} fill="#C084FC" className="text-[#C084FC]" aria-hidden /> Playground
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-line2 bg-accent/15 px-3 py-1 text-xs font-semibold text-soft">
+          <Play size={10} fill="#D9FF8A" className="text-soft" aria-hidden /> Playground
         </span>
         <h1 className="mt-4 text-[clamp(1.62rem,6.2vw,2.05rem)] leading-[1.15] font-bold tracking-tight lg:text-[2.6rem]">
           <span className="block">Stop AI Agents from Acting&nbsp;on</span>
           <span className="grad-text">Hidden Instructions</span>
         </h1>
-        <p className="mt-4 max-w-[560px] text-[0.94rem] leading-relaxed text-[#C3CAE6] lg:text-base">
+        <p className="mt-4 max-w-[560px] text-[0.94rem] leading-relaxed text-[#BCC8C0] lg:text-base">
           AgentShield checks every tool call before it runs, so an AI agent cannot be tricked into sending money by text
           hidden in emails, web pages or files, in Bangla, Banglish and English.
         </p>
         <div className="mt-5 flex flex-col gap-2.5 sm:flex-row">
           <a
             href="#run-scenario"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent2 px-5 font-bold text-white shadow-[0_10px_28px_-8px_rgba(145,71,255,.7)] transition hover:-translate-y-px"
+            className="inline-flex min-h-11 items-center justify-center gap-2 btn-primary rounded-xl px-5 font-bold transition hover:-translate-y-px"
           >
-            <Play size={14} fill="#fff" aria-hidden /> Try a Scenario
+            <Play size={14} fill="currentColor" aria-hidden /> Try a Scenario
           </a>
           <Link
             to="/benchmarks"
@@ -81,9 +81,9 @@ function Kpis() {
   const real = data.real_llm
   return (
     <div className="my-6 grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-4">
-      <Kpi icon={ShieldCheck} tint="#B44CFF" num={String(data.checks.length)} label="Checks per Tool Call"
+      <Kpi icon={ShieldCheck} tint="#C6FF3D" num={String(data.checks.length)} label="Checks per Tool Call"
         note={data.checks.map((c) => c[0].toUpperCase() + c.slice(1)).join(' · ')} />
-      <Kpi icon={ListChecks} tint="#5B8CFF" num={String(data.policy_rules)} label="Policy Rules" note="Deterministic · default.yaml" />
+      <Kpi icon={ListChecks} tint="#38D6F5" num={String(data.policy_rules)} label="Policy Rules" note="Deterministic · default.yaml" />
       <Kpi icon={Bug} tint="#F04452" num={String(data.attack_samples.total)} label="Attack Samples"
         note={byLang.map(([k, v]) => `${langLabel(k)} ${v}`).join(' · ')} />
       <Kpi icon={ChartColumn} tint="#16C784" num={real ? `${real.with.hits}/${real.with.total}` : '–'} label="Attacks that Moved Money"
@@ -120,8 +120,8 @@ function RunCard({
     <section id="run-scenario" className="card flex scroll-mt-20 flex-col gap-4 border-line2 p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent2">
-            <Play size={17} fill="#fff" className="text-white" aria-hidden />
+          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-ink">
+            <Play size={17} fill="currentColor" aria-hidden />
           </span>
           <div>
             <h2 className="text-[1.15rem] font-bold">Run a Safety Scenario</h2>
@@ -160,7 +160,7 @@ function RunCard({
               <label
                 key={id}
                 className={`relative flex min-h-[54px] cursor-pointer flex-col gap-0.5 rounded-xl border py-3 pr-9 pl-3.5 transition ${
-                  active ? 'border-accent2/70 bg-accent/15 shadow-[0_0_0_1px_rgba(192,68,255,.35)]' : 'border-line bg-card2/60 hover:border-line2'
+                  active ? 'border-accent2/70 bg-accent/15 shadow-[0_0_0_1px_rgba(198,255,61,.17)]' : 'border-line bg-card2/60 hover:border-line2'
                 } ${off ? 'cursor-not-allowed opacity-45' : ''}`}
               >
                 <input type="radio" name="mode" value={id} checked={active} disabled={off} onChange={() => setMode(id)} className="sr-only" />
@@ -171,7 +171,7 @@ function RunCard({
                   {id === 'groq' && !liveAvailable ? 'Off on this server (no API key).' : id === 'recorded' && off ? 'No recording for this scenario.' : caption}
                 </span>
                 {active && (
-                  <span className="absolute top-2.5 right-2.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent2 text-[0.75rem] text-white" aria-hidden>
+                  <span className="absolute top-2.5 right-2.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[0.75rem] text-accent-ink" aria-hidden>
                     ✓
                   </span>
                 )}
@@ -187,7 +187,7 @@ function RunCard({
           checked={approve}
           disabled={effectiveMode === 'recorded'}
           onChange={(e) => setApprove(e.target.checked)}
-          className="mt-0.5 h-4.5 w-4.5 shrink-0 accent-[#9147FF]"
+          className="mt-0.5 h-4.5 w-4.5 shrink-0 accent-[#C6FF3D]"
         />
         <span>
           I approve actions that ask for my approval (simulated human click)
@@ -201,7 +201,7 @@ function RunCard({
         type="button"
         disabled={running || !name}
         onClick={() => name && onRun(name, effectiveMode, approve)}
-        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#7C2CFF] to-[#C92BE0] font-bold text-white shadow-[0_10px_28px_-10px_rgba(145,71,255,.8)] transition hover:-translate-y-px disabled:translate-y-0 disabled:opacity-60"
+        className="inline-flex min-h-12 items-center justify-center gap-2 btn-primary rounded-xl font-bold transition hover:-translate-y-px disabled:translate-y-0 disabled:opacity-60"
       >
         {running ? (
           <>
@@ -209,7 +209,7 @@ function RunCard({
           </>
         ) : (
           <>
-            <Play size={15} fill="#fff" aria-hidden /> Run Scenario
+            <Play size={15} fill="currentColor" aria-hidden /> Run Scenario
           </>
         )}
       </button>
@@ -221,7 +221,7 @@ function RunCard({
 function HowItWorks() {
   const nodes = [
     { icon: Mail, color: '#FF6B78', title: 'Untrusted input', sub: 'email · web · file', cls: 'border-bad/40 bg-bad/8' },
-    { icon: ShieldCheck, color: '#E2D4FF', title: 'AgentShield', sub: 'checks each tool call', cls: 'border-accent2/70 bg-accent/18 shadow-[0_0_28px_rgba(113,56,255,.45)]' },
+    { icon: ShieldCheck, color: '#EEFFC2', title: 'AgentShield', sub: 'checks each tool call', cls: 'border-accent2/70 bg-accent/18 shadow-[0_0_28px_rgba(198,255,61,.23)]' },
     { icon: CircleCheck, color: '#16C784', title: 'Decision', sub: 'allow · ask · block', cls: 'border-ok/40 bg-ok/8' },
   ]
   const decisions = [
@@ -283,7 +283,7 @@ function Pipeline() {
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-white/5">
               <Icon size={18} aria-hidden />
             </span>
-            <span className="rounded-md bg-gradient-to-br from-accent to-accent2 px-1.5 py-0.5 font-mono text-[0.72rem] font-bold">
+            <span className="rounded-md bg-accent text-accent-ink px-1.5 py-0.5 font-mono text-[0.72rem] font-bold">
               0{i + 1}
             </span>
             <span className="min-w-0">

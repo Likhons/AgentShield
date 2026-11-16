@@ -15,7 +15,7 @@ type Action = 'preview' | 'open'
 function SourcePill({ sources }: { sources: string[] }) {
   const Icon = sources.some((s) => s.includes('external')) ? Globe : Laptop
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-lg border border-line2 bg-accent/12 px-2.5 py-1 text-[0.76rem] font-semibold text-[#E9D5FF]">
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-line2 bg-accent/12 px-2.5 py-1 text-[0.76rem] font-semibold text-soft">
       <Icon size={13} aria-hidden /> {sources.join(', ')}
     </span>
   )
@@ -24,7 +24,7 @@ function SourcePill({ sources }: { sources: string[] }) {
 function Progress({ pct }: { pct: number }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#1E2952]" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#1B231E]" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
         <div className="h-full rounded-full bg-gradient-to-r from-ok to-[#2EE59D]" style={{ width: `${pct}%` }} />
       </div>
       <span className="w-10 text-right text-xs text-muted tabular-nums">{pct}%</span>
@@ -91,7 +91,7 @@ function FileModal({ file, action, onClose }: { file: FileInfo; action: Action; 
                   {data.records.map((r, i) => (
                     <tr key={String(r.id ?? i)} className="border-t border-line/60 align-top">
                       {cols.map((c) => (
-                        <td key={c} className={`px-3 py-2 ${c === 'text' ? 'min-w-[280px]' : 'whitespace-nowrap'} ${c === 'id' ? 'font-mono text-[#C9B6FF]' : ''}`}>
+                        <td key={c} className={`px-3 py-2 ${c === 'text' ? 'min-w-[280px]' : 'whitespace-nowrap'} ${c === 'id' ? 'font-mono text-soft' : ''}`}>
                           {c === 'text' && !data.texts_public ? <span className="text-muted italic">hidden</span> : String(r[c] ?? (c === 'attack_type' ? '–' : ''))}
                         </td>
                       ))}
@@ -149,7 +149,7 @@ export default function Datasets() {
           <div className="grid gap-4 lg:grid-cols-[1.48fr_1fr]">
             <Card>
               <div className="mb-4 flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line2 bg-accent/15 text-[#D8B4FE]"><ChartColumn size={19} aria-hidden /></span>
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line2 bg-accent/15 text-soft"><ChartColumn size={19} aria-hidden /></span>
                 <div>
                   <h2 className="font-bold">Language Distribution</h2>
                   <p className="text-[0.8rem] text-muted">Number of samples by language in the dataset.</p>
@@ -174,7 +174,7 @@ export default function Datasets() {
                         <td className="w-[40%] py-3">
                           <div className="flex items-center gap-2">
                             <span className="w-12 text-xs text-muted tabular-nums">{share.toFixed(1)}%</span>
-                            <div className="h-2 flex-1 rounded-full bg-[#1E2952]"><div className="h-full rounded-full bg-gradient-to-r from-accent to-accent2" style={{ width: `${Math.min(100, Math.max(4, share * 1.6))}%` }} /></div>
+                            <div className="h-2 flex-1 rounded-full bg-[#1B231E]"><div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(100, Math.max(4, share * 1.6))}%` }} /></div>
                           </div>
                         </td>
                       </tr>
@@ -206,7 +206,7 @@ export default function Datasets() {
           <Card>
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line2 bg-accent/15 text-[#D8B4FE]"><FileText size={19} aria-hidden /></span>
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line2 bg-accent/15 text-soft"><FileText size={19} aria-hidden /></span>
                 <div>
                   <h2 className="font-bold">Dataset Files</h2>
                   <p className="text-[0.8rem] text-muted">Dataset files, sizes and usage across the platform.</p>
@@ -240,7 +240,7 @@ export default function Datasets() {
                     <tbody>
                       {files.map((f, i) => (
                         <tr key={f.file} style={stagger(i)} className="stagger-item border-b border-line/50 hover:bg-accent/5">
-                          <td className="px-2 py-3"><span className="inline-flex items-center gap-2 font-semibold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-[#D8B4FE]">{'{}'}</span>{f.file}</span></td>
+                          <td className="px-2 py-3"><span className="inline-flex items-center gap-2 font-semibold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-soft">{'{}'}</span>{f.file}</span></td>
                           <td className="px-2 py-3 tabular-nums">{f.items}</td>
                           <td className="px-2 py-3 whitespace-nowrap tabular-nums">{f.reviewed} / {f.items}</td>
                           <td className="min-w-[160px] px-2 py-3"><Progress pct={f.items ? Math.round((f.reviewed / f.items) * 100) : 0} /></td>
@@ -260,7 +260,7 @@ export default function Datasets() {
                   {files.map((f, i) => (
                     <li key={f.file} style={stagger(i)} className="stagger-item flex flex-col gap-2.5 rounded-xl border border-line bg-card2/50 p-3.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-2 font-bold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-[#D8B4FE]">{'{}'}</span>{f.file}</span>
+                        <span className="inline-flex items-center gap-2 font-bold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-soft">{'{}'}</span>{f.file}</span>
                         <SourcePill sources={f.sources} />
                       </div>
                       <div className="flex justify-between text-[0.82rem]"><span>Items: <b>{f.items}</b></span><span>Reviewed: <b>{f.reviewed} / {f.items}</b></span></div>

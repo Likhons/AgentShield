@@ -11,7 +11,7 @@ export function PageHeader({ icon: Icon, title, sub, right }: { icon: LucideIcon
     <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3.5">
         <span className="icon-tile h-12 w-12">
-          <Icon size={24} className="text-[#D8B4FE]" aria-hidden />
+          <Icon size={24} className="text-soft" aria-hidden />
         </span>
         <div className="min-w-0">
           <h1 className="text-[1.7rem] leading-tight font-bold tracking-tight">{title}</h1>
@@ -28,7 +28,7 @@ export function PanelTitle({ icon: Icon, title, sub, right }: { icon: LucideIcon
     <div className="mb-3 flex items-start justify-between gap-3">
       <div className="flex items-start gap-2.5">
         <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-line2 bg-accent/15">
-          <Icon size={17} className="text-[#C084FC]" aria-hidden />
+          <Icon size={17} className="text-soft" aria-hidden />
         </span>
         <div>
           <h2 className="text-[1.08rem] font-bold leading-snug">{title}</h2>

@@ -22,31 +22,31 @@ export default function HeroArt() {
       >
         <defs>
           <linearGradient id="sg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#D47AFF" />
-            <stop offset="50%" stopColor="#8A3FFC" />
-            <stop offset="100%" stopColor="#491D8B" />
+            <stop offset="0%" stopColor="#E4FF8A" />
+            <stop offset="50%" stopColor="#A8E61F" />
+            <stop offset="100%" stopColor="#3D5C00" />
           </linearGradient>
           <linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2E1B6E" />
-            <stop offset="100%" stopColor="#120B36" />
+            <stop offset="0%" stopColor="#1A2410" />
+            <stop offset="100%" stopColor="#0A0F06" />
           </linearGradient>
           <linearGradient id="traceL" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#8B5CFF" stopOpacity=".18" />
-            <stop offset="100%" stopColor="#C98BFF" stopOpacity=".75" />
+            <stop offset="0%" stopColor="#9BE600" stopOpacity=".18" />
+            <stop offset="100%" stopColor="#E4FF8A" stopOpacity=".75" />
           </linearGradient>
           <linearGradient id="traceR" x1="1" y1="0" x2="0" y2="0">
-            <stop offset="0%" stopColor="#8B5CFF" stopOpacity=".18" />
-            <stop offset="100%" stopColor="#C98BFF" stopOpacity=".75" />
+            <stop offset="0%" stopColor="#9BE600" stopOpacity=".18" />
+            <stop offset="100%" stopColor="#E4FF8A" stopOpacity=".75" />
           </linearGradient>
           <radialGradient id="glow" cx="50%" cy="46%" r="48%">
-            <stop offset="0%" stopColor="#9333EA" stopOpacity=".55" />
-            <stop offset="60%" stopColor="#6D28D9" stopOpacity=".18" />
-            <stop offset="100%" stopColor="#6D28D9" stopOpacity="0" />
+            <stop offset="0%" stopColor="#C6FF3D" stopOpacity=".55" />
+            <stop offset="60%" stopColor="#5C8F00" stopOpacity=".18" />
+            <stop offset="100%" stopColor="#5C8F00" stopOpacity="0" />
           </radialGradient>
           <radialGradient id="padglow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#C084FC" stopOpacity=".65" />
-            <stop offset="55%" stopColor="#7C3AED" stopOpacity=".28" />
-            <stop offset="100%" stopColor="#7C3AED" stopOpacity="0" />
+            <stop offset="0%" stopColor="#D9FF8A" stopOpacity=".65" />
+            <stop offset="55%" stopColor="#6FA600" stopOpacity=".28" />
+            <stop offset="100%" stopColor="#6FA600" stopOpacity="0" />
           </radialGradient>
         </defs>
         <ellipse className="aura" cx="290" cy="122" rx="185" ry="118" fill="url(#glow)" />
@@ -58,28 +58,28 @@ export default function HeroArt() {
           <path d="M 435 122 L 358 122" stroke="url(#traceR)" />
           <path d="M 395 212 C 368 212, 362 164, 340 154" stroke="url(#traceR)" />
           {[[232, 82], [222, 122], [240, 154], [348, 82], [358, 122], [340, 154]].map(([x, y]) => (
-            <circle key={`${x}-${y}`} cx={x} cy={y} r="3" fill="#E9D5FF" />
+            <circle key={`${x}-${y}`} cx={x} cy={y} r="3" fill="#D9FF8A" />
           ))}
         </g>
         <ellipse className="pad-glow" cx="290" cy="212" rx="96" ry="22" fill="url(#padglow)" />
-        <ellipse cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#A855F7" strokeOpacity=".65" strokeWidth="1.8" />
-        <ellipse cx="290" cy="212" rx="60" ry="10" fill="none" stroke="#E9D5FF" strokeOpacity=".75" strokeWidth="1.5" />
-        <ellipse cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#B44CFF" strokeOpacity=".28" strokeWidth="1.2" />
-        <ellipse className="orbit" cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#F3E8FF" strokeWidth="2"
+        <ellipse cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#C6FF3D" strokeOpacity=".65" strokeWidth="1.8" />
+        <ellipse cx="290" cy="212" rx="60" ry="10" fill="none" stroke="#D9FF8A" strokeOpacity=".75" strokeWidth="1.5" />
+        <ellipse cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#C6FF3D" strokeOpacity=".28" strokeWidth="1.2" />
+        <ellipse className="orbit" cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#EEFFC2" strokeWidth="2"
           strokeLinecap="round" pathLength={1000} strokeDasharray="70 930" />
         <g className="shield-body">
-          <path d="M290 30 L352 54 C352 118 330 160 290 185 C250 160 228 118 228 54 Z" fill="url(#sg)" stroke="#F3E8FF"
+          <path d="M290 30 L352 54 C352 118 330 160 290 185 C250 160 228 118 228 54 Z" fill="url(#sg)" stroke="#EEFFC2"
             strokeOpacity=".85" strokeWidth="2.2" />
-          <path d="M290 46 L337 64 C337 115 320 148 290 167 C260 148 243 115 243 64 Z" fill="url(#sg2)" stroke="#C084FC"
+          <path d="M290 46 L337 64 C337 115 320 148 290 167 C260 148 243 115 243 64 Z" fill="url(#sg2)" stroke="#D9FF8A"
             strokeOpacity=".65" strokeWidth="1.5" />
-          <path d="M267 108 L283 124 L316 90" fill="none" stroke="#FFFFFF" strokeWidth="9.5" strokeLinecap="round"
+          <path d="M267 108 L283 124 L316 90" fill="none" stroke="#F2FFD0" strokeWidth="9.5" strokeLinecap="round"
             strokeLinejoin="round" />
         </g>
       </svg>
       {FEATURES.map(({ label, icon: Icon, pos }) => (
         <span
           key={label}
-          className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line2 bg-[#1A1440]/90 py-1 pr-3 pl-1.5 text-[0.74rem] font-semibold text-[#E9D5FF] backdrop-blur lg:absolute lg:text-[0.8rem] ${pos}`}
+          className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line2 bg-[#0E130F]/90 py-1 pr-3 pl-1.5 text-[0.74rem] font-semibold text-soft backdrop-blur lg:absolute lg:text-[0.8rem] ${pos}`}
         >
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent/25">
             <Icon size={13} aria-hidden />

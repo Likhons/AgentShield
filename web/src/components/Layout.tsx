@@ -34,11 +34,11 @@ function Brand() {
   return (
     <Link to="/" aria-label="AgentShield home" className="flex items-center gap-3">
       <span className="icon-tile h-10 w-10">
-        <ShieldCheck size={21} className="text-[#E9D5FF]" aria-hidden />
+        <ShieldCheck size={21} className="text-soft" aria-hidden />
       </span>
       <div className="leading-tight">
         <div className="text-[1.15rem] font-display font-bold tracking-tight">AgentShield</div>
-        <div className="text-xs text-[#C9B6FF]">AI Agent Safety Platform</div>
+        <div className="text-xs text-soft">AI Agent Safety Platform</div>
       </div>
     </Link>
   )
@@ -49,7 +49,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
     <nav aria-label="Main" className="flex flex-col gap-5">
       {SECTIONS.map((section) => (
         <div key={section.title}>
-          <div className="mb-2 px-2 text-[0.72rem] font-semibold tracking-[0.14em] text-muted uppercase">{section.title}</div>
+          <div className="mb-2 px-2 font-mono text-[0.72rem] text-muted">{`// ${section.title.toLowerCase()}`}</div>
           <ul className="flex flex-col gap-1">
             {section.items.map(({ to, label, icon: Icon }) => (
               <li key={to}>
@@ -59,8 +59,8 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                   className={({ isActive }) =>
                     `flex min-h-11 items-center gap-3 rounded-xl border px-3.5 text-[0.95rem] font-semibold transition-colors ${
                       isActive
-                        ? 'border-accent2/60 bg-gradient-to-r from-accent/80 to-accent2/60 text-white shadow-[0_8px_24px_-10px_rgba(145,71,255,.8)]'
-                        : 'border-transparent text-[#D5DCF6] hover:border-line hover:bg-white/5'
+                        ? 'border-accent/30 bg-accent/10 text-accent shadow-[inset_3px_0_0_var(--color-accent)]'
+                        : 'border-transparent text-[#D6E0D9] hover:border-line hover:bg-white/5'
                     }`
                   }
                 >
@@ -151,7 +151,7 @@ export default function Layout() {
         <Brand />
         <div className="flex items-center gap-2">
           {current && (
-            <span className="hidden rounded-full border border-line2 bg-accent/15 px-3 py-1 text-xs font-semibold text-[#E9D5FF] sm:inline">
+            <span className="hidden rounded-full border border-line2 bg-accent/15 px-3 py-1 text-xs font-semibold text-soft sm:inline">
               {current.label}
             </span>
           )}

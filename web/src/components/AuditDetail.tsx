@@ -65,7 +65,7 @@ export default function AuditDetail({ record, thresholds, onClose }: { record: A
         <b.icon size={20} color={b.color} aria-hidden />
         <div>
           <b style={{ color: b.color }}>{b.title}</b>
-          <p className="text-[0.82rem] text-[#D5DCF6]">{b.sub}</p>
+          <p className="text-[0.82rem] text-[#D6E0D9]">{b.sub}</p>
         </div>
       </div>
 
@@ -77,7 +77,7 @@ export default function AuditDetail({ record, thresholds, onClose }: { record: A
             {record.risk_score.toFixed(2)} · {risk.label}
           </span>
         </Row>
-        <Row icon={Shield} label="Event ID"><code className="font-mono text-[0.78rem] text-[#C9B6FF]">{record.id}</code></Row>
+        <Row icon={Shield} label="Event ID"><code className="font-mono text-[0.78rem] text-soft">{record.id}</code></Row>
         <Row icon={Layers} label="Taint / Latency">
           {record.tainted ? 'Tainted' : 'Untainted'} · {record.total_latency_ms.toFixed(2)} ms
         </Row>
@@ -86,7 +86,7 @@ export default function AuditDetail({ record, thresholds, onClose }: { record: A
 
       <section>
         <h3 className="mb-1.5 flex items-center gap-2 text-sm font-bold"><SquareTerminal size={14} className="text-accent" aria-hidden /> Arguments</h3>
-        <pre className="overflow-x-auto rounded-lg border border-line bg-bg px-3 py-2.5 font-mono text-[0.8rem] text-[#C9B6FF]">{args}</pre>
+        <pre className="overflow-x-auto rounded-lg border border-line bg-bg px-3 py-2.5 font-mono text-[0.8rem] text-soft">{args}</pre>
       </section>
 
       <section>
@@ -99,7 +99,7 @@ export default function AuditDetail({ record, thresholds, onClose }: { record: A
               {record.checks.map((c) => (
                 <span
                   key={c.check}
-                  className={`rounded-md border px-2 py-0.5 font-mono text-[0.74rem] ${c.flagged ? 'border-bad/40 bg-bad/10 text-[#FF8A94]' : 'border-line bg-bg text-[#C9B6FF]'}`}
+                  className={`rounded-md border px-2 py-0.5 font-mono text-[0.74rem] ${c.flagged ? 'border-bad/40 bg-bad/10 text-[#FF8A94]' : 'border-line bg-bg text-soft'}`}
                 >
                   {c.check}: {c.skipped ? 'skipped' : c.risk_score.toFixed(2)}
                   {c.flagged ? ' ⚑' : ''}

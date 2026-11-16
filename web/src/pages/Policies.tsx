@@ -70,10 +70,10 @@ function RuleCard({ rule, onOpen }: { rule: PolicyRule; onOpen: (v: View) => voi
       <div className="flex flex-wrap items-center gap-1.5 text-sm">
         <span className="mr-1 text-muted">Tools:</span>
         {(rule.tools ?? []).map((t) => (
-          <code key={t} className="rounded-md border border-line2 bg-accent/15 px-2 py-0.5 font-mono text-[0.78rem] font-bold text-[#E9D5FF]">{t}</code>
+          <code key={t} className="rounded-md border border-line2 bg-accent/15 px-2 py-0.5 font-mono text-[0.78rem] font-bold text-soft">{t}</code>
         ))}
         {Object.entries(rule.when ?? {}).map(([k, v]) => (
-          <code key={k} className="rounded-md border border-line bg-card2 px-2 py-0.5 font-mono text-[0.76rem] text-[#C9B6FF]">
+          <code key={k} className="rounded-md border border-line bg-card2 px-2 py-0.5 font-mono text-[0.76rem] text-soft">
             {k}: {JSON.stringify(v)}
           </code>
         ))}
@@ -126,7 +126,7 @@ function AddPolicy({ file }: { file: string }) {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-muted">
-        <code className="font-mono text-[#C9B6FF]">{file}</code> stays read-only at runtime. Check a rule against the PolicyRule schema and copy the YAML into the file.
+        <code className="font-mono text-soft">{file}</code> stays read-only at runtime. Check a rule against the PolicyRule schema and copy the YAML into the file.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm font-semibold">Rule ID<input className={input} value={f.id} onChange={(e) => set('id', e.target.value)} /></label>
@@ -139,20 +139,20 @@ function AddPolicy({ file }: { file: string }) {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Risk score: {f.risk.toFixed(2)}
-          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="h-10 cursor-pointer accent-[#9147FF]" />
+          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="h-10 cursor-pointer accent-[#C6FF3D]" />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Amount greater than (0 = none)
           <input type="number" min={0} step={1000} className={input} value={f.amountGt} onChange={(e) => set('amountGt', Math.max(0, Number(e.target.value)))} />
         </label>
         <label className="flex items-center gap-2 self-end text-sm font-semibold sm:min-h-10">
-          <input type="checkbox" checked={f.tainted} onChange={(e) => set('tainted', e.target.checked)} className="h-4 w-4 accent-[#9147FF]" />
+          <input type="checkbox" checked={f.tainted} onChange={(e) => set('tainted', e.target.checked)} className="h-4 w-4 accent-[#C6FF3D]" />
           Require tainted context
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold sm:col-span-2">Reason (Bangla)<input className={input} value={f.reason_bn} onChange={(e) => set('reason_bn', e.target.value)} /></label>
         <label className="flex flex-col gap-1 text-sm font-semibold sm:col-span-2">Reason (English)<input className={input} value={f.reason_en} onChange={(e) => set('reason_en', e.target.value)} /></label>
       </div>
       <button type="button" onClick={() => validate.mutate()} disabled={validate.isPending}
-        className="min-h-11 rounded-xl bg-gradient-to-r from-accent to-accent2 font-bold text-white disabled:opacity-60">
+        className="min-h-11 btn-primary rounded-xl font-bold disabled:opacity-60">
         Validate & generate YAML
       </button>
       {validate.error && <ErrorNote error={validate.error} />}
@@ -163,7 +163,7 @@ function AddPolicy({ file }: { file: string }) {
             <span className="text-sm font-semibold text-ok">Valid PolicyRule schema.</span>
             <CopyText text={validate.data.yaml} />
           </div>
-          <pre className="overflow-x-auto rounded-lg border border-line bg-bg p-3 font-mono text-[0.8rem] text-[#C9B6FF]">{validate.data.yaml}</pre>
+          <pre className="overflow-x-auto rounded-lg border border-line bg-bg p-3 font-mono text-[0.8rem] text-soft">{validate.data.yaml}</pre>
         </div>
       )}
     </div>
@@ -190,7 +190,7 @@ export default function Policies() {
       {data && (
         <>
           <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-            <Kpi icon={Layers} tint="#9147FF" value={rules.length} label="Total Policies" />
+            <Kpi icon={Layers} tint="#C6FF3D" value={rules.length} label="Total Policies" />
             <Kpi icon={ShieldX} tint="#FF526F" value={rules.filter((r) => r.decision === 'block').length} label="Block Policies" />
             <Kpi icon={CircleHelp} tint="#FFB547" value={rules.filter((r) => r.decision === 'ask_human').length} label="Ask Policies" />
           </div>
@@ -203,7 +203,7 @@ export default function Policies() {
                 ['ask_human', `Ask (${matched.filter((r) => r.decision === 'ask_human').length})`],
               ] as const).map(([id, label]) => (
                 <button key={id} type="button" role="radio" aria-checked={decision === id} onClick={() => setDecision(id)}
-                  className={`min-h-10 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap ${decision === id ? 'bg-gradient-to-r from-accent to-accent2 text-white' : 'text-[#D5DCF6] hover:bg-white/5'}`}>
+                  className={`min-h-10 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap ${decision === id ? 'btn-primary' : 'text-[#D6E0D9] hover:bg-white/5'}`}>
                   {label}
                 </button>
               ))}
@@ -216,7 +216,7 @@ export default function Policies() {
                 className="min-h-11 w-full rounded-xl border border-line bg-card2/80 pr-3 pl-9 text-sm placeholder:text-muted" />
             </label>
             <button type="button" onClick={() => setAdding(true)}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent2 px-5 text-sm font-bold text-white">
+              className="inline-flex min-h-11 items-center justify-center gap-2 btn-primary rounded-xl px-5 text-sm font-bold">
               <Plus size={16} aria-hidden /> Add Policy
             </button>
             </div>
@@ -240,8 +240,8 @@ export default function Policies() {
         <Modal title={<>Rule <code className="font-mono">{target.id}</code> · {open.view === 'yaml' ? 'YAML' : open.view === 'inspect' ? 'JSON' : 'Details'}</>} onClose={() => setOpen(null)}>
           {open.view === 'details' ? (
             <ul className="flex flex-col gap-2 text-sm">
-              <li><b>Decision:</b> <code className="font-mono text-[#C9B6FF]">{target.decision}</code> (risk <code className="font-mono">{target.risk ?? 0}</code>)</li>
-              <li><b>Tools:</b> <code className="font-mono text-[#C9B6FF]">{(target.tools ?? []).join(', ')}</code></li>
+              <li><b>Decision:</b> <code className="font-mono text-soft">{target.decision}</code> (risk <code className="font-mono">{target.risk ?? 0}</code>)</li>
+              <li><b>Tools:</b> <code className="font-mono text-soft">{(target.tools ?? []).join(', ')}</code></li>
               <li><b>English template:</b> {target.reason_en}</li>
               <li><b>Bangla template:</b> {target.reason_bn}</li>
             </ul>
@@ -250,7 +250,7 @@ export default function Policies() {
               <div className="flex justify-end">
                 <CopyText text={open.view === 'yaml' ? data.yaml[target.id] : JSON.stringify(target, null, 2)} />
               </div>
-              <pre className="overflow-x-auto rounded-lg border border-line bg-bg p-3 font-mono text-[0.8rem] text-[#C9B6FF]">
+              <pre className="overflow-x-auto rounded-lg border border-line bg-bg p-3 font-mono text-[0.8rem] text-soft">
                 {open.view === 'yaml' ? data.yaml[target.id] : JSON.stringify(target, null, 2)}
               </pre>
             </div>
