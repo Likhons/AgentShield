@@ -95,6 +95,10 @@ def test_audit_filters_detail_and_csv(client):
     assert one["tool_name"] == "send_money" and one["reason_bn"]
     assert client.get("/api/audit/does-not-exist").status_code == 404
 
+    assert body["newest"] and body["counts"]["total"] == body["total"]
+    only_blocks = client.get("/api/audit.csv", params={"decision": "block", "tool": "send_money"}).content
+    assert len(list(csv.reader(io.StringIO(only_blocks.decode("utf-8-sig"))))) - 1 == len(blocks)
+
     raw = client.get("/api/audit.csv").content
     assert raw.startswith(b"\xef\xbb\xbf")  # BOM keeps Bangla in Excel
     rows = list(csv.reader(io.StringIO(raw.decode("utf-8-sig"))))

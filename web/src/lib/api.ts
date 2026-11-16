@@ -122,6 +122,7 @@ export interface AuditPage {
   stats: AuditStats
   tools: string[]
   thresholds: Thresholds
+  newest: string | null
 }
 
 export interface AuditFilters {
@@ -129,6 +130,7 @@ export interface AuditFilters {
   search?: string
   tool?: string
   tainted?: boolean
+  min_risk?: number
   since?: string
   limit?: number
   offset?: number
@@ -222,7 +224,7 @@ export const api = {
     }),
   audit: (f: AuditFilters) => request<AuditPage>(`/api/audit${query({ ...f })}`),
   auditRecord: (id: string) => request<AuditRecord>(`/api/audit/${encodeURIComponent(id)}`),
-  auditCsvUrl: (f: Pick<AuditFilters, 'decision' | 'search' | 'since'>) => `/api/audit.csv${query({ ...f })}`,
+  auditCsvUrl: (f: Omit<AuditFilters, 'limit' | 'offset'>) => `/api/audit.csv${query({ ...f })}`,
   benchmarks: () => request<{ sections: BenchmarkSection[] }>('/api/benchmarks'),
   policies: () => request<{ file: string; rules: PolicyRule[]; thresholds: Thresholds }>('/api/policies'),
   datasets: () => request<Datasets>('/api/datasets'),

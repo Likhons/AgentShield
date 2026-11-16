@@ -260,6 +260,7 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         records, total, counts = audit.query(decision=decision, search=search, tool_name=tool, tainted=tainted,
                                              min_risk=min_risk, since_iso=since, limit=limit, offset=offset)
+        newest = audit.recent(limit=1)
         return {
             "records": [r.model_dump(mode="json") for r in records],
             "total": total,
@@ -267,12 +268,21 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             "stats": audit.stats(),
             "tools": audit.distinct_tools(),
             "thresholds": DecisionThresholds().model_dump(),
+            # date ranges count back from the newest event (as in Streamlit), so older demo data stays reachable
+            "newest": newest[0].timestamp.isoformat() if newest else None,
         }
 
     @app.get("/api/audit.csv", tags=["audit"])
-    def audit_export(decision: Literal["allow", "ask_human", "block"] | None = None, search: str | None = None,
-                     since: str | None = None) -> Response:
-        records, _, _ = audit.query(decision=decision, search=search, since_iso=since, limit=None)
+    def audit_export(
+        decision: Literal["allow", "ask_human", "block"] | None = None,
+        search: str | None = None,
+        tool: str | None = None,
+        tainted: bool | None = None,
+        min_risk: float | None = Query(None, ge=0.0, le=1.0),
+        since: str | None = None,
+    ) -> Response:
+        records, _, _ = audit.query(decision=decision, search=search, tool_name=tool, tainted=tainted,
+                                    min_risk=min_risk, since_iso=since, limit=None)
         return Response(audit_csv(records), media_type="text/csv; charset=utf-8",
                         headers={"Content-Disposition": 'attachment; filename="agentshield_audit.csv"'})
 
