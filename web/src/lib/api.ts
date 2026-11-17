@@ -253,6 +253,120 @@ export class ApiError extends Error {
   }
 }
 
+// -- network (simulated wallet, cross-user graph check: benchmark/network.py) --
+export type NetOutcome = 'moved' | 'agentshield' | 'network'
+export type NetTier = 'flagged' | 'cashout' | 'watch' | 'clear'
+
+export interface NetPayment {
+  t: string
+  amount?: number
+  outcome: NetOutcome
+}
+
+export interface NetMember {
+  number: string
+  role: 'collecting' | 'cash-out'
+  tier: NetTier
+  flagged_at: string | null
+  flagged_after: number | null
+  score: number
+  payers: number
+  attempts: NetPayment[]
+  received_from: string[]
+  origins: string[]
+  truth: string
+}
+
+export interface NetRing {
+  id: string
+  name: string
+  first: string
+  last: string
+  people: number
+  attempts: number
+  sources: string[]
+  origins: string[]
+  moved_per_call: number
+  moved_with_network: number
+  members: NetMember[]
+  edges: { from: string; to: string; amount: number; held: boolean }[]
+  truth: string[]
+}
+
+export interface NetAccount {
+  number: string
+  known_as: string
+  tier: NetTier
+  score: number
+  parts: { fan_in: number; pass_through: number; untrusted: number; linked: number }
+  strangers: number
+  pass_through: number
+  untrusted: number
+  linked: boolean
+  payers: number
+  flagged_at: string | null
+  flagged_after: number | null
+  truth: string
+  truth_role: string
+}
+
+export interface NetMoney {
+  scam_attempts: number
+  scam_moved: number
+  scam_moved_count: number
+  scam_stopped_agentshield: number
+  scam_stopped_network: number
+  legit_attempts: number
+  legit_paid: number
+  legit_blocked_network: number
+  legit_extra_confirm: number
+  legit_declined_network: number
+}
+
+export interface NetworkReport {
+  simulated: true
+  note: string
+  params: {
+    seed: number
+    window_hours: number
+    fan_in_full: number
+    min_inflow: number
+    weights: { fan_in: number; pass_through: number; untrusted: number; linked: number }
+    flag_at: number
+    watch_at: number
+    cashout_share: number
+    approve_legit: number
+    approve_scam: number
+  }
+  world: { users: number; accounts: number; payments: number; forwards: number; start: string; end: string }
+  per_call: NetMoney
+  with_network: NetMoney
+  spotlight: {
+    number: string
+    first_payment: { t: string; amount: number; source: string; origin: string | null; verdict: Decision; rule: string | null }
+    per_person_median: number
+    first_seen: string
+    flagged_at: string
+    flagged_after: number
+    people: number
+    last_seen: string
+    sources: string[]
+    payments: NetPayment[]
+  }
+  rings: NetRing[]
+  accounts: NetAccount[]
+  evaluation: {
+    mules: number
+    mules_flagged: number
+    mules_watch: number
+    cashouts: number
+    cashouts_found: number
+    legit_accounts: number
+    legit_flagged: number
+    legit_watch: number
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...init })
   if (!res.ok) {
@@ -289,6 +403,7 @@ export const api = {
   auditCsvUrl: (f: Omit<AuditFilters, 'limit' | 'offset'>) => `/api/audit.csv${query({ ...f })}`,
   benchmarks: () => request<{ sections: BenchmarkSection[] }>('/api/benchmarks'),
   policies: () => request<Policies>('/api/policies'),
+  network: () => request<NetworkReport>('/api/network'),
   validatePolicy: (rule: Record<string, unknown>) =>
     request<{ valid: boolean; yaml?: string; error?: string }>('/api/policies/validate', { method: 'POST', body: JSON.stringify(rule) }),
   doc: (name: 'results' | 'datasets-readme') => request<{ name: string; file: string; markdown: string }>(`/api/docs/${name}`),

@@ -2,7 +2,7 @@ import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import { useTheme } from '../lib/theme'
 import { useQuery } from '@tanstack/react-query'
-import { ChartColumn, GitBranch, Languages, Menu, ScrollText, SquareTerminal, X, type LucideIcon } from 'lucide-react'
+import { ChartColumn, GitBranch, Languages, Menu, ScrollText, SquareTerminal, Waypoints, X, type LucideIcon } from 'lucide-react'
 import type { Overview } from '../lib/api'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
@@ -31,6 +31,7 @@ const SECTIONS: { title: string; items: NavItem[] }[] = [
     items: [
       { to: '/policies', label: 'Policies', icon: GitBranch, badge: (o) => ({ text: String(o.policy_rules), kind: 'count' }) },
       { to: '/datasets', label: 'Datasets', icon: Languages, badge: () => ({ text: 'BN/EN', kind: 'tag' }) },
+      { to: '/network', label: 'Network', icon: Waypoints, badge: () => ({ text: 'SIM', kind: 'tag' }) },
     ],
   },
 ]

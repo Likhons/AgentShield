@@ -12,6 +12,7 @@ const AuditLog = lazy(() => import('./pages/AuditLog'))
 const Benchmarks = lazy(() => import('./pages/Benchmarks'))
 const Datasets = lazy(() => import('./pages/Datasets'))
 const Policies = lazy(() => import('./pages/Policies'))
+const Network = lazy(() => import('./pages/Network'))
 
 const page = (el: ReactNode) => <Suspense fallback={<Spinner />}>{el}</Suspense>
 
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="audit" element={page(<AuditLog />)} />
         <Route path="policies" element={page(<Policies />)} />
         <Route path="datasets" element={page(<Datasets />)} />
+        <Route path="network" element={page(<Network />)} />
         <Route path="*" element={<Placeholder title="Not found" sub="This page does not exist." />} />
       </Route>
     </Routes>

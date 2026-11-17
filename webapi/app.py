@@ -41,6 +41,7 @@ from agentshield.core.models import (AuditRecord, CheckName, ContextItem, Decisi
 from agentshield.llm import LLMError
 from agentshield.llm.mock import find_money_order, normalize
 from benchmark.dataset import load_dataset, summarize
+from benchmark.network import cached_report as network_report
 from benchmark.report import agent_rows, detection_rows, latest_where, outcome_rows
 from demo_agent.recording import load_result, recording_path
 from demo_agent.run import ScenarioResult, build_engine, run_scenario
@@ -497,6 +498,13 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             raise HTTPException(403, HIDDEN_NOTE)
         return Response(path.read_bytes(), media_type="application/jsonl",
                         headers={"Content-Disposition": f'attachment; filename="{path.name}"'})
+
+    # -- network (graph analysis over a simulated wallet) -------------------------
+    @app.get("/api/network", tags=["network"])
+    def network() -> dict[str, Any]:
+        """Simulated week of a wallet: per-call policy verdicts plus the cross-user graph check
+        (benchmark/network.py). Deterministic (fixed seed), computed once per process."""
+        return network_report()
 
     # -- sandbox (landing page "Open the demo") ------------------------------------
     # Visitors type their own request and email; the engine checks one send_money call. The intent judge is the
