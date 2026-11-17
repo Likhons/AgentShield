@@ -8,7 +8,7 @@ import ThemeToggle from '../components/ThemeToggle'
 import HeroSimulation from '../components/landing/HeroSimulation'
 import Pipeline from '../components/landing/Pipeline'
 import { CountUp, Reveal } from '../components/Motion'
-import { reducedMotion, smoothScrollTo, useInView } from '../lib/motion'
+import { reducedMotion, useInView } from '../lib/motion'
 
 const SandboxModal = lazy(() => import('../components/landing/SandboxModal'))
 
@@ -73,19 +73,16 @@ function Headline() {
   )
 }
 
-function Hero() {
+function Hero({ onRunAttack }: { onRunAttack: () => void }) {
   const ref = useRef<HTMLElement>(null)
   const card = useRef<HTMLDivElement>(null)
   const [runKey, setRunKey] = useState(0)
   useScrollProgress(ref)
 
+  // the card's own replay button restarts the recorded run; the hero CTA lets the visitor run the attack
+  // themselves in the sandbox (the fake Bangla bill is preloaded there)
   const replay = () => setRunKey((k) => k + 1)
-  // the hero CTA: replay the attack, and bring the card into view first where it sits below the text
-  const runAttack = () => {
-    replay()
-    const el = card.current
-    if (el && el.getBoundingClientRect().top > window.innerHeight * 0.6) smoothScrollTo(el, -96)
-  }
+  const runAttack = onRunAttack
 
   return (
     <section ref={ref} className="relative overflow-x-clip">
@@ -264,7 +261,7 @@ export default function Landing() {
       </header>
 
       <main id="main" className="relative">
-        <Hero />
+        <Hero onRunAttack={() => setDemoOpen(true)} />
         <HowItWorks />
         <Results />
         <section id="builders" className="relative scroll-mt-20 border-t border-fg/6">
