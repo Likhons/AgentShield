@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { api, type Decision, type SandboxInput, type SandboxSource } from '../../lib/api'
 import Modal from '../Modal'
@@ -8,11 +8,11 @@ import Modal from '../Modal'
 // Visitors type a request, the text the agent read, and the payment the agent wants to make; the demo server
 // checks that one send_money call with the real engine (offline intent judge, nothing logged) as they type.
 
-const LANG = { bn: 'Bangla', banglish: 'Banglish', en: 'English' } as Record<string, string>
-const DECISION: Record<Decision, { label: string; cls: string; bar: string }> = {
-  allow: { label: 'ALLOW', cls: 'border-ok/50 bg-ok/12 text-ok-ink', bar: 'bg-ok' },
-  ask_human: { label: 'ASK HUMAN', cls: 'border-warn/50 bg-warn/12 text-warn', bar: 'bg-warn' },
-  block: { label: 'BLOCK', cls: 'border-bad/60 bg-bad/15 text-bad-ink shadow-[0_0_40px_-12px_rgba(242,104,90,.42)]', bar: 'bg-bad' },
+const LANG: Record<string, ReactNode> = { bn: <span lang="bn">বাংলা</span>, banglish: 'Banglish', en: 'English' }
+const DECISION: Record<Decision, { word: string; bn: string; ink: string; pin: string }> = {
+  allow: { word: 'Allow', bn: 'অনুমোদিত', ink: 'text-ok-ink', pin: 'bg-ok' },
+  ask_human: { word: 'Ask the user', bn: 'অনুমতি দরকার', ink: 'text-warn-ink', pin: 'bg-warn' },
+  block: { word: 'Block', bn: 'আটকানো', ink: 'text-bad-ink', pin: 'bg-bad' },
 }
 const SOURCES: { value: SandboxSource; label: string }[] = [
   { value: 'tool:email', label: 'an email' },
@@ -29,16 +29,21 @@ function useDebounced<T>(value: T, ms: number) {
   return v
 }
 
-const box = 'rounded-xl border border-fg/10 bg-well/30 px-3 py-2.5 text-sm outline-none transition-colors focus:border-line2'
-const field = `w-full ${box}`
+const field = 'w-full rounded-xl border border-tile-line bg-well/25 px-3.5 py-2.5 text-[0.92rem] outline-none transition-colors focus:border-line2'
+/** Inputs inside the send_money(...) line: no box, just an underline, so the line still reads as one call. */
+const inline = 'border-0 border-b border-dashed border-fg/25 bg-transparent px-1 py-0.5 font-mono text-[0.95rem] text-ink outline-none transition-colors focus:border-solid focus:border-mark'
 
-/** Numbered step label: 1, 2, 3 make the order of the form obvious. */
-function StepLabel({ n, children, htmlFor }: { n: number; children: ReactNode; htmlFor?: string }) {
+/** One step of the story on the left rail: a dot on the line, a label, then the field. */
+function Step({ dot, label, aside, htmlFor, children }: { dot: string; label: ReactNode; aside?: ReactNode; htmlFor?: string; children: ReactNode }) {
   return (
-    <label htmlFor={htmlFor} className="mb-2 flex items-center gap-2 text-sm font-semibold">
-      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-fg/8 font-mono text-[0.7rem] text-muted">{n}</span>
+    <li className="relative">
+      <span className={`absolute top-[0.32rem] -left-[1.62rem] h-3 w-3 rounded-full ring-4 ring-card ${dot}`} aria-hidden />
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <label htmlFor={htmlFor} className="text-[0.88rem] font-semibold text-ink">{label}</label>
+        {aside}
+      </div>
       {children}
-    </label>
+    </li>
   )
 }
 
@@ -90,15 +95,17 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
   const d = v ? DECISION[v.decision] : null
   const t = check.data?.thresholds
   const waking = presets.isLoading || (check.isFetching && !check.data)
+  // real bills first, then the fake ones, so the control reads: real | fake (three languages) | blank
+  const ordered = presets.data ? [...presets.data.presets].sort((a, b) => Number(a.kind !== 'normal') - Number(b.kind !== 'normal')) : []
 
   return (
     <Modal
-      title="Try AgentShield on your own text"
+      title="Try it on your own text"
       onClose={onClose}
       wide
       footer={
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-muted">Real AgentShield engine · offline judge, no LLM call · nothing is saved · fake demo data</p>
+          <p className="font-mono text-[0.72rem] text-muted">real engine · offline judge, no LLM call · nothing saved · fake demo data</p>
           <Link to="/playground" className="btn-primary lift inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold">
             Try it with a real agent <ArrowRight size={15} aria-hidden />
           </Link>
@@ -112,139 +119,184 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
           <Loader2 size={16} className="animate-spin" aria-hidden /> Waking the demo server. The first request can take about a minute.
         </p>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
-          <div className="flex min-w-0 flex-col gap-5">
-            <div>
-              <span className="mb-2 block text-xs font-semibold text-muted">Start from a demo email, or write your own</span>
-              <div className="flex flex-wrap gap-2">
-                {presets.data!.presets.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => applyPreset(p.id)}
-                    aria-pressed={picked === p.id}
-                    className={`lift min-h-9 rounded-full border px-3 text-xs font-semibold ${
-                      picked === p.id ? 'nav-pill-active' : 'border-fg/10 text-body hover:border-fg/20'
-                    }`}
-                  >
-                    {p.kind === 'normal' ? 'Real rent bill' : 'Fake bill'} · {LANG[p.language] ?? p.language}
-                  </button>
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:gap-8">
+          {/* phones: the verdict panel sits under the form, so a slim live summary stays pinned at the top */}
+          {v && d && (
+            <button
+              type="button"
+              onClick={() => document.getElementById('sandbox-verdict')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="sticky -top-4 z-10 -mx-4 -mt-4 flex items-center justify-between gap-3 border-b border-line bg-card/95 px-4 py-2.5 backdrop-blur sm:-mx-5 sm:px-5 lg:hidden"
+            >
+              <span className="flex items-baseline gap-2">
+                <span className={`font-display text-[1.15rem] font-semibold ${d.ink}`}>{d.word}</span>
+                <span className="font-mono text-[0.78rem] text-muted tabular-nums">risk {v.risk_score.toFixed(2)}</span>
+              </span>
+              <span className="text-[0.78rem] text-muted">why ↓</span>
+            </button>
+          )}
+          <div className="flex min-w-0 flex-col gap-6">
+            {/* examples: one quiet segmented control instead of a cloud of pills */}
+            <div className="min-w-0">
+              <span className="mb-2 block text-[0.8rem] text-muted">Start from an example</span>
+              <div role="group" aria-label="Examples" className="flex max-w-full gap-1 overflow-x-auto rounded-xl border border-tile-line bg-fg/[0.025] p-1 [mask-image:linear-gradient(90deg,#000_82%,transparent)] [scrollbar-width:none] sm:[mask-image:none]">
+                {ordered.map((p, i) => (
+                  <Fragment key={p.id}>
+                    {/* fake bills share one label, so each button only names its language */}
+                    {p.kind !== 'normal' && (i === 0 || ordered[i - 1].kind === 'normal') && (
+                      <>
+                        {i > 0 && <span className="my-1.5 w-px shrink-0 bg-line2" aria-hidden />}
+                        <span className="flex shrink-0 items-center pr-0.5 pl-2 text-[0.76rem] text-muted">Fake bill</span>
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => applyPreset(p.id)}
+                      aria-pressed={picked === p.id}
+                      aria-label={`${p.kind === 'normal' ? 'Real rent bill' : 'Fake bill'}, ${p.language}`}
+                      className={`min-h-9 shrink-0 rounded-lg px-3 text-[0.82rem] font-semibold whitespace-nowrap transition-colors duration-300 ${
+                        picked === p.id ? 'bg-fg/[0.09] text-ink shadow-[inset_0_0_0_1px_var(--color-line2)]' : 'text-body hover:bg-fg/[0.04]'
+                      }`}
+                    >
+                      {p.kind === 'normal' ? 'Real rent' : (LANG[p.language] ?? p.language)}
+                    </button>
+                  </Fragment>
                 ))}
+                <span className="my-1.5 w-px shrink-0 bg-line2" aria-hidden />
                 <button
                   type="button"
                   onClick={() => { setPicked(''); set({ content: '', to: '', amount: 1000 }) }}
                   aria-pressed={picked === ''}
-                  className={`lift min-h-9 rounded-full border px-3 text-xs font-semibold ${picked === '' ? 'nav-pill-active' : 'border-fg/10 text-body hover:border-fg/20'}`}
+                  className={`min-h-9 shrink-0 rounded-lg px-3 text-[0.82rem] font-semibold whitespace-nowrap transition-colors duration-300 ${
+                    picked === '' ? 'bg-fg/[0.09] text-ink shadow-[inset_0_0_0_1px_var(--color-line2)]' : 'text-body hover:bg-fg/[0.04]'
+                  }`}
                 >
-                  Write your own
+                  Blank
                 </button>
               </div>
             </div>
 
-            <div>
-              <StepLabel n={1} htmlFor="sandbox-request">What the user asked the agent</StepLabel>
-              <input id="sandbox-request" className={field} value={input.user_request} maxLength={600} onChange={(e) => set({ user_request: e.target.value })} />
-            </div>
+            {/* the story, top to bottom on one rail: what the user said, what the agent read, what it wants to do */}
+            <ol className="relative flex flex-col gap-6 pl-7">
+              <span className="absolute top-2 bottom-3 left-[0.47rem] w-px bg-gradient-to-b from-fg/25 via-warn/40 to-mark/50" aria-hidden />
+              <Step dot="bg-fg/60" label="The user asks" htmlFor="sandbox-request">
+                <input id="sandbox-request" className={field} value={input.user_request} maxLength={600} onChange={(e) => set({ user_request: e.target.value })} />
+              </Step>
 
-            <div>
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <StepLabel n={2} htmlFor="sandbox-content">What the agent read</StepLabel>
-                <select
-                  aria-label="Where the text came from"
-                  className="min-h-8 rounded-lg border border-fg/10 bg-well/40 px-2 text-xs"
-                  value={input.source}
-                  onChange={(e) => set({ source: e.target.value as SandboxSource })}
-                >
-                  {SOURCES.map((s) => <option key={s.value} value={s.value}>from {s.label}</option>)}
-                </select>
-              </div>
-              <textarea
-                id="sandbox-content"
-                data-lenis-prevent
-                placeholder="Paste an email, web page or file text, in English, Bangla or Banglish"
-                className={`${field} min-h-36 resize-y leading-relaxed`}
-                value={input.content}
-                maxLength={4000}
-                onChange={(e) => { setPicked(''); set({ content: e.target.value }) }}
-              />
-              {check.data?.found_order && (check.data.found_order.to !== input.to || check.data.found_order.amount !== input.amount) && (
-                <button
-                  type="button"
-                  onClick={() => set({ to: check.data!.found_order!.to, amount: check.data!.found_order!.amount })}
-                  className="mt-1.5 text-xs font-semibold text-soft underline underline-offset-2"
-                >
-                  The text asks to send {check.data.found_order.amount} to {check.data.found_order.to}. Use that as the payment
-                </button>
-              )}
-            </div>
+              <Step
+                dot="bg-warn"
+                htmlFor="sandbox-content"
+                label="The agent reads"
+                aside={
+                  <select
+                    aria-label="Where the text came from"
+                    className="min-h-8 rounded-lg border border-transparent bg-transparent px-1.5 text-[0.8rem] text-muted hover:border-tile-line focus:border-line2"
+                    value={input.source}
+                    onChange={(e) => set({ source: e.target.value as SandboxSource })}
+                  >
+                    {SOURCES.map((s) => <option key={s.value} value={s.value}>from {s.label}</option>)}
+                  </select>
+                }
+              >
+                <textarea
+                  id="sandbox-content"
+                  data-lenis-prevent
+                  placeholder="Paste an email, web page or file text, in English, Bangla or Banglish"
+                  className={`${field} max-h-60 min-h-36 resize-y text-[0.88rem] leading-relaxed`}
+                  value={input.content}
+                  maxLength={4000}
+                  onChange={(e) => { setPicked(''); set({ content: e.target.value }) }}
+                />
+                {check.data?.found_order && (check.data.found_order.to !== input.to || check.data.found_order.amount !== input.amount) && (
+                  <button
+                    type="button"
+                    onClick={() => set({ to: check.data!.found_order!.to, amount: check.data!.found_order!.amount })}
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-tile-line px-2.5 py-1 text-[0.78rem] text-body hover:border-line2"
+                  >
+                    The text asks for {check.data.found_order.amount} to {check.data.found_order.to}: use it <ArrowRight size={12} aria-hidden />
+                  </button>
+                )}
+              </Step>
 
-            <fieldset>
-              <legend className="contents"><StepLabel n={3}>The payment the agent wants to make</StepLabel></legend>
-              <div className="flex flex-wrap items-center gap-2 font-mono text-sm">
-                <span className="text-soft">send_money(</span>
-                <input aria-label="Recipient number" inputMode="numeric" className={`${box} w-36 font-mono sm:w-40`} value={input.to} maxLength={20}
-                  onChange={(e) => set({ to: e.target.value })} />
-                <input aria-label="Amount in taka" type="number" min={1} className={`${box} w-24 font-mono sm:w-28`} value={input.amount || ''}
-                  onChange={(e) => set({ amount: Math.max(0, Math.floor(Number(e.target.value))) })} />
-                <span className="text-soft">)</span>
-              </div>
-              <p className="mt-1.5 text-xs text-muted">
-                Saved contacts: {Object.entries(presets.data!.contacts).map(([n, num]) => `${n} ${num}`).join(', ')}.
-              </p>
-            </fieldset>
+              <Step dot="bg-mark" label="The agent wants to run">
+                <div className="flex flex-wrap items-baseline gap-x-1 gap-y-2 rounded-xl border border-tile-line bg-well/25 px-3.5 py-3 font-mono text-[0.95rem]">
+                  <span className="text-soft">send_money(</span>
+                  <input aria-label="Recipient number" inputMode="numeric" className={`${inline} w-[8.5rem]`} value={input.to} maxLength={20}
+                    onChange={(e) => set({ to: e.target.value })} />
+                  <span className="text-muted">,</span>
+                  <input aria-label="Amount in taka" type="number" min={1} className={`${inline} w-[5.5rem]`} value={input.amount || ''}
+                    onChange={(e) => set({ amount: Math.max(0, Math.floor(Number(e.target.value))) })} />
+                  <span className="text-soft">)</span>
+                </div>
+                <p className="mt-2 text-[0.78rem] text-muted">
+                  Saved contacts: {Object.entries(presets.data!.contacts).map(([n, num]) => `${n} ${num}`).join(' · ')}
+                </p>
+              </Step>
+            </ol>
           </div>
 
-          {/* the decision stays in view while the form scrolls */}
-          <div className="min-w-0 lg:sticky lg:top-0 lg:self-start" aria-live="polite">
-            <div className="glass p-4 sm:p-5">
-              <div className="flex items-center justify-between gap-3">
-                <span className="font-mono text-[0.72rem] tracking-[0.18em] text-muted uppercase">Decision · live</span>
-                {check.isFetching && <Loader2 size={14} className="animate-spin text-muted" aria-label="Checking" />}
-              </div>
+          {/* the verdict stays in view while the form scrolls */}
+          <div id="sandbox-verdict" className="min-w-0 scroll-mt-14 lg:sticky lg:top-0 lg:self-start" aria-live="polite">
+            <div className="rounded-2xl border border-tile-line bg-well/20 p-5 sm:p-6">
               {check.isError && !check.data ? (
-                <p className="mt-3 text-sm text-bad-pale">{(check.error as Error).message}</p>
+                <p className="text-sm text-bad-pale">{(check.error as Error).message}</p>
               ) : !v || !d ? (
-                <p className="mt-3 text-sm text-muted">{waking ? 'Checking… the first request can take about a minute while the server wakes.' : 'Fill in steps 1 to 3.'}</p>
+                <p className="text-sm text-muted">{waking ? 'Checking… the first request can take about a minute while the server wakes.' : 'Fill in the three steps on the left.'}</p>
               ) : (
                 <>
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <span className={`inline-flex min-h-10 items-center rounded-xl border px-4 font-mono text-base font-bold tracking-wide transition-colors duration-500 ${d.cls}`}>
-                      {d.label}
-                    </span>
-                    <span className="font-mono text-sm tabular-nums text-ink">risk {v.risk_score.toFixed(2)}</span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[0.8rem] text-muted">AgentShield would</div>
+                      <div key={v.decision} className={`verdict-in font-display text-[2.4rem] leading-[1.05] font-semibold tracking-[-0.035em] ${d.ink}`}>{d.word}</div>
+                      <div lang="bn" className={`text-[0.95rem] ${d.ink} opacity-80`}>{d.bn}</div>
+                    </div>
+                    <div className="shrink-0 text-right font-mono text-[0.72rem] text-muted tabular-nums">
+                      {check.isFetching ? <Loader2 size={14} className="ml-auto animate-spin" aria-label="Checking" /> : <>checked in<br /><span className="text-body">{v.total_latency_ms < 10 ? v.total_latency_ms.toFixed(1) : Math.round(v.total_latency_ms)} ms</span></>}
+                    </div>
                   </div>
-                  {/* risk gauge with the two thresholds */}
-                  <div className="relative mt-4 h-2 rounded-full bg-fg/[0.06]" role="img" aria-label={`Risk ${v.risk_score.toFixed(2)} of 1`}>
-                    <div className={`fill-bar h-full rounded-full ${d.bar}`} style={{ transform: `scaleX(${Math.max(0.02, v.risk_score)})` }} />
-                    {t && [t.ask_human_at, t.block_at].map((x) => (
-                      <span key={x} className="absolute -top-1 h-4 w-px bg-fg/40" style={{ left: `${x * 100}%` }} aria-hidden />
-                    ))}
-                  </div>
+
+                  {/* risk on a track split into the three bands; the pin slides to the score */}
                   {t && (
-                    <div className="mt-1 flex justify-between font-mono text-[0.66rem] text-muted tabular-nums">
-                      <span>0</span><span>ask ≥ {t.ask_human_at}</span><span>block ≥ {t.block_at}</span><span>1</span>
+                    <div className="mt-6">
+                      <div className="mb-2 flex items-baseline justify-between font-mono text-[0.72rem] text-muted">
+                        <span>risk</span>
+                        <span className={`text-[0.95rem] font-semibold tabular-nums ${d.ink}`}>{v.risk_score.toFixed(2)}</span>
+                      </div>
+                      <div className="relative" role="img" aria-label={`Risk ${v.risk_score.toFixed(2)} of 1; ask from ${t.ask_human_at}, block from ${t.block_at}`}>
+                        <div className="flex h-1.5 gap-[3px]">
+                          <span className="rounded-full bg-ok/30" style={{ width: `${t.ask_human_at * 100}%` }} />
+                          <span className="rounded-full bg-warn/30" style={{ width: `${(t.block_at - t.ask_human_at) * 100}%` }} />
+                          <span className="flex-1 rounded-full bg-bad/30" />
+                        </div>
+                        <span className={`gauge-pin absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-4 ring-card ${d.pin}`} style={{ left: `${v.risk_score * 100}%` }} />
+                      </div>
+                      <div className="relative mt-2 h-4 font-mono text-[0.66rem] text-muted">
+                        <span className="absolute left-0">allow</span>
+                        <span className="absolute -translate-x-1/2" style={{ left: `${((t.ask_human_at + t.block_at) / 2) * 100}%` }}>ask</span>
+                        <span className="absolute right-0">block</span>
+                      </div>
                     </div>
                   )}
-                  <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
+
+                  {/* the four checks as a quiet ledger: a dot turns red only when a check flags */}
+                  <dl className="mt-5 grid grid-cols-2 gap-x-6 border-t border-line pt-4">
                     {v.checks.map((c) => (
-                      <li key={c.check} className="text-[0.82rem]">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-semibold capitalize">{c.check}</span>
-                          <span className={`font-mono text-[0.72rem] tabular-nums ${c.skipped ? 'text-muted' : c.flagged ? 'text-bad-soft' : 'text-ok-ink'}`}>
-                            {c.skipped ? 'not needed' : c.risk_score.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="mt-1 h-1 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden>
-                          <div className={`fill-bar h-full rounded-full ${c.flagged ? 'bg-bad' : 'bg-ok'}`} style={{ transform: `scaleX(${c.skipped ? 0 : c.risk_score})` }} />
-                        </div>
-                      </li>
+                      <div key={c.check} className="flex items-center justify-between gap-2 py-1.5 text-[0.86rem]">
+                        <dt className="flex items-center gap-2 capitalize">
+                          <span className={`h-1.5 w-1.5 rounded-full ${c.skipped ? 'bg-fg/20' : c.flagged ? 'bg-bad' : 'bg-ok'}`} aria-hidden />
+                          {c.check}
+                        </dt>
+                        <dd className={`font-mono text-[0.78rem] tabular-nums ${c.skipped ? 'text-muted' : c.flagged ? 'text-bad-ink' : 'text-body'}`}>
+                          {c.skipped ? 'not needed' : c.risk_score.toFixed(2)}
+                        </dd>
+                      </div>
                     ))}
-                  </ul>
-                  <div className="mt-4 border-t border-line pt-3">
-                    <p lang="bn" className="text-[0.95rem]">{firstSentence(v.reason_bn, true)}</p>
-                    <p className="mt-1 text-[0.82rem] text-muted">{firstSentence(v.reason_en)}</p>
-                    <details className="group mt-2">
-                      <summary className="cursor-pointer list-none text-xs font-semibold text-soft [&::-webkit-details-marker]:hidden">
+                  </dl>
+
+                  <div className="mt-4 border-t border-line pt-4">
+                    <p lang="bn" className="text-[0.98rem] leading-relaxed">{firstSentence(v.reason_bn, true)}</p>
+                    <p className="mt-1.5 text-[0.84rem] leading-relaxed text-muted">{firstSentence(v.reason_en)}</p>
+                    <details className="group mt-3">
+                      <summary className="cursor-pointer list-none text-[0.8rem] text-muted underline decoration-fg/25 underline-offset-4 hover:text-ink [&::-webkit-details-marker]:hidden">
                         <span className="group-open:hidden">Full reason</span><span className="hidden group-open:inline">Hide full reason</span>
                       </summary>
                       <p lang="bn" className="mt-2 text-sm text-body">{v.reason_bn}</p>
