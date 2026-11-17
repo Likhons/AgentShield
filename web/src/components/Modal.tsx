@@ -5,7 +5,7 @@ import { lockScroll, unlockScroll } from '../lib/motion'
 
 /** Accessible dialog: Escape and backdrop close it, focus moves in and back, background does not scroll.
  *  Full screen on phones, a centred panel from the sm breakpoint up. */
-export default function Modal({ title, onClose, children, wide = false }: { title: ReactNode; onClose: () => void; children: ReactNode; wide?: boolean }) {
+export default function Modal({ title, onClose, children, wide = false, footer }: { title: ReactNode; onClose: () => void; children: ReactNode; wide?: boolean; footer?: ReactNode }) {
   const panel = useRef<HTMLDivElement>(null)
   const close = useRef(onClose)
   useEffect(() => {
@@ -42,6 +42,8 @@ export default function Modal({ title, onClose, children, wide = false }: { titl
           </button>
         </div>
         <div data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">{children}</div>
+        {/* always visible under the scrolling body */}
+        {footer && <div className="border-t border-line px-4 py-3 sm:px-5">{footer}</div>}
       </div>
     </div>,
     document.body,
