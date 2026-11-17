@@ -43,18 +43,31 @@ const HEADLINE_WORDS = HEADLINE.map((line, i) => ({
 
 function Headline() {
   return (
-    <h1 className="text-[clamp(2.2rem,6vw,3.8rem)] leading-[1.04] font-extrabold tracking-[-0.03em]" aria-label={HEADLINE.join(' ')}>
-      {HEADLINE_WORDS.map(({ line, words }, i) => (
-        <span key={line} className="hero-line block" style={{ ['--dir' as string]: i % 2 ? '1' : '-1' }} aria-hidden>
-          {words.map(({ word, index }) => (
-            <span key={index} className="word-rise inline-block" style={{ animationDelay: `${0.08 + 0.06 * index}s` }}>
-              {word}&nbsp;
+    <>
+      <span className="word-rise inline-flex items-center gap-2.5 rounded-full border border-line2 bg-accent/[0.05] px-4 py-1.5 font-mono text-[0.74rem] tracking-[0.16em] text-body uppercase">
+        <span className="h-2 w-2 rounded-full bg-mark shadow-[0_0_10px_var(--color-mark)]" aria-hidden /> Runtime action firewall
+      </span>
+      <h1 className="mt-6 text-[clamp(2.3rem,6.2vw,4rem)] leading-[1.04] font-extrabold tracking-[-0.03em]" aria-label={HEADLINE.join(' ')}>
+        {HEADLINE_WORDS.map(({ line, words }, i) =>
+          i === HEADLINE.length - 1 ? (
+            // the last line rises as one piece, so its gradient runs across both words
+            <span key={line} className="hero-line block" style={{ ['--dir' as string]: '-1' }} aria-hidden>
+              <span className="hero-gradient word-rise inline-block pb-[0.08em]" style={{ animationDelay: `${0.08 + 0.06 * words[0].index}s` }}>
+                {line}
+              </span>
             </span>
-          ))}
-          {i === HEADLINE.length - 1 && <span className="caret" />}
-        </span>
-      ))}
-    </h1>
+          ) : (
+            <span key={line} className="hero-line block" style={{ ['--dir' as string]: i % 2 ? '1' : '-1' }} aria-hidden>
+              {words.map(({ word, index }) => (
+                <span key={index} className="word-rise inline-block" style={{ animationDelay: `${0.08 + 0.06 * index}s` }}>
+                  {word}&nbsp;
+                </span>
+              ))}
+            </span>
+          ),
+        )}
+      </h1>
+    </>
   )
 }
 
@@ -85,7 +98,7 @@ function Hero() {
               AgentShield checks every action an AI agent is about to take, such as sending money, and stops the ones the
               user never asked for. It catches tricks hidden in emails, web pages and files, in Bangla, Banglish and English.
             </p>
-            <p lang="bn" className="mt-3 max-w-[56ch] text-[1.02rem] text-sub">
+            <p lang="bn" className="bn-callout mt-5 w-fit max-w-full text-[1.02rem]">
               এআই এজেন্ট টাকা পাঠানোর আগে AgentShield প্রতিটি কাজ যাচাই করে।
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -234,10 +247,10 @@ export default function Landing() {
             <span className="icon-tile h-9 w-9"><ShieldCheck size={19} className="text-soft" aria-hidden /></span>
             <span className="font-display text-[1.1rem] font-extrabold tracking-[-0.03em]">AgentShield</span>
           </Link>
-          <div className="hidden items-center gap-6 text-sm text-body md:flex">
-            <a href="#how" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">How it works</a>
-            <a href="#results" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">Results</a>
-            <a href="#builders" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">For developers</a>
+          <div className="hidden items-center gap-7 text-[0.95rem] md:flex">
+            <a href="#how" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">How it works</a>
+            <a href="#results" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">Results</a>
+            <a href="#builders" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">For developers</a>
           </div>
           <div className="flex items-center gap-2.5">
             <ThemeToggle />

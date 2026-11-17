@@ -584,6 +584,29 @@ html[data-theme='light'] .nav-pill-active { background: rgb(212 255 42 / 0.45); 
 @keyframes chip-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 .chip-float { animation: chip-float 5s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -0.8s); }
 
+/* landing hero: the last headline line in lime fading to mint (the user asked for this gradient) */
+.hero-gradient {
+  background-image: linear-gradient(90deg, #d4ff2a 0%, #8ef08a 45%, #5eead4 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+html[data-theme='light'] .hero-gradient { background-image: linear-gradient(90deg, #5c8a00 0%, #059669 55%, #0d9488 100%); }
+
+/* landing hero: the Bangla line as a callout with a lime-to-emerald bar on its left edge */
+.bn-callout {
+  position: relative; overflow: hidden; border-radius: 14px; padding: 0.85rem 1.15rem 0.85rem 1.4rem;
+  color: var(--color-ink); font-weight: 500;
+  background: linear-gradient(90deg, rgb(212 255 42 / 0.05), rgb(15 22 19 / 0.55) 45%);
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+.bn-callout::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: linear-gradient(180deg, #d4ff2a, #10b981);
+}
+html[data-theme='light'] .bn-callout {
+  background: linear-gradient(90deg, rgb(212 255 42 / 0.22), rgb(255 255 255 / 0.75) 45%); border-color: rgb(12 22 17 / 0.09);
+}
+html[data-theme='light'] .bn-callout::before { background: linear-gradient(180deg, #8cc800, #059669); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
