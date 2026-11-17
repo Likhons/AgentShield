@@ -287,6 +287,8 @@ export default function Landing() {
       </main>
 
       <footer className="footer-dots relative border-t border-fg/6">
+        {/* a few dots of the grid light up and fade, each set on its own rhythm */}
+        <div className="footer-twinkle" aria-hidden><span /><span /><span /><span /></div>
         <div className="relative mx-auto flex max-w-6xl flex-col gap-4 px-4 py-14 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>Built for the International AI Builders Congress 2026. Demo data is fake: numbers start with 010, domains end in .example.</p>
           <div className="flex gap-5">

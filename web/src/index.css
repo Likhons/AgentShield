@@ -425,6 +425,28 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 @keyframes spring-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
 .spring-in { animation: spring-in 0.8s var(--ease-spring) backwards; animation-delay: calc(var(--i, 0) * 80ms); }
 
+/* benchmarks: table rows rise one after another once the table is seen, their rate bars fill a beat later;
+   the CI band opens out from the estimate while the dot travels from the WITHOUT value to the WITH value */
+.bm-table:not(.is-seen) .bm-row { opacity: 0; }
+.bm-table.is-seen .bm-row { animation: item-in 0.55s var(--ease-spring) backwards; animation-delay: calc(var(--i, 0) * 60ms); }
+.bm-bar { transform: scaleX(0); transform-origin: left center; transition: transform 1.1s var(--ease-spring); transition-delay: calc(var(--i, 0) * 60ms + 250ms); }
+.bm-table.is-seen .bm-bar { transform: scaleX(1); }
+.bm-table.is-seen .bm-pill { animation: pill-glow 1.4s ease-out calc(var(--i, 0) * 60ms + 500ms) 1 backwards; }
+@keyframes pill-glow { 0% { box-shadow: 0 0 0 0 rgb(var(--ok-rgb) / 0.45); } 100% { box-shadow: 0 0 0 8px rgb(var(--ok-rgb) / 0); } }
+.bm-pills > * { animation: item-in 0.5s var(--ease-out-soft) backwards; }
+.bm-pills > :nth-child(2) { animation-delay: 70ms; }
+.bm-pills > :nth-child(3) { animation-delay: 140ms; }
+.bm-pills > :nth-child(4) { animation-delay: 210ms; }
+.ci-band { transform: scaleX(0); opacity: 0.55; transition: transform 1.2s var(--ease-spring) 0.35s; }
+.ci-band.is-in { transform: scaleX(1); }
+.ci-dot { transition: left 1.3s var(--ease-spring) 0.15s; box-shadow: 0 0 12px currentColor; }
+.bm-delta { opacity: 0; transform: translateY(4px) scale(0.92); transition: opacity 0.5s, transform 0.6s var(--ease-spring); transition-delay: 1.1s; }
+.bm-delta.is-in { opacity: 1; transform: none; }
+.bm-chart-bar path { transition: fill-opacity 0.3s; }
+.donut-slice { cursor: pointer; transition: stroke-dasharray 1.1s var(--ease-spring), stroke-width 0.35s var(--ease-spring), opacity 0.3s; }
+@keyframes donut-center { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: none; } }
+.donut-center { animation: donut-center 0.35s var(--ease-spring); }
+
 /* primary CTA: a light sweeps across now and then */
 @keyframes btn-shimmer { 0%, 70% { transform: translateX(-120%) skewX(-18deg); } 100% { transform: translateX(260%) skewX(-18deg); } }
 .btn-shimmer { position: relative; overflow: hidden; isolation: isolate; }
@@ -569,6 +591,27 @@ html[data-theme='light'] .connector-y::after { background: linear-gradient(180de
   -webkit-mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.2), #000 55%);
   mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.2), #000 55%);
 }
+/* twinkle: four sparse sets of lime dots that sit exactly on the 11 px grid above (periods and offsets are
+   multiples of 11 px); each set fades in and out on its own period, so the lit dots look scattered and random */
+.footer-twinkle {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 45%);
+  mask-image: linear-gradient(180deg, transparent, #000 45%);
+  --tw: rgb(var(--accent-rgb) / 0.95); --tw-halo: rgb(var(--accent-rgb) / 0.22);
+}
+.footer-twinkle > span {
+  position: absolute; inset: 0; opacity: 0;
+  background-image: radial-gradient(circle, var(--tw) 1.1px, var(--tw-halo) 2px, transparent 3.5px);
+  animation: twinkle 4s ease-in-out infinite;
+}
+.footer-twinkle > span:nth-child(1) { background-size: 55px 143px; background-position: 27px 38px; animation-duration: 3.4s; }
+.footer-twinkle > span:nth-child(2) { background-size: 187px 77px; background-position: 49px 16px; animation-duration: 4.6s; animation-delay: -1.2s; }
+.footer-twinkle > span:nth-child(3) { background-size: 121px 99px; background-position: 71px 93px; animation-duration: 5.8s; animation-delay: -2.9s; }
+.footer-twinkle > span:nth-child(4) { background-size: 143px 55px; background-position: 5px 60px; animation-duration: 4.1s; animation-delay: -0.6s; }
+@keyframes twinkle { 0%, 100% { opacity: 0; } 45%, 55% { opacity: 1; } }
+html[data-theme='light'] .footer-twinkle { --tw: rgb(47 106 31 / 0.85); --tw-halo: rgb(140 198 63 / 0.25); }
+@media (prefers-reduced-motion: reduce) { .footer-twinkle > span { opacity: 0.35; } }
+
 .footer-dots::after {
   background:
     radial-gradient(520px 220px at 18% 100%, rgb(var(--accent-rgb) / 0.036), transparent 70%),
@@ -735,6 +778,8 @@ html[data-theme='light'] .glass-blur { background: rgb(251 250 245 / 0.78); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
+  .bm-row, .bm-delta { opacity: 1 !important; transform: none !important; }
+  .bm-bar, .ci-band { transform: none !important; }
   .hero-line, .hero-card { transform: none; }
   .sim-item, .stamp { opacity: 1; transform: none; }
   .stamp { transform: rotate(-8deg); }
