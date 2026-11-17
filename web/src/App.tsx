@@ -1,4 +1,3 @@
-import { FileText } from 'lucide-react'
 import { lazy, Suspense, type ReactNode } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
@@ -27,7 +26,7 @@ export default function App() {
         <Route path="audit" element={page(<AuditLog />)} />
         <Route path="policies" element={page(<Policies />)} />
         <Route path="datasets" element={page(<Datasets />)} />
-        <Route path="*" element={<Placeholder icon={FileText} title="Not found" sub="This page does not exist." />} />
+        <Route path="*" element={<Placeholder title="Not found" sub="This page does not exist." />} />
       </Route>
     </Routes>
   )

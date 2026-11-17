@@ -316,7 +316,7 @@ export default function Policies() {
 
   return (
     <>
-      <PageHeader icon={Shield} title="Policies" sub={sub} right={<Precedence />} />
+      <PageHeader title="Policies" sub={sub} right={<Precedence />} />
       {isPending && <PageSkeleton cards={3} />}
       {error && <ErrorNote error={error} />}
       {data && (

@@ -6,20 +6,46 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
   return <section className={`card p-4 sm:p-5 ${className}`}>{children}</section>
 }
 
-export function PageHeader({ icon: Icon, title, sub, right }: { icon: LucideIcon; title: string; sub: ReactNode; right?: ReactNode }) {
+/** Page title. A short mono path sits above it instead of an icon tile, like a location in a console. */
+export function PageHeader({ title, sub, right }: { title: string; sub: ReactNode; right?: ReactNode }) {
   return (
-    <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3.5">
-        <span className="icon-tile h-12 w-12">
-          <Icon size={24} className="text-soft" aria-hidden />
-        </span>
-        <div className="min-w-0">
-          <h1 className="text-[clamp(1.8rem,2.6vw,2.3rem)] leading-[1.08] font-semibold tracking-[-0.035em]">{title}</h1>
-          <p className="mt-0.5 text-sm text-muted">{sub}</p>
+    <header className="mb-6 flex flex-col gap-4 border-b border-line pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <div className="font-mono text-[0.72rem] text-muted">
+          <span className="text-soft">agentshield</span> / {title.toLowerCase()}
         </div>
+        <h1 className="mt-1.5 text-[clamp(1.8rem,2.6vw,2.3rem)] leading-[1.08] font-semibold tracking-[-0.035em]">{title}</h1>
+        <p className="mt-2 max-w-[74ch] text-[0.92rem] leading-relaxed text-body">{sub}</p>
       </div>
-      {right && <div className="flex shrink-0 gap-2">{right}</div>}
+      {right && <div className="flex shrink-0 flex-wrap gap-2">{right}</div>}
     </header>
+  )
+}
+
+export interface Stat {
+  label: string
+  value: ReactNode
+  note?: ReactNode
+  /** CSS colour for the number */
+  tone?: string
+  /** takes two columns (custom content such as a split bar) */
+  wide?: boolean
+}
+
+/** Key numbers in one glass rail split by hairlines: no icon tiles, the numbers carry the page. */
+export function StatRail({ items, label }: { items: Stat[]; label: string }) {
+  return (
+    <dl aria-label={label} className="stat-rail glass grid grid-cols-2 overflow-hidden">
+      {items.map((s, i) => (
+        <div key={s.label} className={`stat-cell spring-in min-w-0 px-4 py-4 sm:px-5 sm:py-5 ${s.wide ? 'is-wide' : ''}`} style={{ ['--i' as string]: i }}>
+          <dt className="text-[0.8rem] text-muted">{s.label}</dt>
+          <dd className="mt-2 font-display text-[1.75rem] leading-none font-semibold tracking-[-0.03em] tabular-nums sm:text-[2.1rem]" style={s.tone ? { color: s.tone } : undefined}>
+            {s.value}
+          </dd>
+          {s.note && <dd className="mt-2 text-[0.75rem] leading-snug text-muted">{s.note}</dd>}
+        </div>
+      ))}
+    </dl>
   )
 }
 

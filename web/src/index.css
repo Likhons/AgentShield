@@ -425,6 +425,24 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 @keyframes spring-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
 .spring-in { animation: spring-in 0.8s var(--ease-spring) backwards; animation-delay: calc(var(--i, 0) * 80ms); }
 
+/* stat rail: cells split by hairlines. Phones: two columns, a wide or odd last cell takes the whole row.
+   From 1024 px: one row, a wide cell counts double. */
+.stat-cell.is-wide, .stat-cell:last-child:nth-child(odd) { grid-column: 1 / -1; }
+@media (max-width: 1023px) {
+  .stat-cell:nth-child(even):not(.is-wide) { border-left: 1px solid var(--color-line); }
+  .stat-cell:nth-child(n+3) { border-top: 1px solid var(--color-line); }
+}
+@media (min-width: 1024px) {
+  .stat-rail { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 1fr; }
+  .stat-cell:last-child:nth-child(odd) { grid-column: auto; }
+  .stat-rail .stat-cell.is-wide { grid-column: span 2; }
+  .stat-cell + .stat-cell { border-left: 1px solid var(--color-line); }
+}
+
+/* audit decision split: the parts grow in from the left one after another */
+@keyframes split-grow { from { transform: scaleX(0); } to { transform: none; } }
+.split-seg { transform-origin: left center; animation: split-grow 1s var(--ease-spring) backwards; animation-delay: calc(0.25s + var(--i, 0) * 0.15s); }
+
 /* policies precedence strip: the two '>' nudge right one after the other and brighten, reading block -> ask -> allow */
 .prec-arrow { display: inline-block; opacity: 0.45; animation: prec-nudge 2.2s var(--ease-out-soft) var(--d, 0s) infinite; }
 @keyframes prec-nudge {

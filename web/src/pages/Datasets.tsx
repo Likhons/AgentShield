@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChartColumn, Database, Download, ExternalLink, Eye, FileText, Globe, Laptop, Lock, RefreshCw, Search } from 'lucide-react'
+import { Download, ExternalLink, Eye, FileText, Lock, RefreshCw, Search } from 'lucide-react'
 import { useState } from 'react'
 import Donut from '../components/Donut'
 import Markdown from '../components/Markdown'
@@ -14,10 +14,10 @@ type FileInfo = DatasetsData['files'][number]
 type Action = 'preview' | 'open'
 
 function SourcePill({ sources }: { sources: string[] }) {
-  const Icon = sources.some((s) => s.includes('external')) ? Globe : Laptop
+  const external = sources.some((s) => s.includes('external'))
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-lg border border-line2 bg-accent/12 px-2.5 py-1 text-[0.76rem] font-semibold text-soft">
-      <Icon size={13} aria-hidden /> {sources.join(', ')}
+    <span className={`font-mono text-[0.76rem] ${external ? 'text-info-ink' : 'text-soft'}`}>
+      {sources.map((s) => s.replace(/_/g, ' ')).join(' + ')}
     </span>
   )
 }
@@ -142,19 +142,16 @@ export default function Datasets() {
 
   return (
     <>
-      <PageHeader icon={Database} title="Datasets" sub="Labeled texts used by the benchmark and for training. Fake data only (numbers start with 010, domains end in .example)." right={headerRight} />
+      <PageHeader title="Datasets" sub="Labeled texts used by the benchmark and for training. Fake data only (numbers start with 010, domains end in .example)." right={headerRight} />
       {isPending && <PageSkeleton cards={3} />}
       {error && <ErrorNote error={error} />}
       {data && (
         <div className="flex flex-col gap-4">
           <div className="grid gap-4 lg:grid-cols-[1.48fr_1fr]">
             <Card>
-              <div className="mb-4 flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line2 bg-accent/15 text-soft"><ChartColumn size={19} aria-hidden /></span>
-                <div>
-                  <h2 className="font-bold">Language Distribution</h2>
-                  <p className="text-[0.8rem] text-muted">Number of samples by language in the dataset.</p>
-                </div>
+              <div className="mb-4">
+                <h2 className="text-[1.15rem] font-semibold tracking-[-0.02em]">By language</h2>
+                <p className="text-[0.82rem] text-muted">Attack and normal texts per language.</p>
               </div>
               <table className="hidden w-full text-sm sm:table">
                 <thead className="text-xs text-muted">
@@ -206,12 +203,9 @@ export default function Datasets() {
 
           <Card>
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line2 bg-accent/15 text-soft"><FileText size={19} aria-hidden /></span>
-                <div>
-                  <h2 className="font-bold">Dataset Files</h2>
-                  <p className="text-[0.8rem] text-muted">Dataset files, sizes and usage across the platform.</p>
-                </div>
+              <div>
+                <h2 className="text-[1.15rem] font-semibold tracking-[-0.02em]">Files</h2>
+                <p className="text-[0.82rem] text-muted">What each file holds and how much of it a person has reviewed.</p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
                 <label className="relative">
@@ -241,7 +235,7 @@ export default function Datasets() {
                     <tbody>
                       {files.map((f, i) => (
                         <tr key={f.file} style={stagger(i)} className="stagger-item border-b border-line/50 hover:bg-accent/5">
-                          <td className="px-2 py-3"><span className="inline-flex items-center gap-2 font-semibold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-soft">{'{}'}</span>{f.file}</span></td>
+                          <td className="px-2 py-3"><span className="inline-flex items-center gap-2 font-semibold"><span className="font-mono text-[0.86rem]">{f.file}</span></span></td>
                           <td className="px-2 py-3 tabular-nums">{f.items}</td>
                           <td className="px-2 py-3 whitespace-nowrap tabular-nums">{f.reviewed} / {f.items}</td>
                           <td className="min-w-[160px] px-2 py-3"><Progress pct={f.items ? Math.round((f.reviewed / f.items) * 100) : 0} delay={i * 110} /></td>
@@ -261,7 +255,7 @@ export default function Datasets() {
                   {files.map((f, i) => (
                     <li key={f.file} style={stagger(i)} className="stagger-item flex flex-col gap-2.5 rounded-xl border border-line bg-card2/50 p-3.5">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-2 font-bold"><span className="rounded-md border border-line2 bg-accent/15 px-1.5 font-mono text-xs text-soft">{'{}'}</span>{f.file}</span>
+                        <span className="inline-flex items-center gap-2 font-bold"><span className="font-mono text-[0.86rem]">{f.file}</span></span>
                         <SourcePill sources={f.sources} />
                       </div>
                       <div className="flex justify-between text-[0.82rem]"><span>Items: <b>{f.items}</b></span><span>Reviewed: <b>{f.reviewed} / {f.items}</b></span></div>

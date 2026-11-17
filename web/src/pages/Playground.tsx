@@ -1,15 +1,11 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  Banknote, CircleCheck, CircleHelp, FileCode2, FileText, Globe, Hourglass, MailWarning, Play, ShieldCheck, ShieldX, Zap,
-  type LucideIcon,
-} from 'lucide-react'
+import { CircleCheck, CircleHelp, Hourglass, MailWarning, ShieldCheck, ShieldX, Zap, type LucideIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import AuditDrawer from '../components/AuditDrawer'
-import HeroArt from '../components/HeroArt'
 import { AnimatedValue } from '../components/Motion'
 import RunResultView from '../components/RunResultView'
-import { DecisionBadge, ErrorNote, Skeleton } from '../components/ui'
+import { DecisionBadge, ErrorNote, PageHeader, Skeleton, StatRail } from '../components/ui'
 import {
   api, type AuditPage, type AuditRecord, type CheckResult, type Decision, type RunMode, type RunResult, type Scenario, type Step,
   type Thresholds, type Verdict,
@@ -38,85 +34,43 @@ function FlowBar({ value, tone, busy = false, className = 'h-1.5' }: { value: nu
 // ---------------------------------------------------------------------------
 // hero
 
-function Hero() {
-  return (
-    <div className="grid items-center gap-6 xl:grid-cols-[1.05fr_1fr]">
-      <div className="spring-in">
-        <span className="glass inline-flex items-center gap-2 rounded-full! px-3 py-1 text-xs font-semibold text-soft">
-          <span className="h-1.5 w-1.5 rounded-full bg-ok shadow-[0_0_8px_var(--color-ok)]" aria-hidden /> AgentShield AI Safety Playground
-        </span>
-        <h1 className="mt-4 text-[clamp(1.75rem,6.2vw,2.2rem)] leading-[1.08] font-extrabold tracking-[-0.025em] lg:text-[2.75rem]">
-          <span className="block">Stop AI Agents from Acting&nbsp;on</span>
-          <span className="text-soft">Hidden Instructions</span>
-        </h1>
-        <p className="mt-4 max-w-[560px] text-[0.95rem] leading-relaxed text-body lg:text-base">
-          AgentShield checks every tool call before it runs, so an AI agent cannot be tricked into sending money by text
-          hidden in emails, web pages or files, in Bangla, Banglish and English.
-        </p>
-        <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
-          <a href="#run-scenario" className="btn-primary btn-shimmer lift inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 font-bold">
-            <Play size={14} fill="currentColor" aria-hidden /> Try a Scenario
-          </a>
-          <Link to="/audit" className="glass lift inline-flex min-h-12 items-center justify-center gap-2 rounded-xl! px-6 font-bold hover:border-line2!">
-            <FileText size={16} aria-hidden /> View Audit Logs
-          </Link>
-        </div>
-      </div>
-      <HeroArt />
-    </div>
-  )
-}
-
 // ---------------------------------------------------------------------------
-// KPI bento
-
-function Kpi({ icon: Icon, tint, num, label, note, index }: { icon: LucideIcon; tint: string; num: string; label: string; note: string; index: number }) {
-  return (
-    <div style={{ ['--i' as string]: index }} className="spring-in">
-      <div className="glass spotlight tilt flex h-full flex-col gap-3 p-4 sm:p-5">
-        <div className="relative flex items-center justify-between gap-2">
-          <span
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-            style={{ background: `color-mix(in srgb, ${tint} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 30%, transparent)` }}
-          >
-            <Icon size={20} color={tint} aria-hidden />
-          </span>
-        </div>
-        <div className="relative min-w-0">
-          <div className="font-mono text-[1.7rem] leading-none font-bold tabular-nums sm:text-[2rem]"><AnimatedValue value={num} /></div>
-          <div className="mt-1.5 text-[0.84rem] font-semibold sm:text-sm">{label}</div>
-          <div className="mt-0.5 text-[0.72rem] text-muted sm:text-xs">{note}</div>
-        </div>
-      </div>
-    </div>
-  )
-}
+// key numbers
 
 const todayUtc = () => `${new Date().toISOString().slice(0, 10)}T00:00:00+00:00`
 
-function Kpis() {
+function PlaygroundStats() {
   const { data } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
   // BLOCK decisions in the audit log since 00:00 UTC (runs on this page add to it)
   const blocked = useQuery({ queryKey: ['audit', 'blocked-today'], queryFn: () => api.audit({ decision: 'block', since: todayUtc(), limit: 1 }) })
-  if (!data)
-    return (
-      <div className="my-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" aria-hidden>
-        {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-[150px]" />)}
-      </div>
-    )
+  if (!data) return <Skeleton className="h-[118px]" />
   const real = data.real_llm
   const langs = Object.keys(data.attack_samples.by_language).length
   const blockedTotal = blocked.data?.stats.block
   return (
-    <div className="my-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-      <Kpi index={0} icon={ShieldCheck} tint="var(--color-soft)" num={String(data.checks.length)} label="Active Security Layers"
-        note={data.checks.map((c) => c[0].toUpperCase() + c.slice(1)).join(' · ')} />
-      <Kpi index={1} icon={Globe} tint="var(--color-info)" num={String(langs)} label="Supported Languages" note="Bangla · Banglish · English" />
-      <Kpi index={2} icon={ShieldX} tint="var(--color-bad)" num={blocked.data ? String(blocked.data.total) : '–'} label="Blocked Attacks Today"
-        note={blockedTotal !== undefined ? `Since 00:00 UTC · ${blockedTotal} in the audit log` : 'From the audit log'} />
-      <Kpi index={3} icon={Banknote} tint="var(--color-ok)" num={real ? `${real.with.hits}/${real.with.total}` : '–'} label="Unauthorized Transfers"
-        note={real ? `Real LLM with AgentShield · ${real.without.hits}/${real.without.total} without` : 'No real-LLM run yet'} />
-    </div>
+    <StatRail
+      label="Key numbers"
+      items={[
+        {
+          label: 'Blocked today',
+          value: blocked.data ? <AnimatedValue value={String(blocked.data.total)} /> : '–',
+          tone: 'var(--color-bad-ink)',
+          note: blockedTotal !== undefined ? `since 00:00 UTC · ${blockedTotal} in the whole log` : 'from the audit log',
+        },
+        {
+          label: 'Money sent to attackers, real model',
+          value: real ? <><AnimatedValue value={String(real.with.hits)} /><span className="text-muted">/{real.with.total}</span></> : '–',
+          tone: 'var(--color-ok-ink)',
+          note: real ? `with AgentShield · ${real.without.hits}/${real.without.total} without` : 'no real-model run yet',
+        },
+        {
+          label: 'Checks before each tool call',
+          value: <AnimatedValue value={String(data.checks.length)} />,
+          note: data.checks.join(' · '),
+        },
+        { label: 'Languages', value: <AnimatedValue value={String(langs)} />, note: 'Bangla · Banglish · English' },
+      ]}
+    />
   )
 }
 
@@ -126,7 +80,7 @@ function Kpis() {
 const MODES: { id: RunMode; label: string; caption: string }[] = [
   { id: 'mock', label: 'Offline', caption: 'Simulated naive agent. Works offline.' },
   { id: 'groq', label: 'Live (Groq)', caption: 'Real model via Groq, same tools. Can take up to a minute.' },
-  { id: 'recorded', label: 'Recorded Run', caption: 'Instant replay of a saved real run.' },
+  { id: 'recorded', label: 'Recorded run', caption: 'Instant replay of a saved real run.' },
 ]
 
 const DECISION_BN: Record<Decision, string> = { allow: 'অনুমোদিত', ask_human: 'অনুমতি দরকার', block: 'আটকানো' }
@@ -150,9 +104,6 @@ const callText = (tool: string, args: Record<string, unknown>) =>
 /** HH:MM:SS in UTC. */
 const clock = (iso: string) => new Date(iso).toISOString().slice(11, 19)
 
-function MonoLabel({ children }: { children: ReactNode }) {
-  return <span className="font-mono text-[0.7rem] tracking-[0.14em] text-muted uppercase">{children}</span>
-}
 
 // ---------------------------------------------------------------------------
 // scenario runner
@@ -182,8 +133,8 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
     <section id="run-scenario" className="glass spotlight flex scroll-mt-20 flex-col gap-5 overflow-hidden p-5 sm:p-7" aria-busy={scanning}>
       {scanning && <span className="laser" aria-hidden />}
       <div className="relative">
-        <h2 className="text-[1.3rem] font-bold">Run a Safety Scenario</h2>
-        <p className="mt-1 text-sm text-muted">Test the same task on an unprotected agent and on an agent protected by AgentShield.</p>
+        <h2 className="text-[1.3rem] font-semibold tracking-[-0.02em]">Run a scenario</h2>
+        <p className="mt-1 text-sm text-muted">Pick who runs it, pick a story, run.</p>
         <div role="radiogroup" aria-label="Agent mode" className="mt-4 inline-flex max-w-full gap-1 rounded-xl border border-tile-line bg-fg/[0.03] p-1">
           {MODES.map(({ id, label }) => {
             const off = disabled(id)
@@ -210,7 +161,7 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
       </div>
 
       <div className="relative border-t border-line pt-5">
-        <label htmlFor="scenario" className="mb-2 block"><MonoLabel>Select attack / benign preset</MonoLabel></label>
+        <label htmlFor="scenario" className="mb-2 block text-sm font-semibold">Scenario</label>
         <select
           id="scenario"
           value={scenario?.name}
@@ -226,7 +177,7 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
       {/* what the agent will be given */}
       <div className="relative rounded-2xl border border-tile-line bg-well/25 p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <span className="flex items-center gap-2"><FileCode2 size={15} className="text-soft" aria-hidden /><MonoLabel>Live context payload</MonoLabel></span>
+          <span className="text-sm font-semibold">What the agent will read</span>
           <span className={`rounded-md border px-2 py-0.5 font-mono text-[0.72rem] ${firstSource ? 'border-bad/40 bg-bad/10 text-bad-ink' : 'border-ok/35 bg-ok/10 text-ok-ink'}`}>
             {firstSource ? `untrusted: ${firstSource}` : 'trusted: user only'}
           </span>
@@ -286,7 +237,7 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
           {scanning ? (
             <><span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-ink/30 border-t-accent-ink" aria-hidden /> Agent is working…</>
           ) : (
-            <><Zap size={16} fill="currentColor" aria-hidden /> Run Scenario</>
+            <><Zap size={16} fill="currentColor" aria-hidden /> Run scenario</>
           )}
         </button>
       </div>
@@ -341,7 +292,7 @@ function HowItWorks({ scenario, scanning, decided, thresholds }: {
     <section className="glass spotlight flex h-full flex-col p-5 sm:p-7">
       <div className="relative flex items-start justify-between gap-3 border-b border-line pb-5">
         <div>
-          <h2 className="text-[1.3rem] font-bold">How AgentShield Works</h2>
+          <h2 className="text-[1.3rem] font-semibold tracking-[-0.02em]">How it decides</h2>
           <p className="mt-1 text-sm text-muted">Every tool call is intercepted and checked before it runs.</p>
         </div>
         <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[0.74rem] ${scanning ? 'border-line2 bg-accent/10 text-soft' : 'border-ok/35 bg-ok/10 text-ok-ink'}`}>
@@ -350,13 +301,13 @@ function HowItWorks({ scenario, scanning, decided, thresholds }: {
       </div>
       <div className="relative mt-5 flex-1">
         <FlowNode
-          icon={MailWarning} iconCls="border-warn/40 bg-warn/10 text-warn-ink" title="Untrusted Input" sub="Email · Web Page · Document"
+          icon={MailWarning} iconCls="border-warn/40 bg-warn/10 text-warn-ink" title="Untrusted input" sub="Email · Web Page · Document"
           tag={hasUntrusted ? 'TAINTED' : 'CLEAN'} tagCls={hasUntrusted ? 'border-warn/45 bg-warn/12 text-warn-ink' : 'border-ok/40 bg-ok/12 text-ok-ink'}
           cls="border-tile-line bg-tile"
         />
         <FlowLink flowing={scanning} />
         <FlowNode
-          icon={ShieldCheck} iconCls="border-accent/40 bg-accent/12 text-soft" title="AgentShield Gateway"
+          icon={ShieldCheck} iconCls="border-accent/40 bg-accent/12 text-soft" title="AgentShield gateway"
           sub={decided ? `4 checks · ${decided.latency < 10 ? decided.latency.toFixed(1) : Math.round(decided.latency)} ms` : '4 checks before every tool call'}
           tag="INSPECT" tagCls="border-accent/45 bg-accent/12 text-soft" cls={`border-accent/30 bg-accent/[0.05] ${scanning ? 'is-lit' : ''}`}
         />
@@ -451,7 +402,7 @@ function PipelineCards({ data, scanning, thresholds }: { data: PipelineData | nu
     <section className="glass spotlight p-5 sm:p-7">
       <div className="relative flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-[1.3rem] font-bold">Evaluation Pipeline</h2>
+          <h2 className="text-[1.3rem] font-semibold tracking-[-0.02em]">The four checks</h2>
           <p className="mt-1 text-sm text-muted">Four checks run before every tool call; the stricter of score and policy wins.</p>
           {data && !scanning && (
             <p className="mt-1.5 font-mono text-[0.74rem] text-muted">
@@ -541,7 +492,7 @@ function RecentEvaluations({ scanning }: { scanning: boolean }) {
     <section className="glass spotlight p-5 sm:p-7">
       <div className="relative flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-[1.3rem] font-bold">Recent Evaluations</h2>
+          <h2 className="text-[1.3rem] font-semibold tracking-[-0.02em]">Recent decisions</h2>
           <p className="mt-1 text-sm text-muted">Click any row to inspect the full JSON audit trace and taint lineage.</p>
         </div>
         <div role="tablist" aria-label="Filter by decision" className="inline-flex gap-1 rounded-xl border border-tile-line bg-fg/[0.03] p-1">
@@ -702,8 +653,12 @@ export default function Playground() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <Hero />
-        <Kpis />
+        <PageHeader
+          title="Playground"
+          sub="Give the same task to an unprotected agent and to one behind AgentShield, then compare what each one did with the money."
+          right={<Link to="/audit" className="hidden min-h-11 items-center gap-1.5 rounded-xl border border-line2 px-4 text-sm font-semibold hover:bg-fg/5 sm:inline-flex">Audit log →</Link>}
+        />
+        <PlaygroundStats />
       </div>
 
       <div className="grid items-stretch gap-5 xl:grid-cols-[1.2fr_1fr]">

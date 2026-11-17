@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Bot, ChartColumn, Check, Database, FileText, Laptop, RefreshCw, Shield, ShieldCheck, Activity, Workflow, Bug } from 'lucide-react'
+import { ChartColumn, Check, FileText, Shield, ShieldCheck, Bug } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Bar, BarChart, CartesianGrid, LabelList, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import Donut from '../components/Donut'
@@ -30,23 +30,25 @@ const OUTCOME_COLORS: Record<string, string> = {
   'attacker paid': 'var(--color-bad)',
 }
 
-function Pill({ icon: Icon, children, tone = 'plain' }: { icon: typeof Shield; children: ReactNode; tone?: 'plain' | 'real' | 'sim' }) {
-  const cls = tone === 'real' ? 'border-ok/45 bg-ok/12 text-ok-ink' : tone === 'sim' ? 'border-warn/45 bg-warn/10 text-warn' : 'border-line bg-bg/60 text-body'
+/** One fact about the run, as "key value" in mono; real and simulated providers get their colour. */
+function Pill({ k, children, tone = 'plain' }: { k: string; children: ReactNode; tone?: 'plain' | 'real' | 'sim' }) {
+  const cls = tone === 'real' ? 'text-ok-ink' : tone === 'sim' ? 'text-warn-ink' : 'text-body'
   return (
-    <span className={`inline-flex items-start gap-1.5 rounded-lg border px-2.5 py-1 text-[0.78rem] font-semibold break-words ${cls}`}>
-      <Icon size={13} className="mt-0.5 shrink-0" aria-hidden />
-      <span>{children}</span>
+    <span className="font-mono text-[0.76rem] break-words">
+      <span className="text-muted">{k}</span> <span className={cls}>{children}</span>
     </span>
   )
 }
 
-function SectionBanner({ icon: Icon, title, children }: { icon: typeof Shield; title: string; children: ReactNode }) {
+function SectionBanner({ index, title, children }: { index: number; title: string; children: ReactNode }) {
   return (
-    <div className="glass spotlight flex flex-col items-start gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-      <span className="icon-tile relative h-12 w-12"><Icon size={24} className="text-soft" aria-hidden /></span>
-      <div className="relative min-w-0">
-        <h2 className="text-[1.2rem] font-semibold tracking-[-0.02em]">{title}</h2>
-        <div className="bm-pills mt-2 flex flex-wrap gap-1.5">{children}</div>
+    <div className="flex flex-col gap-2 border-b border-line pb-4">
+      <div className="flex items-baseline gap-3">
+        <span className="font-mono text-[0.8rem] text-soft tabular-nums">{String(index + 1).padStart(2, '0')}</span>
+        <h2 className="text-[clamp(1.25rem,2vw,1.55rem)] font-semibold tracking-[-0.025em]">{title}</h2>
+      </div>
+      <div className="min-w-0 pl-0 sm:pl-8">
+        <div className="bm-pills flex flex-wrap gap-x-4 gap-y-1">{children}</div>
       </div>
     </div>
   )
@@ -168,7 +170,7 @@ function ShiftStat({ label, before, after, icon: Icon, tone, index }: { label: s
   )
 }
 
-function AgentBlock({ s }: { s: AgentSection }) {
+function AgentBlock({ s, index }: { s: AgentSection; index: number }) {
   const all = s.rows.find((r) => r.language === 'all') ?? s.rows[0]
   const att = all?.['attack success WITH AgentShield']
   const attBefore = all?.['attack success WITHOUT AgentShield']
@@ -177,11 +179,11 @@ function AgentBlock({ s }: { s: AgentSection }) {
   const real = s.provider !== 'mock'
   return (
     <section className="flex flex-col gap-4">
-      <SectionBanner icon={Bot} title={s.title}>
-        <Pill icon={FileText}>Source: {s.source}</Pill>
-        <Pill icon={Laptop} tone={real ? 'real' : 'sim'}>Provider: {s.provider}{s.note ? ` (${s.note})` : ''}</Pill>
-        <Pill icon={Shield}>Detector: {s.detector}</Pill>
-        <Pill icon={RefreshCw}>Runs per item: {s.runs}</Pill>
+      <SectionBanner index={index} title={s.title}>
+        <Pill k="source">{s.source}</Pill>
+        <Pill k="provider" tone={real ? 'real' : 'sim'}>{s.provider}{s.note ? ` (${s.note})` : ''}</Pill>
+        <Pill k="detector">{s.detector}</Pill>
+        <Pill k="runs per item">{s.runs}</Pill>
       </SectionBanner>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.8fr)_2fr]">
@@ -218,7 +220,7 @@ function AgentBlock({ s }: { s: AgentSection }) {
       {s.outcome_totals.length > 0 && (
         <>
           <div className="flex flex-wrap items-baseline gap-2">
-            <h3 className="flex items-center gap-2 font-bold"><Workflow size={18} className="text-soft" aria-hidden /> How each case ended with AgentShield</h3>
+            <h3 className="font-semibold tracking-[-0.01em]">How each case ended with AgentShield</h3>
             <span className="text-sm text-muted">(held for approval = one human click, not a block)</span>
           </div>
           <div className="grid gap-4 xl:grid-cols-[minmax(310px,1fr)_1.58fr]">
@@ -321,13 +323,13 @@ function DetectionChart({ s }: { s: DetectionSection }) {
   )
 }
 
-function DetectionBlock({ s }: { s: DetectionSection }) {
+function DetectionBlock({ s, index }: { s: DetectionSection; index: number }) {
   return (
     <section className="flex flex-col gap-4">
-      <SectionBanner icon={ShieldCheck} title={s.title}>
-        <Pill icon={FileText}>Source: {s.source}</Pill>
-        <Pill icon={Database}>Dataset: {s.dataset}</Pill>
-        <Pill icon={Activity}>{s.note}</Pill>
+      <SectionBanner index={index} title={s.title}>
+        <Pill k="source">{s.source}</Pill>
+        <Pill k="dataset">{s.dataset}</Pill>
+        <Pill k="note">{s.note}</Pill>
       </SectionBanner>
       <TableCard hint="Swipe table horizontally for all detector metrics">
         <table className="w-full min-w-[620px] border-collapse text-[0.83rem]">
@@ -359,7 +361,6 @@ export default function Benchmarks() {
   return (
     <>
       <PageHeader
-        icon={ChartColumn}
         title="Benchmarks"
         sub="Numbers come only from saved runs in benchmark/results/. Small samples: read the 95% intervals. Full write-up with caveats: docs/results.md."
         right={
@@ -371,8 +372,8 @@ export default function Benchmarks() {
       {isPending && <PageSkeleton cards={2} />}
       {error && <ErrorNote error={error} />}
       <div className="flex flex-col gap-10">
-        {data?.sections.map((s) => (
-          <Reveal key={s.title}>{s.kind === 'agent' ? <AgentBlock s={s} /> : <DetectionBlock s={s} />}</Reveal>
+        {data?.sections.map((s, i) => (
+          <Reveal key={s.title}>{s.kind === 'agent' ? <AgentBlock s={s} index={i} /> : <DetectionBlock s={s} index={i} />}</Reveal>
         ))}
       </div>
       {docOpen && (

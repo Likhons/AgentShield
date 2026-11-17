@@ -1,15 +1,12 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import {
-  Activity, ChevronLeft, ChevronRight, CircleCheck, CircleHelp, CircleX, Download, FileText, Filter, Layers, Search, Zap,
-  type LucideIcon,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Filter, Search } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
 import AuditDetail from '../components/AuditDetail'
 import ToolIcon from '../components/ToolIcon'
 import { AnimatedValue } from '../components/Motion'
-import { Card, DecisionBadge, ErrorNote, PageHeader, PageSkeleton } from '../components/ui'
+import { Card, DecisionBadge, ErrorNote, PageHeader, PageSkeleton, StatRail } from '../components/ui'
 import { api, type AuditRecord, type Decision, type Thresholds } from '../lib/api'
 import { riskLevel, utcFull } from '../lib/audit'
 import { short } from '../lib/format'
@@ -34,16 +31,28 @@ function useDebounced<T>(value: T, ms = 300): T {
   return v
 }
 
-function Kpi({ icon: Icon, tint, label, value, note, wide = false }: { icon: LucideIcon; tint: string; label: string; value: string; note: string; wide?: boolean }) {
+/** Allow / ask / block as parts of one bar that grows in, with the counts under it. */
+function DecisionSplit({ stats }: { stats: { total: number; allow: number; ask_human: number; block: number } }) {
+  const parts = [
+    { key: 'allow', label: 'allowed', n: stats.allow, bar: 'bg-ok', ink: 'text-ok-ink' },
+    { key: 'ask', label: 'asked', n: stats.ask_human, bar: 'bg-warn', ink: 'text-warn-ink' },
+    { key: 'block', label: 'blocked', n: stats.block, bar: 'bg-bad', ink: 'text-bad-ink' },
+  ]
+  const share = (n: number) => (stats.total ? (n / stats.total) * 100 : 0)
   return (
-    <div className={`card flex flex-col items-start gap-2.5 p-4 sm:flex-row sm:items-center sm:gap-3.5 ${wide ? 'col-span-2 flex-row! items-center! md:col-span-1' : ''}`}>
-      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${tint} 13%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 33%, transparent)` }}>
-        <Icon size={20} color={tint} aria-hidden />
-      </span>
-      <div className="min-w-0">
-        <div className="text-[0.8rem] text-muted">{label}</div>
-        <div className="text-[1.45rem] leading-tight font-display font-bold tabular-nums"><AnimatedValue value={value} /></div>
-        <div className="text-[0.74rem] font-semibold" style={{ color: tint }}>{note}</div>
+    <div className="font-sans text-base tracking-normal">
+      <div className="split-bar flex h-2.5 w-full gap-[3px] overflow-hidden rounded-full" aria-hidden>
+        {parts.map((p, i) => p.n > 0 && (
+          <span key={p.key} className={`split-seg h-full rounded-full ${p.bar}`} style={{ flexGrow: p.n, flexBasis: 0, minWidth: 6, ['--i' as string]: i }} />
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[0.84rem]">
+        {parts.map((p) => (
+          <span key={p.key} className="inline-flex items-baseline gap-1.5">
+            <b className={`font-display text-[1.25rem] font-semibold tabular-nums ${p.ink}`}><AnimatedValue value={String(p.n)} /></b>
+            <span className="text-muted">{p.label} · {share(p.n) < 1 && p.n > 0 ? share(p.n).toFixed(1) : Math.round(share(p.n))}%</span>
+          </span>
+        ))}
       </div>
     </div>
   )
@@ -183,7 +192,6 @@ export default function AuditLog() {
   const counts = data?.counts
   const total = data?.total ?? 0
   const pages = Math.max(1, Math.ceil(total / pageSize))
-  const pct = (n: number, digits = 0) => (stats?.total ? `${((n / stats.total) * 100).toFixed(digits)}% of total` : '0% of total')
   const chips: { id: Decision | 'all'; name: string; count: number }[] = useMemo(
     () => [
       { id: 'all', name: 'All', count: counts?.total ?? 0 },
@@ -217,24 +225,25 @@ export default function AuditLog() {
 
   return (
     <>
-      <PageHeader icon={FileText} title="Audit Log" sub="Every AgentShield decision, newest first (SQLite, path from AUDIT_DB_PATH)." right={headerRight} />
+      <PageHeader title="Audit Log" sub="Every AgentShield decision, newest first (SQLite, path from AUDIT_DB_PATH)." right={headerRight} />
 
       {error && <ErrorNote error={error} />}
       {isPending && <PageSkeleton cards={5} />}
 
       {stats && (
         <>
-          <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5 xl:gap-4">
-            <Kpi wide icon={Layers} tint="var(--color-soft)" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
-            <Kpi icon={CircleCheck} tint="var(--color-ok)" label="Allowed" value={String(stats.allow)} note={pct(stats.allow)} />
-            <Kpi icon={CircleHelp} tint="var(--color-warn)" label="Asked Human" value={String(stats.ask_human)} note={pct(stats.ask_human, 1)} />
-            <Kpi icon={CircleX} tint="var(--color-bad)" label="Blocked" value={String(stats.block)} note={pct(stats.block)} />
-            <Kpi icon={Zap} tint="var(--color-info)" label="Median Latency" value={stats.median_latency_ms == null ? '–' : `${stats.median_latency_ms.toFixed(1)} ms`} note={`LLM judge: ${stats.llm_calls}/${stats.total}`} />
-          </div>
-          <p className="mt-3 inline-flex items-center gap-2 rounded-lg border border-line bg-card/70 px-3 py-1.5 text-[0.82rem] text-muted">
-            <Activity size={14} className="text-soft" aria-hidden />
-            LLM judge called for <b className="text-ink">{stats.llm_calls}</b> of <b className="text-ink">{stats.total}</b> checks.
-          </p>
+          <StatRail
+            label="Audit totals"
+            items={[
+              { label: 'Checked calls', value: <AnimatedValue value={String(stats.total)} />, note: 'every one kept in SQLite' },
+              {
+                label: 'Median check time',
+                value: stats.median_latency_ms == null ? '–' : `${stats.median_latency_ms.toFixed(1)} ms`,
+                note: `the LLM judge ran on ${stats.llm_calls} of ${stats.total}`,
+              },
+              { label: 'Decisions', wide: true, value: <DecisionSplit stats={stats} /> },
+            ]}
+          />
         </>
       )}
 
