@@ -636,6 +636,22 @@ html[data-theme='light'] .footer-dots { background: rgb(234 231 221 / 0.7); }
 html[data-theme='light'] .footer-dots::before { background-image: radial-gradient(circle, rgb(18 19 16 / 0.16) 1px, transparent 1.5px); }
 html[data-theme='light'] .footer-dots::after { background: radial-gradient(520px 220px at 18% 100%, rgb(194 239 106 / 0.18), transparent 70%); }
 
+/* hero shield art colours: pale lime light lines at night, deep leaf green lines on paper by day */
+.shield-art {
+  --sa-trace-a: #9fcf55; --sa-trace-a-op: 0.18; --sa-trace-b: #e2f5b8; --sa-trace-b-op: 0.75;
+  --sa-energy: #eef7d8; --sa-energy-glow: #c2ef6a; --sa-node: #d6f2a0;
+  --sa-ring: #c2ef6a; --sa-ring2: #d6f2a0; --sa-orbit: #eef7d8; --sa-outline: #eef7d8;
+  --sa-glow: #c2ef6a; --sa-glow-op: 0.55; --sa-glow2: #6e9a35; --sa-glow2-op: 0.18;
+  --sa-pad: #d6f2a0; --sa-pad-op: 0.65; --sa-pad2: #7fae45;
+}
+html[data-theme='light'] .shield-art {
+  --sa-trace-a: #6f9a3a; --sa-trace-a-op: 0.35; --sa-trace-b: #2f6a1f; --sa-trace-b-op: 0.85;
+  --sa-energy: #2f6a1f; --sa-energy-glow: rgb(140 198 63 / 0.6); --sa-node: #3d7a25;
+  --sa-ring: #5c8f2e; --sa-ring2: #4f7f22; --sa-orbit: #2f6a1f; --sa-outline: #3d6a1f;
+  --sa-glow: #c2ef6a; --sa-glow-op: 0.38; --sa-glow2: #a6d85a; --sa-glow2-op: 0.12;
+  --sa-pad: #c2ef6a; --sa-pad-op: 0.55; --sa-pad2: #8cc63f;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }

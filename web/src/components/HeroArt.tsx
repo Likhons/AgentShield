@@ -41,22 +41,22 @@ export default function HeroArt() {
             <stop offset="100%" stopColor="#0A0F06" />
           </linearGradient>
           <linearGradient id="traceL" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#9FCF55" stopOpacity=".18" />
-            <stop offset="100%" stopColor="#E2F5B8" stopOpacity=".75" />
+            <stop offset="0%" style={{ stopColor: 'var(--sa-trace-a)', stopOpacity: 'var(--sa-trace-a-op)' }} />
+            <stop offset="100%" style={{ stopColor: 'var(--sa-trace-b)', stopOpacity: 'var(--sa-trace-b-op)' }} />
           </linearGradient>
           <linearGradient id="traceR" x1="1" y1="0" x2="0" y2="0">
-            <stop offset="0%" stopColor="#9FCF55" stopOpacity=".18" />
-            <stop offset="100%" stopColor="#E2F5B8" stopOpacity=".75" />
+            <stop offset="0%" style={{ stopColor: 'var(--sa-trace-a)', stopOpacity: 'var(--sa-trace-a-op)' }} />
+            <stop offset="100%" style={{ stopColor: 'var(--sa-trace-b)', stopOpacity: 'var(--sa-trace-b-op)' }} />
           </linearGradient>
           <radialGradient id="glow" cx="50%" cy="46%" r="48%">
-            <stop offset="0%" stopColor="#C2EF6A" stopOpacity=".55" />
-            <stop offset="60%" stopColor="#6E9A35" stopOpacity=".18" />
-            <stop offset="100%" stopColor="#6E9A35" stopOpacity="0" />
+            <stop offset="0%" style={{ stopColor: 'var(--sa-glow)', stopOpacity: 'var(--sa-glow-op)' }} />
+            <stop offset="60%" style={{ stopColor: 'var(--sa-glow2)', stopOpacity: 'var(--sa-glow2-op)' }} />
+            <stop offset="100%" style={{ stopColor: 'var(--sa-glow2)', stopOpacity: 0 }} />
           </radialGradient>
           <radialGradient id="padglow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#D6F2A0" stopOpacity=".65" />
-            <stop offset="55%" stopColor="#7FAE45" stopOpacity=".28" />
-            <stop offset="100%" stopColor="#7FAE45" stopOpacity="0" />
+            <stop offset="0%" style={{ stopColor: 'var(--sa-pad)', stopOpacity: 'var(--sa-pad-op)' }} />
+            <stop offset="55%" style={{ stopColor: 'var(--sa-pad2)', stopOpacity: 0.28 }} />
+            <stop offset="100%" style={{ stopColor: 'var(--sa-pad2)', stopOpacity: 0 }} />
           </radialGradient>
         </defs>
         <ellipse className="aura" cx="290" cy="122" rx="185" ry="118" fill="url(#glow)" />
@@ -64,23 +64,23 @@ export default function HeroArt() {
           {TRACES.map((d) => <path key={d} d={d} stroke="url(#traceL)" />)}
           {/* energy pulses flowing towards the shield */}
           {TRACES.map((d, i) => (
-            <path key={`e-${d}`} className="energy" d={d} stroke="#EEF7D8" strokeWidth="2.4" strokeLinecap="round"
-              pathLength={220} style={{ animationDelay: `${i * -0.43}s`, filter: 'drop-shadow(0 0 4px #C2EF6A)' }} />
+            <path key={`e-${d}`} className="energy" d={d} strokeWidth="2.4" strokeLinecap="round"
+              pathLength={220} style={{ stroke: 'var(--sa-energy)', animationDelay: `${i * -0.43}s`, filter: 'drop-shadow(0 0 4px var(--sa-energy-glow))' }} />
           ))}
           {[[232, 82], [222, 122], [240, 154], [348, 82], [358, 122], [340, 154]].map(([x, y]) => (
-            <circle key={`${x}-${y}`} cx={x} cy={y} r="3" fill="#D6F2A0" />
+            <circle key={`${x}-${y}`} cx={x} cy={y} r="3" style={{ fill: 'var(--sa-node)' }} />
           ))}
         </g>
-        <ellipse className="ring-out" cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#C2EF6A" strokeWidth="1.4" />
-        <ellipse className="ring-out r2" cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#C2EF6A" strokeWidth="1.4" />
+        <ellipse className="ring-out" cx="290" cy="212" rx="86" ry="16" fill="none" style={{ stroke: 'var(--sa-ring)' }} strokeWidth="1.4" />
+        <ellipse className="ring-out r2" cx="290" cy="212" rx="86" ry="16" fill="none" style={{ stroke: 'var(--sa-ring)' }} strokeWidth="1.4" />
         <ellipse className="pad-glow" cx="290" cy="212" rx="96" ry="22" fill="url(#padglow)" />
-        <ellipse cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#C2EF6A" strokeOpacity=".65" strokeWidth="1.8" />
-        <ellipse cx="290" cy="212" rx="60" ry="10" fill="none" stroke="#D6F2A0" strokeOpacity=".75" strokeWidth="1.5" />
-        <ellipse cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#C2EF6A" strokeOpacity=".28" strokeWidth="1.2" />
-        <ellipse className="orbit" cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#EEF7D8" strokeWidth="2"
+        <ellipse cx="290" cy="212" rx="86" ry="16" fill="none" style={{ stroke: 'var(--sa-ring)' }} strokeOpacity=".65" strokeWidth="1.8" />
+        <ellipse cx="290" cy="212" rx="60" ry="10" fill="none" style={{ stroke: 'var(--sa-ring2)' }} strokeOpacity=".75" strokeWidth="1.5" />
+        <ellipse cx="290" cy="124" rx="108" ry="30" fill="none" style={{ stroke: 'var(--sa-ring)' }} strokeOpacity=".35" strokeWidth="1.2" />
+        <ellipse className="orbit" cx="290" cy="124" rx="108" ry="30" fill="none" style={{ stroke: 'var(--sa-orbit)' }} strokeWidth="2"
           strokeLinecap="round" pathLength={1000} strokeDasharray="70 930" />
         <g className="shield-body">
-          <path d="M290 30 L352 54 C352 118 330 160 290 185 C250 160 228 118 228 54 Z" fill="url(#sg)" stroke="#EEF7D8"
+          <path d="M290 30 L352 54 C352 118 330 160 290 185 C250 160 228 118 228 54 Z" fill="url(#sg)" style={{ stroke: 'var(--sa-outline)' }}
             strokeOpacity=".85" strokeWidth="2.2" />
           <path d="M290 46 L337 64 C337 115 320 148 290 167 C260 148 243 115 243 64 Z" fill="url(#sg2)" stroke="#D6F2A0"
             strokeOpacity=".65" strokeWidth="1.5" />
