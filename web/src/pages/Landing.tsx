@@ -284,8 +284,8 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="relative border-t border-fg/6">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <footer className="footer-dots relative border-t border-fg/6">
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-4 px-4 py-14 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>Built for the International AI Builders Congress 2026. Demo data is fake: numbers start with 010, domains end in .example.</p>
           <div className="flex gap-5">
             <Link to="/playground" className="inline-flex min-h-11 min-w-11 items-center transition-colors hover:text-soft">Demo</Link>

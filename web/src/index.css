@@ -609,6 +609,26 @@ html[data-theme='light'] .bn-callout {
 }
 html[data-theme='light'] .bn-callout::before { background: linear-gradient(180deg, #8cc800, #059669); }
 
+/* landing footer: a dense halftone dot field that fades in from the top, with a faint lime patch */
+.footer-dots { background: rgb(4 6 5 / 0.6); isolation: isolate; }
+.footer-dots::before, .footer-dots::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.footer-dots::before {
+  background-image: radial-gradient(circle, rgb(196 214 160 / 0.22) 1px, transparent 1.5px);
+  background-size: 11px 11px; background-position: 5px 5px;
+  -webkit-mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.2), #000 55%);
+  mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.2), #000 55%);
+}
+.footer-dots::after {
+  background:
+    radial-gradient(520px 220px at 18% 100%, rgb(212 255 42 / 0.06), transparent 70%),
+    radial-gradient(420px 200px at 92% 0%, rgb(16 185 129 / 0.04), transparent 70%);
+}
+html[data-theme='light'] .footer-dots { background: rgb(233 239 229 / 0.7); }
+html[data-theme='light'] .footer-dots::before { background-image: radial-gradient(circle, rgb(61 102 0 / 0.2) 1px, transparent 1.5px); }
+html[data-theme='light'] .footer-dots::after {
+  background: radial-gradient(520px 220px at 18% 100%, rgb(212 255 42 / 0.25), transparent 70%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
