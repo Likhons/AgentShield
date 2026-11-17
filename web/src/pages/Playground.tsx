@@ -120,8 +120,29 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
   scanning: boolean
   onRun: () => void
 }) {
-  const disabled = (m: RunMode) => (m === 'groq' && !liveAvailable) || (m === 'recorded' && !scenario?.has_recording)
+  // only three scenarios were recorded with a real model; "Recorded run" stays clickable and moves to one of them
+  const recorded = scenarios.filter((s) => s.has_recording)
+  const disabled = (m: RunMode) => (m === 'groq' && !liveAvailable) || (m === 'recorded' && recorded.length === 0)
+  const [note, setNote] = useState('')
   const caption = MODES.find((m) => m.id === mode)?.caption
+  const pickMode = (id: RunMode) => {
+    setNote('')
+    if (id === 'recorded' && !scenario?.has_recording && recorded.length) {
+      const target = recorded.find((s) => s.name === 'attack_bill_bn') ?? recorded[0]
+      setName(target.name)
+      setNote(`Switched to “${target.description.split('. ')[0].replace(/\.$/, '')}”: only ${recorded.length} scenarios have a recorded real run (marked “recorded” in the list).`)
+    }
+    setMode(id)
+  }
+  const pickScenario = (name: string) => {
+    setNote('')
+    setName(name)
+    const next = scenarios.find((s) => s.name === name)
+    if (mode === 'recorded' && next && !next.has_recording) {
+      setMode('mock')
+      setNote('That scenario has no recorded run, so it runs offline.')
+    }
+  }
   const untrusted = scenario?.untrusted ?? [] // older API servers do not send these fields yet
   // the injected item first; the ordinary ones collapse into "+N more"
   const attacks = untrusted.filter((u) => u.kind === 'attack')
@@ -146,8 +167,8 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
                 role="radio"
                 aria-checked={active}
                 disabled={off}
-                title={off ? (id === 'groq' ? 'Off on this server (no API key).' : 'No recording for this scenario.') : undefined}
-                onClick={() => setMode(id)}
+                title={off ? (id === 'groq' ? 'Off on this server (no API key).' : 'No recorded runs on this server.') : undefined}
+                onClick={() => pickMode(id)}
                 className={`min-h-9 rounded-lg px-3 font-mono text-[0.8rem] whitespace-nowrap transition-colors duration-300 sm:px-4 ${
                   active ? 'bg-accent font-bold text-accent-ink' : 'text-body hover:bg-fg/5'
                 } ${off ? 'cursor-not-allowed opacity-40' : ''}`}
@@ -158,6 +179,7 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
           })}
         </div>
         <p className="mt-1.5 text-xs text-muted">{caption}</p>
+        {note && <p className="mt-1 text-xs text-soft" role="status">{note}</p>}
       </div>
 
       <div className="relative border-t border-line pt-5">
@@ -165,11 +187,13 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
         <select
           id="scenario"
           value={scenario?.name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => pickScenario(e.target.value)}
           className="min-h-12 w-full rounded-xl border border-accent/45 bg-card2 px-4 text-[0.95rem] font-semibold text-ink"
         >
           {scenarios.map((s, i) => (
-            <option key={s.name} value={s.name}>{i + 1}. {s.description.replace(/\.$/, '')} ({s.kind === 'attack' ? 'Attack' : 'Normal'})</option>
+            <option key={s.name} value={s.name}>
+              {i + 1}. {s.description.split('. ')[0].replace(/\.$/, '')} ({s.kind === 'attack' ? 'Attack' : 'Normal'}){s.has_recording ? ' · recorded' : ''}
+            </option>
           ))}
         </select>
       </div>
