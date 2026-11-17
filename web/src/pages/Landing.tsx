@@ -50,12 +50,12 @@ function Headline() {
       <span className="word-rise inline-flex items-center gap-2.5 rounded-full border border-line2 bg-accent/[0.05] px-4 py-1.5 font-mono text-[0.74rem] tracking-[0.16em] text-body uppercase">
         <span className="h-2 w-2 rounded-full bg-mark shadow-[0_0_10px_var(--color-mark)]" aria-hidden /> Runtime action firewall
       </span>
-      <h1 className="mt-6 text-[clamp(2.3rem,6.2vw,4rem)] leading-[1.04] font-extrabold tracking-[-0.03em]" aria-label={HEADLINE.join(' ')}>
+      <h1 className="mt-6 text-[clamp(2.75rem,5.6vw,4.6rem)] leading-[0.98] font-semibold tracking-[-0.045em]" aria-label={HEADLINE.join(' ')}>
         {HEADLINE_WORDS.map(({ line, words }, i) =>
           i === HEADLINE.length - 1 ? (
             // the last line rises as one piece, so its gradient runs across both words
             <span key={line} className="hero-line block" style={{ ['--dir' as string]: '-1' }} aria-hidden>
-              <span className="hero-gradient word-rise inline-block pb-[0.08em]" style={{ animationDelay: `${0.08 + 0.06 * words[0].index}s` }}>
+              <span className="hero-gradient accent-serif word-rise inline-block pr-[0.08em] pb-[0.1em]" style={{ animationDelay: `${0.08 + 0.06 * words[0].index}s` }}>
                 {line}
               </span>
             </span>
@@ -94,11 +94,11 @@ function Hero({ onRunAttack }: { onRunAttack: () => void }) {
         <div>
           <Headline />
           <div className="landing-step" style={{ animationDelay: '0.45s' }}>
-            <p className="mt-5 max-w-[56ch] text-[1.05rem] leading-relaxed text-body">
+            <p className="mt-6 max-w-[54ch] text-[1.08rem] leading-[1.65] text-body sm:text-[1.18rem]">
               AgentShield checks every action an AI agent is about to take, such as sending money, and stops the ones the
               user never asked for. It catches tricks hidden in emails, web pages and files, in Bangla, Banglish and English.
             </p>
-            <p lang="bn" className="bn-callout mt-5 w-fit max-w-full text-[1.02rem]">
+            <p lang="bn" className="bn-callout mt-6 w-fit max-w-full text-[1.08rem] text-balance sm:text-[1.15rem]">
               এআই এজেন্ট টাকা পাঠানোর আগে AgentShield প্রতিটি কাজ যাচাই করে।
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -127,10 +127,10 @@ function HowItWorks() {
     <section id="how" className="relative scroll-mt-20 border-t border-fg/6">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <Reveal>
-          <h2 className="max-w-[28ch] text-[clamp(1.7rem,3.6vw,2.5rem)] leading-tight font-extrabold">
-            Four checks run before every action, in about a millisecond.
+          <h2 className="max-w-[22ch] text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.04] font-semibold tracking-[-0.04em]">
+            Four checks run before every action, <em className="accent-serif text-soft">in about a millisecond.</em>
           </h2>
-          <p className="mt-3 max-w-[62ch] text-body">
+          <p className="mt-5 max-w-[62ch] text-[1.05rem] leading-relaxed text-body sm:text-[1.1rem]">
             Follow the fake bill’s payment through them. The stricter of the score and the rules decides: allow, ask the
             user, or block. Every decision is explained in Bangla and English and kept in an audit log.
           </p>
@@ -184,10 +184,10 @@ function Results() {
       <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:items-center">
           <Reveal>
-            <h2 className="text-[clamp(1.7rem,3.6vw,2.5rem)] leading-tight font-extrabold">
-              Attacks stopped. Real bills still paid.
+            <h2 className="text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.04] font-semibold tracking-[-0.04em]">
+              Attacks stopped. <em className="accent-serif text-soft">Real bills still paid.</em>
             </h2>
-            <p className="mt-3 max-w-[54ch] text-body">
+            <p className="mt-5 max-w-[54ch] text-[1.05rem] leading-relaxed text-body sm:text-[1.1rem]">
               A real model (qwen3.8-27b via Groq) worked through 20 Bangla and Banglish attacks and 20 normal bill payments,
               once without and once with AgentShield. Small samples: the benchmark page shows the confidence intervals.
             </p>
@@ -270,10 +270,10 @@ export default function Landing() {
           <div className="glow glow-lime right-[-12%] bottom-0 h-[520px] w-[520px] opacity-80" aria-hidden />
           <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.4fr] lg:items-center lg:py-24">
             <Reveal>
-              <h2 className="text-[clamp(1.7rem,3.6vw,2.5rem)] leading-tight font-extrabold">
-                One call before each tool runs.
+              <h2 className="text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.04] font-semibold tracking-[-0.04em]">
+                One call <em className="accent-serif text-soft">before</em> each tool runs.
               </h2>
-              <p className="mt-3 max-w-[50ch] text-body">
+              <p className="mt-5 max-w-[50ch] text-[1.05rem] leading-relaxed text-body sm:text-[1.1rem]">
                 Use the Python SDK, which wraps your agent’s tools, or call the HTTP gateway from any language or agent
                 framework. The answer comes with a risk score and a reason the user can read.
               </p>

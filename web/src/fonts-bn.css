@@ -1,0 +1,19 @@
+/* Bangla fonts, Bengali subset only: Latin letters and digits in a Bangla line keep coming from Plus Jakarta Sans.
+   Baloo Da 2: rounded, soft, easy on the eye for running text (reasons, emails, callouts).
+   Anek Bangla: modern and crisp for Bangla in headings and other display text. */
+@font-face {
+  font-family: 'Baloo Da 2 BN';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 800;
+  src: url('../node_modules/@fontsource-variable/baloo-da-2/files/baloo-da-2-bengali-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+25CC, U+A8F1;
+}
+@font-face {
+  font-family: 'Anek Bangla BN';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('../node_modules/@fontsource-variable/anek-bangla/files/anek-bangla-bengali-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+25CC, U+A8F1;
+}

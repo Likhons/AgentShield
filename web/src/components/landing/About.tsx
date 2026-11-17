@@ -42,10 +42,10 @@ export default function About() {
         <div className="grid gap-10 lg:grid-cols-[1fr_1.15fr] lg:gap-14">
           <Reveal>
             <span className="font-mono text-[0.72rem] tracking-[0.2em] text-muted uppercase">About AgentShield</span>
-            <h2 className="mt-3 text-[clamp(1.7rem,3.6vw,2.5rem)] leading-tight font-extrabold">
-              A safety check between an AI agent and the money it can move.
+            <h2 className="mt-3 text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.04] font-semibold tracking-[-0.04em]">
+              A safety check between an AI agent and <em className="accent-serif text-soft">the money it can move.</em>
             </h2>
-            <p className="mt-4 max-w-[56ch] leading-relaxed text-body">
+            <p className="mt-5 max-w-[56ch] text-[1.05rem] leading-relaxed text-body sm:text-[1.1rem]">
               Banks and wallets are starting to give AI agents real permissions: reading customer emails, browsing the
               web, opening files and calling payment tools. An agent cannot reliably tell its user’s instruction from
               text an attacker hid in the data it reads. In Bangladesh that text is often Bangla or Banglish, and most

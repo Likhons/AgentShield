@@ -7,11 +7,13 @@ import { ToastProvider } from './components/Toast'
 import { startSmoothScroll } from './lib/motion'
 import '@fontsource-variable/plus-jakarta-sans/wght.css'
 import '@fontsource-variable/jetbrains-mono/wght.css'
-// Hind Siliguri: only the Bangla subset (Latin characters fall through to Plus Jakarta Sans)
-import '@fontsource/hind-siliguri/bengali-400.css'
-import '@fontsource/hind-siliguri/bengali-500.css'
-import '@fontsource/hind-siliguri/bengali-600.css'
-import '@fontsource/hind-siliguri/bengali-700.css'
+// Bricolage Grotesque for headings (weight + optical size), Fraunces italic for the accent words in headlines
+import '@fontsource-variable/bricolage-grotesque/opsz.css'
+import '@fontsource-variable/fraunces/wght-italic.css'
+// Tiro Bangla: Bangla serif for callouts and quotes (its own Latin too, so English words in a callout match)
+import '@fontsource/tiro-bangla/400.css'
+// Bangla: Baloo Da 2 (text) and Anek Bangla (display), Bengali subset only
+import './fonts-bn.css'
 import './index.css'
 
 startSmoothScroll()

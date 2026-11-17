@@ -1,16 +1,20 @@
 @import "tailwindcss";
 
 /* Type: self-hosted fonts (no Google CDN), imported in main.tsx.
-   Plus Jakarta Sans for UI text and headings, Hind Siliguri for Bangla characters (Latin fonts have no Bangla
-   glyphs, so the browser falls through to it per character; :lang(bn) puts it first), JetBrains Mono for code,
-   tool names and numbers. */
+   Bricolage Grotesque for headings, Fraunces italic for a few accent words in headlines (.accent-serif),
+   Plus Jakarta Sans for UI and running text. Bangla characters fall through per character (Latin fonts have no
+   Bangla glyphs) to Baloo Da 2 in running text and Anek Bangla in headings (src/fonts-bn.css, Bengali subset only;
+   :lang(bn) puts them first), Tiro Bangla for Bangla callouts and quotes. JetBrains Mono for code, tool names and numbers. */
 
 /* Design tokens: obsidian dark with one electric-lime accent (the Streamlit dashboard on main keeps its purple theme).
    Lime is the brand and the "act here" colour; decision colours stay separate: emerald allow, amber ask, crimson block. */
 @theme {
-  --font-sans: "Plus Jakarta Sans Variable", "Hind Siliguri", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Plus Jakarta Sans Variable", "Hind Siliguri", system-ui, sans-serif;
-  --font-bangla: "Hind Siliguri", "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans Variable", "Baloo Da 2 BN", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Anek Bangla BN", system-ui, sans-serif;
+  --font-serif: "Fraunces Variable", "Tiro Bangla", Georgia, serif;
+  --font-bangla: "Baloo Da 2 BN", "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-bangla-display: "Anek Bangla BN", "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-bangla-serif: "Tiro Bangla", "Fraunces Variable", Georgia, serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, Consolas, monospace;
 
   --color-bg: #0a0b09;
@@ -76,8 +80,12 @@
       var(--color-bg);
     background-attachment: fixed;
   }
-  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.03em; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.03em; font-optical-sizing: auto; }
+  /* accent words in a headline: a soft serif italic beside the grotesque, never a whole sentence */
+  .accent-serif { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -0.02em; }
   :lang(bn) { font-family: var(--font-bangla); line-height: 1.7; }
+  /* Bangla in headings and display text: Anek Bangla, no negative tracking (it pulls conjuncts and the matra apart) */
+  :is(h1, h2, h3, .font-display):lang(bn), :is(h1, h2, h3, .font-display) :lang(bn) { font-family: var(--font-bangla-display); letter-spacing: 0; }
   code, kbd, pre, .tabular { font-variant-numeric: tabular-nums; }
   ::selection { background: var(--color-accent); color: var(--color-accent-ink); }
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
@@ -543,7 +551,7 @@ html[data-theme='light'] .connector-y::after { background: linear-gradient(180de
 /* landing hero: the Bangla line as a callout with a lime-to-emerald bar on its left edge */
 .bn-callout {
   position: relative; overflow: hidden; border-radius: 14px; padding: 0.85rem 1.15rem 0.85rem 1.4rem;
-  color: var(--color-ink); font-weight: 500;
+  color: var(--color-ink); font-weight: 400; font-family: var(--font-bangla-serif); line-height: 1.75;
   background: linear-gradient(90deg, rgb(var(--accent-rgb) / 0.03), rgb(15 22 19 / 0.55) 45%);
   border: 1px solid rgb(255 255 255 / 0.08);
 }
