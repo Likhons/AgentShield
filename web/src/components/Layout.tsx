@@ -51,7 +51,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
     <nav aria-label="Main" className="flex flex-col gap-5">
       {SECTIONS.map((section) => (
         <div key={section.title}>
-          <div className="mb-2 px-2 font-mono text-[0.72rem] text-muted">{`// ${section.title.toLowerCase()}`}</div>
+          <div className="mb-2 px-3 text-[0.68rem] font-bold tracking-[0.16em] text-muted uppercase">{section.title}</div>
           <ul className="flex flex-col gap-1">
             {section.items.map(({ to, label, icon: Icon }) => (
               <li key={to}>
@@ -59,10 +59,8 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                   to={to}
                   onClick={onNavigate}
                   className={({ isActive }) =>
-                    `flex min-h-11 items-center gap-3 rounded-xl border px-3.5 text-[0.95rem] font-semibold transition-colors ${
-                      isActive
-                        ? 'border-accent/30 bg-accent/10 text-soft shadow-[inset_3px_0_0_var(--color-accent)]'
-                        : 'border-transparent text-body hover:border-line hover:bg-fg/5'
+                    `lift flex min-h-11 items-center gap-3 rounded-full border px-3.5 text-[0.93rem] font-semibold ${
+                      isActive ? 'nav-pill-active' : 'border-transparent text-body hover:border-fg/10 hover:bg-fg/5'
                     }`
                   }
                 >
@@ -78,32 +76,84 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
+const PING_EVERY_MS = 15_000
+const PING_KEEP = 14
+
+/** Round trip to the gateway's /health, measured in the browser every 15 s while the app is open. */
+function usePing() {
+  const [pings, setPings] = useState<number[]>([])
+  useEffect(() => {
+    let alive = true
+    const ping = async () => {
+      if (document.hidden) return
+      const t0 = performance.now()
+      try {
+        const r = await fetch('/health', { cache: 'no-store' })
+        if (!r.ok) return
+        const ms = Math.round(performance.now() - t0)
+        if (alive) setPings((p) => [...p.slice(-(PING_KEEP - 1)), ms])
+      } catch {
+        /* offline: keep the last values */
+      }
+    }
+    void ping()
+    const id = window.setInterval(ping, PING_EVERY_MS)
+    return () => { alive = false; clearInterval(id) }
+  }, [])
+  return pings
+}
+
 function StatusCard() {
   const { data } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
+  const pings = usePing()
+  const last = pings.at(-1)
+  const max = Math.max(...pings, 1)
   const rows: [string, string | number][] = data
     ? [
-        ['Agent LLM', data.agent_llm],
-        ['Injection detector', data.detector],
-        ['Checks', data.checks.length],
-        ['Policy rules', data.policy_rules],
-        ['Decisions logged', data.decisions_logged],
+        ['model', data.agent_llm],
+        ['detector', data.detector],
+        ['policy', `${data.policy_rules} rules`],
+        ['decisions', data.decisions_logged],
       ]
     : []
   return (
-    <div className="card p-4">
-      <div className="mb-3 flex items-center gap-2 text-sm font-bold">
-        <span className={`h-2 w-2 rounded-full ${data ? 'bg-ok animate-pulse' : 'bg-muted'}`} aria-hidden />
-        {data ? 'Gateway Ready' : 'Connecting…'}
+    <div className="glass spotlight p-4">
+      <div className="relative mb-3 flex items-center justify-between gap-2">
+        <span className="flex items-center gap-2 text-[0.84rem] font-bold whitespace-nowrap">
+          <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
+            {data && <span className="absolute inset-0 animate-ping rounded-full bg-ok/60" />}
+            <span className={`relative h-2.5 w-2.5 rounded-full ${data ? 'bg-ok' : 'bg-muted'}`} />
+          </span>
+          {data ? 'Gateway Ready' : 'Connecting…'}
+        </span>
+        {last !== undefined && (
+          <span className="shrink-0 rounded-full border border-ok/35 bg-ok/10 px-2 py-0.5 font-mono text-[0.68rem] font-semibold whitespace-nowrap text-ok-ink tabular-nums" title="Round trip to /health from this browser">
+            {last} ms
+          </span>
+        )}
       </div>
-      <dl className="flex flex-col gap-2 text-[0.82rem]">
+      {/* ping history: one bar per check, newest on the right */}
+      <div className="relative mb-3 flex h-9 items-end gap-[3px]" role="img" aria-label={last !== undefined ? `API ping, last ${last} milliseconds` : 'API ping not measured yet'}>
+        {Array.from({ length: PING_KEEP }, (_, i) => {
+          const v = pings[i - (PING_KEEP - pings.length)]
+          return (
+            <span
+              key={i}
+              className={`spark-bar flex-1 rounded-sm ${v === undefined ? 'bg-fg/8' : i === PING_KEEP - 1 ? 'bg-ok' : 'bg-ok/45'}`}
+              style={{ height: '100%', transform: `scaleY(${v === undefined ? 0.12 : Math.max(0.12, v / max)})` }}
+            />
+          )
+        })}
+      </div>
+      <dl className="relative flex flex-col gap-1.5 text-[0.8rem]">
         {rows.map(([k, v]) => (
           <div key={k} className="flex justify-between gap-2">
-            <dt className="text-muted">{k}</dt>
-            <dd className="font-bold">{v}</dd>
+            <dt className="font-mono text-[0.74rem] text-muted">{k}</dt>
+            <dd className="font-mono text-[0.76rem] font-semibold tabular-nums">{v}</dd>
           </div>
         ))}
       </dl>
-      {data && <div className="mt-3 border-t border-line pt-2 text-xs text-muted">v{data.version}</div>}
+      {data && <div className="relative mt-3 border-t border-line pt-2 font-mono text-[0.7rem] text-muted">v{data.version} · API ping</div>}
     </div>
   )
 }
@@ -115,7 +165,7 @@ function ThemeRow() {
     <div className="flex items-center justify-between gap-3 rounded-xl border border-line px-3 py-2">
       <span className="text-sm">
         <span className="block font-semibold">{day ? 'Day mode' : 'Night mode'}</span>
-        <span className="block text-xs text-muted">{day ? 'Light, for bright rooms' : 'Dark, easy on the eyes'}</span>
+        <span className="block text-xs text-muted">{day ? 'Bright and clear' : 'Low glare'}</span>
       </span>
       <ThemeToggle />
     </div>
@@ -147,13 +197,16 @@ export default function Layout() {
   }, [open])
 
   return (
-    <div className="min-h-dvh lg:pl-[280px]">
+    <div className="relative min-h-dvh lg:pl-[240px]">
+      <div className="cyber-grid app-grid" aria-hidden />
+      <div className="aurora aurora-lime -top-40 right-[-10%] h-[620px] w-[620px]" aria-hidden />
+      <div className="aurora aurora-emerald bottom-[-20%] left-[10%] h-[560px] w-[560px]" aria-hidden />
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-3 focus:py-2">
         Skip to main content
       </a>
 
       {/* desktop sidebar */}
-      <aside data-lenis-prevent className="fixed inset-y-0 left-0 hidden w-[280px] flex-col gap-6 overflow-y-auto border-r border-line bg-side/95 px-5 py-6 lg:flex">
+      <aside data-lenis-prevent className="sidebar-glass fixed inset-y-0 left-0 z-20 hidden w-[240px] flex-col gap-6 overflow-y-auto px-4 py-6 lg:flex">
         <Brand />
         <div className="h-px bg-line" />
         <NavList />
@@ -164,7 +217,7 @@ export default function Layout() {
       </aside>
 
       {/* mobile / tablet top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-bg/85 px-4 backdrop-blur-md lg:hidden">
+      <header className="sidebar-glass sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line px-4 lg:hidden">
         <Brand />
         <div className="flex items-center gap-2">
           {current && (
@@ -201,7 +254,7 @@ export default function Layout() {
         aria-label="Navigation"
         inert={!open}
         data-lenis-prevent
-        className={`fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col gap-6 overflow-y-auto border-r border-line2 bg-side px-5 py-5 transition-transform duration-300 ease-out-soft lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[min(300px,86vw)] flex-col gap-6 overflow-y-auto border-r border-line2 bg-side px-4 py-5 transition-transform duration-300 ease-out-soft lg:hidden ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -222,7 +275,7 @@ export default function Layout() {
         </div>
       </div>
 
-      <main id="main" className="mx-auto w-full max-w-[1480px] px-4 py-5 sm:px-6 lg:px-9 lg:py-7">
+      <main id="main" className="relative mx-auto w-full max-w-[1480px] px-4 py-5 sm:px-6 lg:px-9 lg:py-7">
         {/* each page fades in on navigation and starts at the top */}
         <div key={location.pathname} className="page-enter">
           <Outlet />

@@ -1,5 +1,15 @@
 import { CircleAlert, EyeOff, Globe, Layers, Scale, Zap, type LucideIcon } from 'lucide-react'
 
+// circuit paths from each pill to the shield (left three, then right three), drawn from the pill inwards
+const TRACES = [
+  'M 155 34 C 195 34, 205 74, 232 82',
+  'M 145 122 L 222 122',
+  'M 185 212 C 212 212, 218 164, 240 154',
+  'M 425 34 C 385 34, 375 74, 348 82',
+  'M 435 122 L 358 122',
+  'M 395 212 C 368 212, 362 164, 340 154',
+]
+
 const FEATURES: { label: string; icon: LucideIcon; pos: string }[] = [
   { label: 'Prompt Injection', icon: Zap, pos: 'lg:left-[1%] lg:top-[5%]' },
   { label: 'Data Tainting', icon: Layers, pos: 'lg:left-0 lg:top-[39%]' },
@@ -51,16 +61,18 @@ export default function HeroArt() {
         </defs>
         <ellipse className="aura" cx="290" cy="122" rx="185" ry="118" fill="url(#glow)" />
         <g className="hidden lg:inline" fill="none" strokeWidth="1.5">
-          <path d="M 155 34 C 195 34, 205 74, 232 82" stroke="url(#traceL)" />
-          <path d="M 145 122 L 222 122" stroke="url(#traceL)" />
-          <path d="M 185 212 C 212 212, 218 164, 240 154" stroke="url(#traceL)" />
-          <path d="M 425 34 C 385 34, 375 74, 348 82" stroke="url(#traceR)" />
-          <path d="M 435 122 L 358 122" stroke="url(#traceR)" />
-          <path d="M 395 212 C 368 212, 362 164, 340 154" stroke="url(#traceR)" />
+          {TRACES.map((d) => <path key={d} d={d} stroke="url(#traceL)" />)}
+          {/* energy pulses flowing towards the shield */}
+          {TRACES.map((d, i) => (
+            <path key={`e-${d}`} className="energy" d={d} stroke="#EEFFC2" strokeWidth="2.4" strokeLinecap="round"
+              pathLength={220} style={{ animationDelay: `${i * -0.43}s`, filter: 'drop-shadow(0 0 4px #D4FF2A)' }} />
+          ))}
           {[[232, 82], [222, 122], [240, 154], [348, 82], [358, 122], [340, 154]].map(([x, y]) => (
             <circle key={`${x}-${y}`} cx={x} cy={y} r="3" fill="#D9FF8A" />
           ))}
         </g>
+        <ellipse className="ring-out" cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#D4FF2A" strokeWidth="1.4" />
+        <ellipse className="ring-out r2" cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#D4FF2A" strokeWidth="1.4" />
         <ellipse className="pad-glow" cx="290" cy="212" rx="96" ry="22" fill="url(#padglow)" />
         <ellipse cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#D4FF2A" strokeOpacity=".65" strokeWidth="1.8" />
         <ellipse cx="290" cy="212" rx="60" ry="10" fill="none" stroke="#D9FF8A" strokeOpacity=".75" strokeWidth="1.5" />
@@ -76,10 +88,11 @@ export default function HeroArt() {
             strokeLinejoin="round" />
         </g>
       </svg>
-      {FEATURES.map(({ label, icon: Icon, pos }) => (
+      {FEATURES.map(({ label, icon: Icon, pos }, i) => (
         <span
           key={label}
-          className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line2 bg-card/90 py-1 pr-3 pl-1.5 text-[0.74rem] font-semibold text-soft backdrop-blur lg:absolute lg:text-[0.8rem] ${pos}`}
+          className={`glass chip-float inline-flex min-h-9 items-center gap-1.5 rounded-full! border-line2! py-1 pr-3 pl-1.5 text-[0.74rem] font-semibold text-soft lg:absolute! lg:text-[0.8rem] ${pos}`}
+          style={{ ['--i' as string]: i }}
         >
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent/25">
             <Icon size={13} aria-hidden />

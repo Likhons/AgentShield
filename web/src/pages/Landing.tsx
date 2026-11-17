@@ -7,7 +7,6 @@ import HeroSimulation from '../components/landing/HeroSimulation'
 import Pipeline from '../components/landing/Pipeline'
 import { CountUp, Reveal } from '../components/Motion'
 import { reducedMotion, smoothScrollTo, useInView } from '../lib/motion'
-import { useSpotlight } from '../lib/spotlight'
 
 const SandboxModal = lazy(() => import('../components/landing/SandboxModal'))
 
@@ -222,7 +221,6 @@ function Results() {
 
 export default function Landing() {
   const [demoOpen, setDemoOpen] = useState(false)
-  useSpotlight()
 
   return (
     <div className="relative min-h-dvh overflow-x-clip">

@@ -1,5 +1,5 @@
 import {
-  CircleCheck, CircleHelp, Clock, Copy, FileText, Layers, Mail, Shield, ShieldX, SquareTerminal, TriangleAlert, X,
+  Braces, CircleCheck, CircleHelp, Clock, Copy, FileText, GitBranch, Layers, Mail, Scale, Shield, ShieldX, SquareTerminal, TriangleAlert, X,
   type LucideIcon,
 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
@@ -44,11 +44,36 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   )
 }
 
+interface ArgTrace { status?: string; source?: string; origin?: string; value?: string }
+
+/** Where each argument value came from, from the taint check's details. */
+function lineage(record: AuditRecord): { arg: string; value: string; from: string; tainted: boolean }[] {
+  const taint = record.checks.find((c) => c.check === 'taint')
+  const args = (taint?.details?.arguments ?? {}) as Record<string, ArgTrace>
+  return Object.entries(args).map(([arg, t]) => {
+    const value = t.value ?? String(record.arguments[arg] ?? '')
+    if (t.status === 'user') return { arg, value, from: 'the user’s request', tainted: false }
+    if (t.status === 'tool_data') return { arg, value, from: `${t.source ?? 'a tool'}${t.origin ? ` (${t.origin})` : ''}`, tainted: true }
+    return { arg, value, from: 'not traced (treated as untrusted)', tainted: true }
+  })
+}
+
+/** The policy rules that matched, the strictest first, and what the rules forced. */
+function policyInfo(record: AuditRecord): { rules: string[]; top?: string; forced?: string | null } | null {
+  const policy = record.checks.find((c) => c.check === 'policy')
+  if (!policy) return null
+  const d = (policy.details ?? {}) as { matched_rules?: string[]; top_rule?: string }
+  return { rules: d.matched_rules ?? [], top: d.top_rule, forced: policy.forced_decision }
+}
+
 export default function AuditDetail({ record, thresholds, onClose }: { record: AuditRecord; thresholds: Thresholds; onClose: () => void }) {
   const b = BANNER[record.decision]
   const risk = riskLevel(record.risk_score, thresholds)
   const args = JSON.stringify(record.arguments, null, 2)
   const time = utcFull(record.timestamp)
+  const trace = lineage(record)
+  const policy = policyInfo(record)
+  const json = JSON.stringify(record, null, 2)
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -110,7 +135,53 @@ export default function AuditDetail({ record, thresholds, onClose }: { record: A
         </div>
       </section>
 
+      {trace.length > 0 && (
+        <section>
+          <h3 className="mb-1.5 flex items-center gap-2 text-sm font-bold"><GitBranch size={14} className="text-soft" aria-hidden /> Taint lineage</h3>
+          <ul className="flex flex-col gap-1.5">
+            {trace.map((t) => (
+              <li key={t.arg} className={`flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border px-3 py-2 text-[0.82rem] ${t.tainted ? 'border-bad/30 bg-bad/6' : 'border-ok/30 bg-ok/6'}`}>
+                <code className="font-mono text-[0.78rem] text-soft">{t.arg}={t.value}</code>
+                <span className="text-muted">came from</span>
+                <span className={`font-semibold ${t.tainted ? 'text-bad-ink' : 'text-ok-ink'}`}>{t.from}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {policy && (
+        <section>
+          <h3 className="mb-1.5 flex items-center gap-2 text-sm font-bold"><Scale size={14} className="text-soft" aria-hidden /> Policy rule</h3>
+          {policy.rules.length === 0 ? (
+            <p className="rounded-lg border border-line px-3 py-2 text-[0.82rem] text-muted">No rule matched; the score decided.</p>
+          ) : (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {policy.rules.map((r) => (
+                <code key={r} className={`rounded-md border px-2 py-0.5 font-mono text-[0.76rem] ${r === policy.top ? 'border-bad/45 bg-bad/10 text-bad-ink' : 'border-line text-body'}`}>
+                  {r}
+                </code>
+              ))}
+              {policy.forced && (
+                <p className="w-full text-[0.8rem] text-muted">
+                  The rules forced: <b className="text-ink">{policy.forced.replace('_', ' ')}</b> (the strictest rule is highlighted)
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+
+      <details className="group rounded-xl border border-line">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-3.5 text-sm font-bold [&::-webkit-details-marker]:hidden">
+          <span className="flex items-center gap-2"><Braces size={14} className="text-soft" aria-hidden /> JSON audit trace</span>
+          <span className="text-xs font-normal text-muted group-open:hidden">show</span>
+        </summary>
+        <pre className="max-h-80 overflow-auto border-t border-line px-3 py-2.5 font-mono text-[0.74rem] leading-relaxed text-soft">{json}</pre>
+      </details>
+
       <div className="flex flex-wrap gap-2">
+        <CopyButton text={json} label="Copy JSON trace" />
         <CopyButton text={JSON.stringify(record.arguments)} label="Copy arguments" />
         <CopyButton text={record.id} label="Copy event ID" />
       </div>

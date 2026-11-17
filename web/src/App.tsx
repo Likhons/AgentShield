@@ -6,6 +6,7 @@ import { Spinner } from './components/ui'
 import Placeholder from './pages/Placeholder'
 import Landing from './pages/Landing'
 import Playground from './pages/Playground'
+import { useSpotlight } from './lib/spotlight'
 
 // Playground is the landing page and loads with the app; the rest (charts, Markdown) load when opened.
 const AuditLog = lazy(() => import('./pages/AuditLog'))
@@ -16,6 +17,7 @@ const Policies = lazy(() => import('./pages/Policies'))
 const page = (el: ReactNode) => <Suspense fallback={<Spinner />}>{el}</Suspense>
 
 export default function App() {
+  useSpotlight() // spotlight borders and card tilt, app-wide
   return (
     <Routes>
       <Route index element={<Landing />} />
