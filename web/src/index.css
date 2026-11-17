@@ -172,7 +172,7 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
   100% { opacity: 1; transform: rotate(-8deg) scale(1); }
 }
 .stamp {
-  position: absolute; top: 2.4rem; right: 0.9rem;
+  position: absolute; bottom: 1rem; right: 0.9rem;
   border: 2px solid rgb(251 113 133 / 0.85); border-radius: 8px; padding: 0.15rem 0.6rem 0.2rem;
   color: #fb7185; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; text-align: center;
   line-height: 1.15; transform: rotate(-8deg); box-shadow: 0 0 22px -6px rgb(244 63 94 / 0.7);
@@ -262,13 +262,31 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
   transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring), background-color 0.5s, border-color 0.5s, box-shadow 0.5s;
 }
 .sim-item.is-in { opacity: 1; transform: none; }
-/* the scanning beam sweeps down the card while the run plays */
-@keyframes beam { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-.scan-beam {
-  position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: 0; transition: opacity 0.5s;
-  background: linear-gradient(180deg, transparent 0%, transparent 82%, rgb(212 255 42 / 0.07) 96%, rgb(212 255 42 / 0.55) 99.6%, transparent 100%);
+/* the call being checked: a soft light sweeps across its row (its own clipped layer, so the stamp is not clipped) */
+@keyframes row-scan { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.row-scan { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.row-scan::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 25%, rgb(212 255 42 / 0.14) 50%, transparent 75%);
+  animation: row-scan 1.15s var(--ease-out-soft) infinite;
 }
-.scan-beam.is-on { opacity: 1; animation: beam 1.8s var(--ease-out-soft) infinite; }
+/* the four check chips pop in one by one with their scores */
+.chip {
+  opacity: 0.4; transform: scale(0.94);
+  transition: opacity 0.45s var(--ease-spring), transform 0.45s var(--ease-spring), background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+.chip.is-in { opacity: 1; transform: none; }
+/* the decision lands: one short pulse of the row */
+@keyframes impact { 0% { transform: scale(1); } 35% { transform: scale(1.02); } 100% { transform: scale(1); } }
+.sim-item.impact { animation: impact 0.55s var(--ease-spring); }
+/* run progress line on the card's top edge */
+.run-progress {
+  position: absolute; left: 0; right: 0; top: 0; height: 2px; z-index: 2; pointer-events: none; transform-origin: left center;
+  background: linear-gradient(90deg, transparent, var(--color-accent));
+  transition: transform 0.5s var(--ease-spring), opacity 0.8s;
+}
+.run-progress.is-blocked { background: linear-gradient(90deg, rgb(212 255 42 / 0.4), var(--color-bad)); }
+.run-progress.is-done { opacity: 0.35; }
 @keyframes pulse-dot { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 .pulse-dot { animation: pulse-dot 1s ease-in-out infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -290,5 +308,6 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
   .hero-line, .hero-card { transform: none; }
   .sim-item, .stamp { opacity: 1; transform: none; }
   .stamp { transform: rotate(-8deg); }
-  .scan-beam { display: none; }
+  .row-scan { display: none; }
+  .chip { opacity: 1; transform: none; }
 }
