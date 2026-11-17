@@ -50,11 +50,12 @@ function Brand() {
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const { data } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
   return (
-    <nav aria-label="Main" className="flex flex-col gap-6">
+    <nav aria-label="Main" className="flex flex-col gap-6 lg:gap-5">
       {SECTIONS.map((section) => (
         <div key={section.title}>
-          <div className="mb-2.5 px-3 font-mono text-[0.68rem] tracking-[0.2em] text-muted uppercase">{section.title}</div>
-          <ul className="flex flex-col gap-1.5">
+          <div className="mb-2.5 px-3 font-mono text-[0.68rem] tracking-[0.2em] text-muted uppercase lg:mb-2">{section.title}</div>
+          {/* desktop (mouse): 40 px rows packed tight; the phone drawer keeps 44 px touch targets */}
+          <ul className="flex flex-col gap-1.5 lg:gap-0.5">
             {section.items.map(({ to, label, icon: Icon, badge }) => {
               const b = data && badge ? badge(data) : null
               return (
@@ -63,7 +64,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                     to={to}
                     onClick={onNavigate}
                     className={({ isActive }) =>
-                      `nav-item flex min-h-11 items-center gap-3 rounded-xl border px-3 text-[0.95rem] font-semibold ${isActive ? 'nav-active' : 'border-transparent text-body'}`
+                      `nav-item flex min-h-11 items-center gap-3 rounded-xl border px-3 text-[0.95rem] font-semibold lg:min-h-10 ${isActive ? 'nav-active' : 'border-transparent text-body'}`
                     }
                   >
                     {({ isActive }) => (
