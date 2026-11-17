@@ -294,13 +294,15 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 @keyframes impact { 0% { transform: scale(1); } 35% { transform: scale(1.02); } 100% { transform: scale(1); } }
 .sim-item.impact { animation: impact 0.55s var(--ease-spring); }
 /* run progress line on the card's top edge */
+/* run progress: one continuous linear fill over the whole run (no per-step jumps), then it fades away */
+@keyframes run-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .run-progress {
   position: absolute; left: 0; right: 0; top: 0; height: 2px; z-index: 2; pointer-events: none; transform-origin: left center;
-  background: linear-gradient(90deg, transparent, var(--color-accent));
-  transition: transform 0.5s var(--ease-spring), opacity 0.8s;
+  background: linear-gradient(90deg, rgb(212 255 42 / 0.15), var(--color-mark));
+  transform: scaleX(0); animation: run-fill var(--run-ms, 5s) linear forwards; will-change: transform;
+  transition: opacity 0.7s ease-out;
 }
-.run-progress.is-blocked { background: linear-gradient(90deg, rgb(212 255 42 / 0.4), var(--color-bad)); }
-.run-progress.is-done { opacity: 0.35; }
+.run-progress.is-done { opacity: 0; }
 @keyframes pulse-dot { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 .pulse-dot { animation: pulse-dot 1s ease-in-out infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -613,7 +615,7 @@ html[data-theme='light'] .bn-callout::before { background: linear-gradient(180de
   .hero-line, .hero-card { transform: none; }
   .sim-item, .stamp { opacity: 1; transform: none; }
   .stamp { transform: rotate(-8deg); }
-  .row-scan { display: none; }
+  .row-scan, .run-progress { display: none; }
   .laser, .packet, .flow-bar.is-busy::before { display: none; }
   .tilt { transform: none !important; }
   .chip { opacity: 1; transform: none; }

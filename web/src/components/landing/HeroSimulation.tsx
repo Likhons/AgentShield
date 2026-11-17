@@ -81,8 +81,8 @@ export default function HeroSimulation({ runKey, onReplay }: { runKey: number; o
       <div className={`glow glow-crimson -right-24 -bottom-24 h-72 w-72 ${blocked ? 'opacity-100' : 'opacity-0'}`} aria-hidden />
       {/* run progress along the top edge */}
       <span
-        className={`run-progress ${blocked ? 'is-blocked' : ''} ${done ? 'is-done' : ''}`}
-        style={{ transform: `scaleX(${phase / DONE})` }}
+        className={`run-progress ${done ? 'is-done' : ''}`}
+        style={{ ['--run-ms' as string]: `${PHASE_AT[PHASE_AT.length - 1]}ms` }}
         aria-hidden
       />
       <figcaption className="relative mb-3 flex items-center justify-between gap-3 text-sm">
