@@ -1,6 +1,7 @@
 import { ChartColumn, PlayCircle } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef, useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
+import About from '../components/landing/About'
 import DevTerminal from '../components/landing/DevTerminal'
 import Logo from '../components/Logo'
 import ThemeToggle from '../components/ThemeToggle'
@@ -248,6 +249,7 @@ export default function Landing() {
             <Logo size={30} />
           </Link>
           <div className="hidden items-center gap-7 text-[0.95rem] md:flex">
+            <a href="#about" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">About</a>
             <a href="#how" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">How it works</a>
             <a href="#results" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">Results</a>
             <a href="#builders" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">For developers</a>
@@ -263,6 +265,7 @@ export default function Landing() {
 
       <main id="main" className="relative">
         <Hero />
+        <About />
         <HowItWorks />
         <Results />
         <section id="builders" className="relative scroll-mt-20 border-t border-fg/6">
