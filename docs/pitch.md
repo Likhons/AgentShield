@@ -1,6 +1,6 @@
 # AgentShield: Pitch and Demo Script
 
-> Draft, updated 12 Nov 2026. Every number here is in [results.md](results.md) with its source file. Re-check them after the final benchmark run; anything still TBD there must not be said on stage.
+> Draft, updated 17 Nov 2026. Every number here is in [results.md](results.md) with its source file. Re-check them after the final benchmark run; anything still TBD there must not be said on stage.
 
 ## 1. The 3-minute pitch
 
@@ -33,6 +33,7 @@ Say "first agent-action security for Bangla", never "first Bangla guardrail".
 | AgentShield with a real model | 0/20 attacks moved money (4/20 without); rent paid 16/20 with and 16/20 without AgentShield | 20 + 20 items, 1 run each, `agent_20261112-111137`. The 4 blocked attacks are exactly the 4 that stole without protection; the other 16 the agent never tried. The 4 unpaid rents were also unpaid without AgentShield |
 | Simulated agent | 0/60 attacks succeed with AgentShield (22/60 without); 175/175 rent payments completed | Simulation (mock agent), say so; `agent_20261111-122758` |
 | Speed | ~0.1–0.6 ms per check without an LLM call; LLM judge called only when needed | Free-tier LLM latency varies |
+| Network check across users | Simulated wallet week: money reaching scammers 334,300 → 96,000 BDT; 0 of 1,109 real accounts flagged; phone-scam numbers caught after 12, then 4, then 1 person | **Simulation**: 600 fake users, our own scam patterns, weights chosen on the same data. Shows the method, not accuracy. 46 real payments needed an extra confirmation, 1 small scam was missed. `network_20261117-175247` |
 
 ## 4. Likely judge questions and honest answers
 
@@ -41,6 +42,7 @@ Say "first agent-action security for Bangla", never "first Bangla guardrail".
 - **"Your dataset is small."** Yes: 24 team-written Bangla/Banglish attacks, 40 public English agent attacks, 135 benign look-alikes. Every number comes with a 95% interval. Growing the dataset with native speakers is part of the plan (NRB volunteers).
 - **"How do you avoid blocking normal Bangla users?"** We test benign look-alikes on purpose (money, bills, "ignore", "assistant" in normal sentences) and report false positives per language. When unsure we ask the human instead of blocking.
 - **"What does it cost to run?"** Most checks are local and take under a millisecond; the LLM judge runs only for sensitive tools when another check sees risk (8 of 34 checks in our demo comparison).
+- **"Do you do fraud detection across transactions, or graph analysis?"** Per call, no: each check judges one tool call. On top of that we built a network check that looks across all users of a wallet: a number that many unrelated people pay, and that sends the money straight on, is flagged for everyone, and numbers that send money to a known cash-out account are caught after one or two victims. We have only tested it on a simulated wallet week, and we say so. With a partner wallet's transaction data it would need re-tuning and real fraud labels. It is a rule-based score, not a trained streaming model.
 - **"Who pays?"** Wallets and banks deploying agents (on-prem licence), fintech startups (hosted plan), agent platforms (partner plan). Pricing is still being validated with interviews.
 
 ## 5. Demo video script (about 2 minutes)

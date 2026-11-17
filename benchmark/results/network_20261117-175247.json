@@ -1,0 +1,1636 @@
+{
+  "created_utc": "20261117-175247",
+  "simulated": true,
+  "note": "Simulated wallet, one week. Per-call verdicts come from the real policy rules (policy check only: the simulation has no message texts). User approval rates are assumptions, and the network weights and thresholds were set on this same data: this shows the method, not real-world accuracy.",
+  "params": {
+    "seed": 2026,
+    "window_hours": 24.0,
+    "fan_in_full": 15,
+    "min_inflow": 5000,
+    "weights": {
+      "fan_in": 0.45,
+      "pass_through": 0.3,
+      "untrusted": 0.25,
+      "linked": 0.35
+    },
+    "flag_at": 0.6,
+    "watch_at": 0.35,
+    "cashout_share": 0.5,
+    "approve_legit": 0.9,
+    "approve_scam": 0.55
+  },
+  "world": {
+    "users": 600,
+    "accounts": 1718,
+    "payments": 4779,
+    "forwards": 114,
+    "start": "2026-11-09T00:00:00+06:00",
+    "end": "2026-11-16T00:00:00+06:00"
+  },
+  "per_call": {
+    "scam_attempts": 174,
+    "scam_moved": 334300,
+    "scam_moved_count": 55,
+    "scam_stopped_agentshield": 119,
+    "scam_stopped_network": 0,
+    "legit_attempts": 4605,
+    "legit_paid": 4596,
+    "legit_blocked_network": 0,
+    "legit_extra_confirm": 0,
+    "legit_declined_network": 0
+  },
+  "with_network": {
+    "scam_attempts": 174,
+    "scam_moved": 96000,
+    "scam_moved_count": 15,
+    "scam_stopped_agentshield": 119,
+    "scam_stopped_network": 40,
+    "legit_attempts": 4605,
+    "legit_paid": 4589,
+    "legit_blocked_network": 0,
+    "legit_extra_confirm": 46,
+    "legit_declined_network": 7
+  },
+  "spotlight": {
+    "number": "01085280164",
+    "first_payment": {
+      "t": "2026-11-10T09:13:57+06:00",
+      "amount": 2700,
+      "source": "tool:email",
+      "origin": "billing-notice.example",
+      "verdict": "block",
+      "rule": "tainted_transfer_to_stranger"
+    },
+    "per_person_median": 1,
+    "first_seen": "2026-11-10T09:13:57+06:00",
+    "flagged_at": "2026-11-10T11:09:43+06:00",
+    "flagged_after": 12,
+    "people": 48,
+    "last_seen": "2026-11-12T22:17:51+06:00",
+    "sources": [
+      "tool:email",
+      "tool:web"
+    ],
+    "payments": [
+      {
+        "t": "2026-11-10T09:13:57+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T09:19:44+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T09:40:26+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T09:55:10+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T10:00:03+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T10:02:57+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T10:08:58+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T10:21:58+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T10:33:54+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T10:36:59+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T11:04:39+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T11:09:43+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T11:09:46+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T11:16:22+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T11:39:07+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T12:04:32+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T12:23:17+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T12:33:31+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T12:37:10+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T12:47:15+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T12:55:01+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T13:03:35+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T13:10:21+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T13:13:22+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T13:29:03+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T13:35:46+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T13:45:59+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T13:56:06+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T14:14:44+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T14:18:00+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T14:23:13+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T14:26:22+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T14:41:09+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T14:56:49+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-10T14:58:12+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T18:13:35+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T19:06:55+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T19:31:06+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T19:35:44+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T19:44:48+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T19:48:01+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T19:59:01+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T20:54:11+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T20:55:22+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T21:11:50+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T21:27:31+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T21:27:35+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T21:51:34+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T22:10:13+06:00",
+        "outcome": "agentshield"
+      },
+      {
+        "t": "2026-11-12T22:17:51+06:00",
+        "outcome": "agentshield"
+      }
+    ]
+  },
+  "rings": [
+    {
+      "id": "R1",
+      "name": "Ring 1",
+      "first": "2026-11-10T09:04:51+06:00",
+      "last": "2026-11-12T22:49:31+06:00",
+      "people": 104,
+      "attempts": 115,
+      "sources": [
+        "tool:email",
+        "tool:web"
+      ],
+      "origins": [
+        "billing-notice.example",
+        "deal-today.example"
+      ],
+      "moved_per_call": 0,
+      "moved_with_network": 0,
+      "members": [
+        {
+          "number": "01085280164",
+          "role": "collecting",
+          "tier": "flagged",
+          "flagged_at": "2026-11-10T11:09:43+06:00",
+          "flagged_after": 12,
+          "score": 1.0,
+          "payers": 48,
+          "attempts": [
+            {
+              "t": "2026-11-10T09:13:57+06:00",
+              "amount": 2700,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T09:19:44+06:00",
+              "amount": 3000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T09:40:26+06:00",
+              "amount": 2200,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T09:55:10+06:00",
+              "amount": 2100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:00:03+06:00",
+              "amount": 4100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:02:57+06:00",
+              "amount": 2600,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:08:58+06:00",
+              "amount": 3400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:21:58+06:00",
+              "amount": 3000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:33:54+06:00",
+              "amount": 2500,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:36:59+06:00",
+              "amount": 4450,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:04:39+06:00",
+              "amount": 2300,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:09:43+06:00",
+              "amount": 3850,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:09:46+06:00",
+              "amount": 2050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:16:22+06:00",
+              "amount": 2700,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:39:07+06:00",
+              "amount": 2950,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:04:32+06:00",
+              "amount": 2600,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:23:17+06:00",
+              "amount": 3900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:33:31+06:00",
+              "amount": 3700,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:37:10+06:00",
+              "amount": 3100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:47:15+06:00",
+              "amount": 3750,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:55:01+06:00",
+              "amount": 2000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:03:35+06:00",
+              "amount": 2000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:10:21+06:00",
+              "amount": 3950,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:13:22+06:00",
+              "amount": 3850,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:29:03+06:00",
+              "amount": 2150,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:35:46+06:00",
+              "amount": 3700,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:45:59+06:00",
+              "amount": 3200,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:56:06+06:00",
+              "amount": 4400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:14:44+06:00",
+              "amount": 2800,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:18:00+06:00",
+              "amount": 2550,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:23:13+06:00",
+              "amount": 3450,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:26:22+06:00",
+              "amount": 4350,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:41:09+06:00",
+              "amount": 3650,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:56:49+06:00",
+              "amount": 2750,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:58:12+06:00",
+              "amount": 2150,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T18:13:35+06:00",
+              "amount": 1350,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:06:55+06:00",
+              "amount": 3250,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:31:06+06:00",
+              "amount": 2500,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:35:44+06:00",
+              "amount": 1150,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:44:48+06:00",
+              "amount": 1000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:48:01+06:00",
+              "amount": 1900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:59:01+06:00",
+              "amount": 2200,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:54:11+06:00",
+              "amount": 3400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:55:22+06:00",
+              "amount": 1500,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:11:50+06:00",
+              "amount": 2800,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:27:31+06:00",
+              "amount": 1450,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:27:35+06:00",
+              "amount": 2100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:51:34+06:00",
+              "amount": 3450,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:10:13+06:00",
+              "amount": 1700,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:17:51+06:00",
+              "amount": 1350,
+              "outcome": "agentshield"
+            }
+          ],
+          "received_from": [],
+          "origins": [
+            "billing-notice.example",
+            "deal-today.example"
+          ],
+          "truth": "mule"
+        },
+        {
+          "number": "01041045407",
+          "role": "collecting",
+          "tier": "flagged",
+          "flagged_at": "2026-11-10T11:23:41+06:00",
+          "flagged_after": 11,
+          "score": 1.0,
+          "payers": 40,
+          "attempts": [
+            {
+              "t": "2026-11-10T09:04:51+06:00",
+              "amount": 3250,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T09:05:47+06:00",
+              "amount": 3900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T09:22:12+06:00",
+              "amount": 2500,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T09:37:02+06:00",
+              "amount": 3900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:06:13+06:00",
+              "amount": 3600,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:09:36+06:00",
+              "amount": 3600,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:15:26+06:00",
+              "amount": 2700,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:24:02+06:00",
+              "amount": 1950,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T10:35:18+06:00",
+              "amount": 2750,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:01:58+06:00",
+              "amount": 4000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:23:41+06:00",
+              "amount": 3100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:30:29+06:00",
+              "amount": 3400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:31:27+06:00",
+              "amount": 3050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:40:53+06:00",
+              "amount": 4050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:41:42+06:00",
+              "amount": 3100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:48:10+06:00",
+              "amount": 2050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T11:59:11+06:00",
+              "amount": 3700,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:05:57+06:00",
+              "amount": 3250,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:07:35+06:00",
+              "amount": 1850,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:15:59+06:00",
+              "amount": 4350,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:27:20+06:00",
+              "amount": 1950,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:41:18+06:00",
+              "amount": 4100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:51:02+06:00",
+              "amount": 2250,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T12:52:21+06:00",
+              "amount": 3100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:00:55+06:00",
+              "amount": 2500,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:06:00+06:00",
+              "amount": 2900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:12:43+06:00",
+              "amount": 4150,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:28:44+06:00",
+              "amount": 4400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:29:51+06:00",
+              "amount": 3100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:30:59+06:00",
+              "amount": 3050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:32:36+06:00",
+              "amount": 4250,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:32:38+06:00",
+              "amount": 3550,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:34:21+06:00",
+              "amount": 3050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:36:26+06:00",
+              "amount": 2850,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:37:34+06:00",
+              "amount": 3900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:38:39+06:00",
+              "amount": 3800,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T13:59:29+06:00",
+              "amount": 2850,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:00:16+06:00",
+              "amount": 2200,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:44:10+06:00",
+              "amount": 2050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-10T14:56:33+06:00",
+              "amount": 2700,
+              "outcome": "agentshield"
+            }
+          ],
+          "received_from": [],
+          "origins": [
+            "billing-notice.example"
+          ],
+          "truth": "mule"
+        },
+        {
+          "number": "01024136354",
+          "role": "collecting",
+          "tier": "flagged",
+          "flagged_at": "2026-11-12T18:36:58+06:00",
+          "flagged_after": 1,
+          "score": 1.0,
+          "payers": 25,
+          "attempts": [
+            {
+              "t": "2026-11-12T18:36:58+06:00",
+              "amount": 2900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T18:50:58+06:00",
+              "amount": 3200,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T18:56:09+06:00",
+              "amount": 3450,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:08:53+06:00",
+              "amount": 1300,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:12:08+06:00",
+              "amount": 2550,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:31:25+06:00",
+              "amount": 3300,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T19:37:25+06:00",
+              "amount": 2050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:19:41+06:00",
+              "amount": 3450,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:22:20+06:00",
+              "amount": 1950,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:46:29+06:00",
+              "amount": 3050,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:47:28+06:00",
+              "amount": 3350,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:48:38+06:00",
+              "amount": 1100,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:56:56+06:00",
+              "amount": 1800,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:58:11+06:00",
+              "amount": 2800,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T20:58:33+06:00",
+              "amount": 1500,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:02:55+06:00",
+              "amount": 2650,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:20:28+06:00",
+              "amount": 2400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:28:39+06:00",
+              "amount": 2800,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T21:49:38+06:00",
+              "amount": 3400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:26:33+06:00",
+              "amount": 1900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:26:53+06:00",
+              "amount": 2950,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:34:30+06:00",
+              "amount": 2350,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:36:47+06:00",
+              "amount": 1900,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:48:40+06:00",
+              "amount": 3400,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-12T22:49:31+06:00",
+              "amount": 1800,
+              "outcome": "agentshield"
+            }
+          ],
+          "received_from": [],
+          "origins": [
+            "deal-today.example"
+          ],
+          "truth": "mule"
+        }
+      ],
+      "edges": [],
+      "truth": [
+        "fake bill email",
+        "fake bill email + fake shop page",
+        "fake shop page"
+      ]
+    },
+    {
+      "id": "R2",
+      "name": "Ring 2",
+      "first": "2026-11-11T11:39:44+06:00",
+      "last": "2026-11-13T15:47:27+06:00",
+      "people": 54,
+      "attempts": 54,
+      "sources": [
+        "user"
+      ],
+      "origins": [],
+      "moved_per_call": 304900,
+      "moved_with_network": 78800,
+      "members": [
+        {
+          "number": "01031537768",
+          "role": "collecting",
+          "tier": "flagged",
+          "flagged_at": "2026-11-11T16:55:31+06:00",
+          "flagged_after": 12,
+          "score": 1.0,
+          "payers": 20,
+          "attempts": [
+            {
+              "t": "2026-11-11T11:39:44+06:00",
+              "amount": 5400,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T12:01:11+06:00",
+              "amount": 8200,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T12:39:18+06:00",
+              "amount": 5500,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T13:33:31+06:00",
+              "amount": 4100,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T13:53:04+06:00",
+              "amount": 3800,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T13:57:35+06:00",
+              "amount": 9000,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T14:41:43+06:00",
+              "amount": 4500,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T15:08:39+06:00",
+              "amount": 17500,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T15:39:41+06:00",
+              "amount": 3600,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T15:59:56+06:00",
+              "amount": 13000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-11T16:50:57+06:00",
+              "amount": 5200,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-11T16:55:31+06:00",
+              "amount": 8000,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T18:10:34+06:00",
+              "amount": 6700,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T18:12:59+06:00",
+              "amount": 3000,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T18:26:35+06:00",
+              "amount": 3600,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T19:05:00+06:00",
+              "amount": 6400,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T19:13:18+06:00",
+              "amount": 3400,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T19:22:34+06:00",
+              "amount": 13000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-11T19:33:07+06:00",
+              "amount": 7300,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-11T19:35:46+06:00",
+              "amount": 7900,
+              "outcome": "network"
+            }
+          ],
+          "received_from": [],
+          "origins": [],
+          "truth": "mule"
+        },
+        {
+          "number": "01071523100",
+          "role": "collecting",
+          "tier": "flagged",
+          "flagged_at": "2026-11-12T11:22:34+06:00",
+          "flagged_after": 4,
+          "score": 1.0,
+          "payers": 18,
+          "attempts": [
+            {
+              "t": "2026-11-12T10:04:36+06:00",
+              "amount": 3100,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-12T10:17:22+06:00",
+              "amount": 7500,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-12T10:41:56+06:00",
+              "amount": 8600,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-12T11:22:34+06:00",
+              "amount": 6000,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T12:06:17+06:00",
+              "amount": 4300,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T13:48:43+06:00",
+              "amount": 7700,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T14:49:49+06:00",
+              "amount": 3700,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T15:00:29+06:00",
+              "amount": 3600,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T15:11:43+06:00",
+              "amount": 3400,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T15:26:07+06:00",
+              "amount": 4800,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T15:38:20+06:00",
+              "amount": 7400,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T15:41:45+06:00",
+              "amount": 3700,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T16:07:32+06:00",
+              "amount": 3200,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T16:15:49+06:00",
+              "amount": 5200,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T16:50:33+06:00",
+              "amount": 6500,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T17:23:02+06:00",
+              "amount": 8700,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T18:05:27+06:00",
+              "amount": 6400,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-12T18:29:49+06:00",
+              "amount": 6300,
+              "outcome": "network"
+            }
+          ],
+          "received_from": [],
+          "origins": [],
+          "truth": "mule"
+        },
+        {
+          "number": "01018016823",
+          "role": "collecting",
+          "tier": "flagged",
+          "flagged_at": "2026-11-13T11:08:04+06:00",
+          "flagged_after": 1,
+          "score": 1.0,
+          "payers": 16,
+          "attempts": [
+            {
+              "t": "2026-11-13T10:20:04+06:00",
+              "amount": 5400,
+              "outcome": "moved"
+            },
+            {
+              "t": "2026-11-13T11:14:44+06:00",
+              "amount": 6900,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T11:16:30+06:00",
+              "amount": 7800,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T11:20:30+06:00",
+              "amount": 4700,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T11:25:22+06:00",
+              "amount": 6300,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T11:36:20+06:00",
+              "amount": 8400,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T11:47:13+06:00",
+              "amount": 6800,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T11:48:15+06:00",
+              "amount": 8500,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T12:14:28+06:00",
+              "amount": 6200,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T12:29:40+06:00",
+              "amount": 3300,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T12:49:56+06:00",
+              "amount": 8100,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T12:57:53+06:00",
+              "amount": 6800,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T14:32:43+06:00",
+              "amount": 13500,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-13T15:06:19+06:00",
+              "amount": 5700,
+              "outcome": "network"
+            },
+            {
+              "t": "2026-11-13T15:24:03+06:00",
+              "amount": 12000,
+              "outcome": "agentshield"
+            },
+            {
+              "t": "2026-11-13T15:47:27+06:00",
+              "amount": 6800,
+              "outcome": "network"
+            }
+          ],
+          "received_from": [],
+          "origins": [],
+          "truth": "mule"
+        },
+        {
+          "number": "01030312295",
+          "role": "cash-out",
+          "tier": "cashout",
+          "flagged_at": "2026-11-11T16:55:31+06:00",
+          "flagged_after": null,
+          "score": 0.0,
+          "payers": 0,
+          "attempts": [],
+          "received_from": [
+            "01018016823",
+            "01031537768",
+            "01071523100"
+          ],
+          "origins": [],
+          "truth": "cashout"
+        }
+      ],
+      "edges": [
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 4648,
+          "held": false
+        },
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 7035,
+          "held": false
+        },
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 5111,
+          "held": false
+        },
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 3648,
+          "held": false
+        },
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 3456,
+          "held": false
+        },
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 3955,
+          "held": false
+        },
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 15994,
+          "held": false
+        },
+        {
+          "from": "01031537768",
+          "to": "01030312295",
+          "amount": 4577,
+          "held": true
+        },
+        {
+          "from": "01071523100",
+          "to": "01030312295",
+          "amount": 2929,
+          "held": true
+        },
+        {
+          "from": "01071523100",
+          "to": "01030312295",
+          "amount": 6694,
+          "held": true
+        },
+        {
+          "from": "01071523100",
+          "to": "01030312295",
+          "amount": 7445,
+          "held": true
+        },
+        {
+          "from": "01018016823",
+          "to": "01030312295",
+          "amount": 5045,
+          "held": true
+        }
+      ],
+      "truth": [
+        "phone scam"
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "number": "01018016823",
+      "known_as": "Unknown number",
+      "tier": "flagged",
+      "score": 1.0,
+      "parts": {
+        "fan_in": 0.39,
+        "pass_through": 0.28,
+        "untrusted": 0.0,
+        "linked": 0.35
+      },
+      "strangers": 13,
+      "pass_through": 0.93,
+      "untrusted": 0.0,
+      "linked": true,
+      "payers": 16,
+      "flagged_at": "2026-11-13T11:08:04+06:00",
+      "flagged_after": 1,
+      "truth": "mule",
+      "truth_role": "mule"
+    },
+    {
+      "number": "01024136354",
+      "known_as": "Unknown number",
+      "tier": "flagged",
+      "score": 1.0,
+      "parts": {
+        "fan_in": 0.42,
+        "pass_through": 0.0,
+        "untrusted": 0.25,
+        "linked": 0.35
+      },
+      "strangers": 14,
+      "pass_through": 0.0,
+      "untrusted": 1.0,
+      "linked": true,
+      "payers": 25,
+      "flagged_at": "2026-11-12T18:36:58+06:00",
+      "flagged_after": 1,
+      "truth": "mule",
+      "truth_role": "mule"
+    },
+    {
+      "number": "01031537768",
+      "known_as": "Unknown number",
+      "tier": "flagged",
+      "score": 1.0,
+      "parts": {
+        "fan_in": 0.39,
+        "pass_through": 0.268,
+        "untrusted": 0.0,
+        "linked": 0.35
+      },
+      "strangers": 13,
+      "pass_through": 0.89,
+      "untrusted": 0.0,
+      "linked": true,
+      "payers": 20,
+      "flagged_at": "2026-11-11T16:55:31+06:00",
+      "flagged_after": 12,
+      "truth": "mule",
+      "truth_role": "mule"
+    },
+    {
+      "number": "01041045407",
+      "known_as": "Unknown number",
+      "tier": "flagged",
+      "score": 1.0,
+      "parts": {
+        "fan_in": 0.42,
+        "pass_through": 0.0,
+        "untrusted": 0.25,
+        "linked": 0.35
+      },
+      "strangers": 14,
+      "pass_through": 0.0,
+      "untrusted": 1.0,
+      "linked": true,
+      "payers": 40,
+      "flagged_at": "2026-11-10T11:23:41+06:00",
+      "flagged_after": 11,
+      "truth": "mule",
+      "truth_role": "mule"
+    },
+    {
+      "number": "01071523100",
+      "known_as": "Unknown number",
+      "tier": "flagged",
+      "score": 1.0,
+      "parts": {
+        "fan_in": 0.39,
+        "pass_through": 0.267,
+        "untrusted": 0.0,
+        "linked": 0.35
+      },
+      "strangers": 13,
+      "pass_through": 0.89,
+      "untrusted": 0.0,
+      "linked": true,
+      "payers": 18,
+      "flagged_at": "2026-11-12T11:22:34+06:00",
+      "flagged_after": 4,
+      "truth": "mule",
+      "truth_role": "mule"
+    },
+    {
+      "number": "01085280164",
+      "known_as": "Unknown number",
+      "tier": "flagged",
+      "score": 1.0,
+      "parts": {
+        "fan_in": 0.42,
+        "pass_through": 0.0,
+        "untrusted": 0.25,
+        "linked": 0.35
+      },
+      "strangers": 14,
+      "pass_through": 0.0,
+      "untrusted": 1.0,
+      "linked": true,
+      "payers": 48,
+      "flagged_at": "2026-11-10T11:09:43+06:00",
+      "flagged_after": 12,
+      "truth": "mule",
+      "truth_role": "mule"
+    },
+    {
+      "number": "01066033634",
+      "known_as": "Pop-up seller",
+      "tier": "watch",
+      "score": 0.52,
+      "parts": {
+        "fan_in": 0.45,
+        "pass_through": 0.07,
+        "untrusted": 0.0,
+        "linked": 0.0
+      },
+      "strangers": 27,
+      "pass_through": 0.23,
+      "untrusted": 0.0,
+      "linked": false,
+      "payers": 58,
+      "flagged_at": null,
+      "flagged_after": null,
+      "truth": "legit",
+      "truth_role": "popup"
+    },
+    {
+      "number": "01051200729",
+      "known_as": "Unknown number",
+      "tier": "watch",
+      "score": 0.42,
+      "parts": {
+        "fan_in": 0.12,
+        "pass_through": 0.3,
+        "untrusted": 0.0,
+        "linked": 0.0
+      },
+      "strangers": 4,
+      "pass_through": 1.0,
+      "untrusted": 0.0,
+      "linked": false,
+      "payers": 5,
+      "flagged_at": null,
+      "flagged_after": null,
+      "truth": "mule",
+      "truth_role": "mule"
+    },
+    {
+      "number": "01096700199",
+      "known_as": "Mess manager",
+      "tier": "clear",
+      "score": 0.3,
+      "parts": {
+        "fan_in": 0.0,
+        "pass_through": 0.298,
+        "untrusted": 0.0,
+        "linked": 0.0
+      },
+      "strangers": 0,
+      "pass_through": 0.99,
+      "untrusted": 0.0,
+      "linked": false,
+      "payers": 12,
+      "flagged_at": null,
+      "flagged_after": null,
+      "truth": "legit",
+      "truth_role": "mess"
+    },
+    {
+      "number": "01042880483",
+      "known_as": "Gas biller",
+      "tier": "clear",
+      "score": 0.25,
+      "parts": {
+        "fan_in": 0.0,
+        "pass_through": 0.0,
+        "untrusted": 0.25,
+        "linked": 0.0
+      },
+      "strangers": 0,
+      "pass_through": 0.0,
+      "untrusted": 1.0,
+      "linked": false,
+      "payers": 460,
+      "flagged_at": null,
+      "flagged_after": null,
+      "truth": "legit",
+      "truth_role": "biller"
+    },
+    {
+      "number": "01067446522",
+      "known_as": "Water biller",
+      "tier": "clear",
+      "score": 0.25,
+      "parts": {
+        "fan_in": 0.0,
+        "pass_through": 0.0,
+        "untrusted": 0.25,
+        "linked": 0.0
+      },
+      "strangers": 0,
+      "pass_through": 0.0,
+      "untrusted": 1.0,
+      "linked": false,
+      "payers": 452,
+      "flagged_at": null,
+      "flagged_after": null,
+      "truth": "legit",
+      "truth_role": "biller"
+    },
+    {
+      "number": "01068695681",
+      "known_as": "Internet biller",
+      "tier": "clear",
+      "score": 0.19,
+      "parts": {
+        "fan_in": 0.0,
+        "pass_through": 0.0,
+        "untrusted": 0.188,
+        "linked": 0.0
+      },
+      "strangers": 0,
+      "pass_through": 0.0,
+      "untrusted": 0.75,
+      "linked": false,
+      "payers": 452,
+      "flagged_at": null,
+      "flagged_after": null,
+      "truth": "legit",
+      "truth_role": "biller"
+    },
+    {
+      "number": "01015988000",
+      "known_as": "Electricity biller",
+      "tier": "clear",
+      "score": 0.18,
+      "parts": {
+        "fan_in": 0.0,
+        "pass_through": 0.0,
+        "untrusted": 0.179,
+        "linked": 0.0
+      },
+      "strangers": 0,
+      "pass_through": 0.0,
+      "untrusted": 0.72,
+      "linked": false,
+      "payers": 475,
+      "flagged_at": null,
+      "flagged_after": null,
+      "truth": "legit",
+      "truth_role": "biller"
+    }
+  ],
+  "evaluation": {
+    "mules": 7,
+    "mules_flagged": 6,
+    "mules_watch": 1,
+    "cashouts": 2,
+    "cashouts_found": 1,
+    "legit_accounts": 1109,
+    "legit_flagged": 0,
+    "legit_watch": 1
+  }
+}

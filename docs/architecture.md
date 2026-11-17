@@ -1,6 +1,6 @@
 # AgentShield Architecture
 
-> Draft, updated 11 Nov 2026. The status column shows what is built today. Nothing marked "planned" exists in code yet.
+> Draft, updated 17 Nov 2026. The status column shows what is built today. Nothing marked "planned" exists in code yet.
 
 ## 1. The idea in one picture
 
@@ -35,14 +35,16 @@ Design principle: **"AI where judgment is needed, deterministic rules where cert
 |---|---|---|---|
 | LLM provider layer | `agentshield/llm/` | One interface for `mock` (offline, also an offline intent judge), `groq` and `gemini`; provider and models come from `.env`; retries on rate limits and timeouts | Built, tested |
 | Taint tracking | `agentshield/checks/taint.py` | Traces every argument of a tool call to the user's request, a specific tool output (email, web page, file, bank data) or nowhere | Built, tested |
-| Injection classifier | `agentshield/checks/classifier.py` | Scans untrusted context for attempts to instruct the AI (EN/BN/Banglish); for sensitive tools only the items that supplied the arguments are scored (scope B); heuristic baseline behind a swappable detector interface | Heuristic built; trained model planned (Phase 4) |
+| Injection classifier | `agentshield/checks/classifier.py` | Scans untrusted context for attempts to instruct the AI (EN/BN/Banglish); for sensitive tools only the items that supplied the arguments are scored (scope B); heuristic baseline behind a swappable detector interface | Heuristic built and used at runtime; XLM-R model trained (Phase 4) but not adopted, see `docs/results.md` §3e |
 | Intent check | `agentshield/checks/intent.py` | LLM judge: does this action follow from what the user asked? Sees only the user's request and the tool call, never the untrusted text | Built, tested |
 | Policy engine | `agentshield/checks/policy.py`, `policies/default.yaml` | Readable, validated YAML rules (amount limits, unknown recipients, tainted transfers) | Built, tested |
 | Decision engine | `agentshield/core/engine.py` | Combines the checks into a risk score and a decision with a bilingual reason; measures latency | Built, tested |
 | Audit log | `agentshield/audit/log.py` | Every decision with per-check results, latency and KPI stats (SQLite) | Built, tested |
 | SDK wrapper | `agentshield/sdk/session.py` | Protect any agent's tools: `session.wrap(name, func, source)` | Built, tested |
 | Demo banking agent | `demo_agent/` | Agent with six fake MockPay tools and 14 scenarios (6 benign, 8 attacks), runnable without and with AgentShield; real runs can be recorded and replayed | Built, tested |
-| Dashboard | `dashboard/` | Streamlit: side-by-side demo (mock, live Groq, or recorded replay), simulated human approval, audit log with KPIs, benchmark tab reading `benchmark/results/` | Built, tested |
+| Dashboard (first version) | `dashboard/` | Streamlit: side-by-side demo (mock, live Groq, or recorded replay), simulated human approval, audit log with KPIs, benchmark tab reading `benchmark/results/` | Built, tested, live on Streamlit Cloud |
+| Web dashboard | `web/`, `webapi/` | React site and its FastAPI backend: the same pages plus a landing page, a sandbox for one request, and the Network view | Built, tested, live on Vercel + Render |
+| Network check | `benchmark/network.py` | Across users: replays a wallet's payments in time order and scores each receiving number (fan-in of strangers, pass-through, untrusted share, graph links to cash-out accounts and shared sources); flags block, watch asks | Prototype on a simulated wallet week only |
 | Benchmark | `benchmark/`, `datasets/` | Text-level (detectors) and agent-level (money outcome) benchmarks per language, with 95% confidence intervals | Built; dataset growing (Phase 3) |
 | HTTP gateway | `agentshield/api/app.py` | Same checks as a web service (FastAPI): `POST /v1/check`, `GET /v1/audit`, `GET /v1/stats`; optional API key | Built, tested |
 
@@ -91,5 +93,5 @@ Design principle: **"AI where judgment is needed, deterministic rules where cert
 ## 6. Deployment
 
 - **Laptop / demo:** `streamlit run dashboard/app.py`, works fully offline with the mock provider.
-- **Cloud (planned):** the HTTP gateway and dashboard as two small services; any cloud or Hugging Face Spaces for the demo.
+- **Cloud (live demo):** web dashboard on Vercel, its API on Render (free tier, Singapore), the first Streamlit version on Streamlit Community Cloud. Steps in `docs/deploy.md`.
 - **On-prem (planned):** the same services inside an institution's network, with a local or private LLM endpoint.

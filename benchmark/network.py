@@ -24,21 +24,26 @@ Honest limits: the data is simulated, the user approval rates are assumptions, a
 thresholds were chosen on this same data. It shows the method; it is not evidence of real-world accuracy.
 
     python -m benchmark.network          # print the summary
+    python -m benchmark.network --save   # also write benchmark/results/network_<UTC stamp>.json and .md
 """
 
 from __future__ import annotations
 
+import argparse
 import heapq
+import json
 import random
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 from agentshield.checks.policy import PolicyEngine
 from agentshield.core.models import ContextItem, GuardRequest, SourceType, ToolCall
 
+RESULTS_DIR = Path(__file__).resolve().parent / "results"
 SEED = 2026
 N_USERS = 600
 BD = timezone(timedelta(hours=6))  # Bangladesh time
@@ -605,8 +610,57 @@ def cached_report() -> dict[str, Any]:
     return report()
 
 
+def summary_markdown(r: dict[str, Any], stamp: str) -> str:
+    pc, nw, e = r["per_call"], r["with_network"], r["evaluation"]
+    lines = [
+        f"# Network check over a simulated wallet {stamp} (UTC)",
+        "",
+        f"**SIMULATION.** {r['note']}",
+        "",
+        f"World: {r['world']['users']} users, {r['world']['payments']:,} payments, {r['world']['start'][:10]} to "
+        f"{r['world']['end'][:10]}, seed {r['params']['seed']}. Network weights {r['params']['weights']}, "
+        f"flag at {r['params']['flag_at']}, watch at {r['params']['watch_at']}.",
+        "",
+        "| | Per-call checks only | Per-call + network |",
+        "|---|---|---|",
+        f"| Scam money that moved (BDT) | {pc['scam_moved']:,} ({pc['scam_moved_count']}/{pc['scam_attempts']} payments) "
+        f"| {nw['scam_moved']:,} ({nw['scam_moved_count']}/{nw['scam_attempts']}) |",
+        f"| Scam payments stopped by the per-call checks | {pc['scam_stopped_agentshield']} | {nw['scam_stopped_agentshield']} |",
+        f"| Scam payments stopped by the network check | {pc['scam_stopped_network']} | {nw['scam_stopped_network']} |",
+        f"| Legit payments made | {pc['legit_paid']:,}/{pc['legit_attempts']:,} | {nw['legit_paid']:,}/{nw['legit_attempts']:,} |",
+        f"| Legit payments asked again (extra confirmation) | {pc['legit_extra_confirm']} | {nw['legit_extra_confirm']} |",
+        f"| Legit payments blocked by the network check | {pc['legit_blocked_network']} | {nw['legit_blocked_network']} |",
+        "",
+        f"Against the simulation's truth: scam numbers flagged {e['mules_flagged']}/{e['mules']} ({e['mules_watch']} on watch), "
+        f"cash-out accounts found {e['cashouts_found']}/{e['cashouts']}, legit accounts flagged "
+        f"{e['legit_flagged']}/{e['legit_accounts']:,}, legit accounts on watch {e['legit_watch']}.",
+        "",
+        "| Ring | People | Payments | Sources | Flagged after (people, in order) | Moved per-call only (BDT) | Moved with network (BDT) |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for ring in r["rings"]:
+        caught = sorted((m for m in ring["members"] if m["flagged_after"] is not None), key=lambda m: m["flagged_at"])
+        lines.append(f"| {ring['name']} | {ring['people']} | {ring['attempts']} | {', '.join(ring['sources'])} "
+                     f"| {' -> '.join(str(m['flagged_after']) for m in caught)} | {ring['moved_per_call']:,} "
+                     f"| {ring['moved_with_network']:,} |")
+    s = r["spotlight"]
+    lines += ["", f"First number flagged: after {s['flagged_after']} people, {s['first_seen'][11:16]} to "
+                  f"{s['flagged_at'][11:16]} on {s['first_seen'][:10]} (Bangladesh time); {s['people']} people in total."]
+    return "\n".join(lines) + "\n"
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--save", action="store_true", help="write the report to benchmark/results/")
+    args = parser.parse_args()
     r = report()
+    if args.save:
+        RESULTS_DIR.mkdir(exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        (RESULTS_DIR / f"network_{stamp}.json").write_text(
+            json.dumps({"created_utc": stamp, **r}, indent=2, ensure_ascii=False), encoding="utf-8")
+        (RESULTS_DIR / f"network_{stamp}.md").write_text(summary_markdown(r, stamp), encoding="utf-8")
+        print(f"saved benchmark/results/network_{stamp}.json and .md")
     pc, nw = r["per_call"], r["with_network"]
     print("SIMULATION:", r["note"])
     print(f"world: {r['world']}")
