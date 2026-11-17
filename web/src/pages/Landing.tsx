@@ -2,6 +2,7 @@ import { ChartColumn, PlayCircle } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef, useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import About from '../components/landing/About'
+import Architecture from '../components/landing/Architecture'
 import DevTerminal from '../components/landing/DevTerminal'
 import Marquee from '../components/landing/Marquee'
 import Logo from '../components/Logo'
@@ -247,7 +248,7 @@ export default function Landing() {
             <Logo size={30} />
           </Link>
           <div className="hidden items-center gap-4 text-[0.88rem] whitespace-nowrap md:flex lg:gap-7 lg:text-[0.95rem]">
-            <a href="#how" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">How it works</a>
+            <a href="#architecture" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">How it works</a>
             <a href="#results" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">Results</a>
             <a href="#builders" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">For developers</a>
             <a href="#about" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">About</a>
@@ -264,6 +265,7 @@ export default function Landing() {
       <main id="main" className="relative">
         <Hero onRunAttack={() => setDemoOpen(true)} />
         <Marquee />
+        <Architecture />
         <HowItWorks />
         <Results />
         <section id="builders" className="relative scroll-mt-20 border-t border-fg/6">
