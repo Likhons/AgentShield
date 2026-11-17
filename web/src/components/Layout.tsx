@@ -2,7 +2,8 @@ import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import { useTheme } from '../lib/theme'
 import { useQuery } from '@tanstack/react-query'
-import { ChartColumn, Database, FileText, Menu, PlayCircle, Scale, X, type LucideIcon } from 'lucide-react'
+import { ChartColumn, GitBranch, Languages, Menu, ScrollText, SquareTerminal, X, type LucideIcon } from 'lucide-react'
+import type { Overview } from '../lib/api'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
@@ -12,25 +13,30 @@ interface NavItem {
   to: string
   label: string
   icon: LucideIcon
+  /** small marker on the right, from live data: a count chip or a short tag */
+  badge?: (o: Overview) => { text: string; kind: 'count' | 'tag' } | null
 }
 
 const SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: 'Workspace',
     items: [
-      { to: '/playground', label: 'Playground', icon: PlayCircle },
+      { to: '/playground', label: 'Playground', icon: SquareTerminal },
       { to: '/benchmarks', label: 'Benchmarks', icon: ChartColumn },
-      { to: '/audit', label: 'Audit Log', icon: FileText },
+      { to: '/audit', label: 'Audit Log', icon: ScrollText, badge: (o) => ({ text: compact(o.decisions_logged), kind: 'count' }) },
     ],
   },
   {
     title: 'Security',
     items: [
-      { to: '/policies', label: 'Policies', icon: Scale },
-      { to: '/datasets', label: 'Datasets', icon: Database },
+      { to: '/policies', label: 'Policies', icon: GitBranch, badge: (o) => ({ text: String(o.policy_rules), kind: 'count' }) },
+      { to: '/datasets', label: 'Datasets', icon: Languages, badge: () => ({ text: 'BN/EN', kind: 'tag' }) },
     ],
   },
 ]
+
+/** 454 -> "454", 1234 -> "1.2k" */
+const compact = (n: number) => (n < 1000 ? String(n) : `${(n / 1000).toFixed(n < 10000 ? 1 : 0)}k`)
 const ALL_ITEMS = SECTIONS.flatMap((s) => s.items)
 
 function Brand() {
@@ -42,28 +48,41 @@ function Brand() {
 }
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
+  const { data } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
   return (
-    <nav aria-label="Main" className="flex flex-col gap-5">
+    <nav aria-label="Main" className="flex flex-col gap-6">
       {SECTIONS.map((section) => (
         <div key={section.title}>
-          <div className="mb-2 px-3 text-[0.68rem] font-bold tracking-[0.16em] text-muted uppercase">{section.title}</div>
-          <ul className="flex flex-col gap-1">
-            {section.items.map(({ to, label, icon: Icon }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  onClick={onNavigate}
-                  className={({ isActive }) =>
-                    `lift flex min-h-11 items-center gap-3 rounded-full border px-3.5 text-[0.93rem] font-semibold ${
-                      isActive ? 'nav-pill-active' : 'border-transparent text-body hover:border-fg/10 hover:bg-fg/5'
-                    }`
-                  }
-                >
-                  <Icon size={17} aria-hidden />
-                  {label}
-                </NavLink>
-              </li>
-            ))}
+          <div className="mb-2.5 px-3 font-mono text-[0.68rem] tracking-[0.2em] text-muted uppercase">{section.title}</div>
+          <ul className="flex flex-col gap-1.5">
+            {section.items.map(({ to, label, icon: Icon, badge }) => {
+              const b = data && badge ? badge(data) : null
+              return (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    onClick={onNavigate}
+                    className={({ isActive }) =>
+                      `nav-item flex min-h-11 items-center gap-3 rounded-xl border px-3 text-[0.95rem] font-semibold ${isActive ? 'nav-active' : 'border-transparent text-body'}`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Icon size={18} strokeWidth={1.8} className="shrink-0" aria-hidden />
+                        <span className="min-w-0 flex-1 truncate">{label}</span>
+                        {isActive ? (
+                          <span className="nav-dot h-1.5 w-1.5 shrink-0 rounded-full" aria-hidden />
+                        ) : b?.kind === 'count' ? (
+                          <span className="shrink-0 rounded-md border border-fg/10 bg-fg/[0.04] px-1.5 py-0.5 font-mono text-[0.68rem] text-muted tabular-nums">{b.text}</span>
+                        ) : b ? (
+                          <span className="shrink-0 font-mono text-[0.68rem] font-bold tracking-wide text-ok-ink">{b.text}</span>
+                        ) : null}
+                      </>
+                    )}
+                  </NavLink>
+                </li>
+              )
+            })}
           </ul>
         </div>
       ))}

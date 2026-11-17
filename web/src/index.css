@@ -657,6 +657,18 @@ html[data-theme='light'] .shield-art {
 html[data-theme='light'] .logo-dot { fill: #9fd14a; stroke: rgb(18 19 16 / 0.28); stroke-width: 0.6; filter: none; }
 a:hover .logo-mark .logo-dot, .logo-mark:hover .logo-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
 
+/* sidebar items: soft card on hover; the open page is lime-tinted with a glowing dot */
+.nav-item { transition: background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.4s var(--ease-spring); }
+.nav-item:not(.nav-active):hover { background: rgb(236 234 226 / 0.05); color: var(--color-ink); }
+.nav-active {
+  background: rgb(var(--accent-rgb) / 0.12); border-color: rgb(var(--accent-rgb) / 0.42); color: var(--color-soft);
+  box-shadow: 0 0 26px -12px rgb(var(--accent-rgb) / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+.nav-dot { background: var(--color-accent); box-shadow: 0 0 8px rgb(var(--accent-rgb) / 0.9); }
+html[data-theme='light'] .nav-item:not(.nav-active):hover { background: rgb(18 19 16 / 0.05); }
+html[data-theme='light'] .nav-active { background: rgb(194 239 106 / 0.42); border-color: rgb(79 127 34 / 0.3); color: #1f4d12; box-shadow: none; }
+html[data-theme='light'] .nav-dot { background: #4f7f22; box-shadow: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
