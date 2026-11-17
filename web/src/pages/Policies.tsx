@@ -139,13 +139,13 @@ function AddPolicy({ file }: { file: string }) {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Risk score: {f.risk.toFixed(2)}
-          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="h-10 cursor-pointer accent-[#C6FF3D]" />
+          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="h-10 cursor-pointer accent-[#D4FF2A]" />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Amount greater than (0 = none)
           <input type="number" min={0} step={1000} className={input} value={f.amountGt} onChange={(e) => set('amountGt', Math.max(0, Number(e.target.value)))} />
         </label>
         <label className="flex items-center gap-2 self-end text-sm font-semibold sm:min-h-10">
-          <input type="checkbox" checked={f.tainted} onChange={(e) => set('tainted', e.target.checked)} className="h-4 w-4 accent-[#C6FF3D]" />
+          <input type="checkbox" checked={f.tainted} onChange={(e) => set('tainted', e.target.checked)} className="h-4 w-4 accent-[#D4FF2A]" />
           Require tainted context
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold sm:col-span-2">Reason (Bangla)<input className={input} value={f.reason_bn} onChange={(e) => set('reason_bn', e.target.value)} /></label>
@@ -156,7 +156,7 @@ function AddPolicy({ file }: { file: string }) {
         Validate & generate YAML
       </button>
       {validate.error && <ErrorNote error={validate.error} />}
-      {validate.data?.valid === false && <div role="alert" className="rounded-xl border border-bad/40 bg-bad/10 px-4 py-3 text-sm text-[#FF8A94]">Validation error: {validate.data.error}</div>}
+      {validate.data?.valid === false && <div role="alert" className="rounded-xl border border-bad/40 bg-bad/10 px-4 py-3 text-sm text-[#FDA4AF]">Validation error: {validate.data.error}</div>}
       {validate.data?.yaml && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
@@ -190,7 +190,7 @@ export default function Policies() {
       {data && (
         <>
           <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-            <Kpi icon={Layers} tint="#C6FF3D" value={rules.length} label="Total Policies" />
+            <Kpi icon={Layers} tint="#D4FF2A" value={rules.length} label="Total Policies" />
             <Kpi icon={ShieldX} tint="#FF526F" value={rules.filter((r) => r.decision === 'block').length} label="Block Policies" />
             <Kpi icon={CircleHelp} tint="#FFB547" value={rules.filter((r) => r.decision === 'ask_human').length} label="Ask Policies" />
           </div>

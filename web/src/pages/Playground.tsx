@@ -81,7 +81,7 @@ function Kpis() {
   const real = data.real_llm
   return (
     <div className="my-6 grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-4">
-      <Kpi icon={ShieldCheck} tint="#C6FF3D" num={String(data.checks.length)} label="Checks per Tool Call"
+      <Kpi icon={ShieldCheck} tint="#D4FF2A" num={String(data.checks.length)} label="Checks per Tool Call"
         note={data.checks.map((c) => c[0].toUpperCase() + c.slice(1)).join(' · ')} />
       <Kpi icon={ListChecks} tint="#38D6F5" num={String(data.policy_rules)} label="Policy Rules" note="Deterministic · default.yaml" />
       <Kpi icon={Bug} tint="#F04452" num={String(data.attack_samples.total)} label="Attack Samples"
@@ -160,7 +160,7 @@ function RunCard({
               <label
                 key={id}
                 className={`relative flex min-h-[54px] cursor-pointer flex-col gap-0.5 rounded-xl border py-3 pr-9 pl-3.5 transition ${
-                  active ? 'border-accent2/70 bg-accent/15 shadow-[0_0_0_1px_rgba(198,255,61,.17)]' : 'border-line bg-card2/60 hover:border-line2'
+                  active ? 'border-accent2/70 bg-accent/15 shadow-[0_0_0_1px_rgba(212,255,42,.17)]' : 'border-line bg-card2/60 hover:border-line2'
                 } ${off ? 'cursor-not-allowed opacity-45' : ''}`}
               >
                 <input type="radio" name="mode" value={id} checked={active} disabled={off} onChange={() => setMode(id)} className="sr-only" />
@@ -187,7 +187,7 @@ function RunCard({
           checked={approve}
           disabled={effectiveMode === 'recorded'}
           onChange={(e) => setApprove(e.target.checked)}
-          className="mt-0.5 h-4.5 w-4.5 shrink-0 accent-[#C6FF3D]"
+          className="mt-0.5 h-4.5 w-4.5 shrink-0 accent-[#D4FF2A]"
         />
         <span>
           I approve actions that ask for my approval (simulated human click)
@@ -220,8 +220,8 @@ function RunCard({
 // ---------------------------------------------------------------------------
 function HowItWorks() {
   const nodes = [
-    { icon: Mail, color: '#FF6B78', title: 'Untrusted input', sub: 'email · web · file', cls: 'border-bad/40 bg-bad/8' },
-    { icon: ShieldCheck, color: '#EEFFC2', title: 'AgentShield', sub: 'checks each tool call', cls: 'border-accent2/70 bg-accent/18 shadow-[0_0_28px_rgba(198,255,61,.23)]' },
+    { icon: Mail, color: '#FB7185', title: 'Untrusted input', sub: 'email · web · file', cls: 'border-bad/40 bg-bad/8' },
+    { icon: ShieldCheck, color: '#EEFFC2', title: 'AgentShield', sub: 'checks each tool call', cls: 'border-accent2/70 bg-accent/18 shadow-[0_0_28px_rgba(212,255,42,.23)]' },
     { icon: CircleCheck, color: '#16C784', title: 'Decision', sub: 'allow · ask · block', cls: 'border-ok/40 bg-ok/8' },
   ]
   const decisions = [

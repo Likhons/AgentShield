@@ -59,7 +59,7 @@ function Side({ side, title, safe }: { side: RunSide; title: string; safe: boole
     <div className="flex min-w-0 flex-col gap-3">
       <div
         className={`flex items-center gap-2 rounded-xl border px-4 py-2.5 text-[1.05rem] font-bold animate-rise ${
-          safe ? 'border-ok/40 bg-ok/10 text-[#4BE0A8]' : 'border-bad/40 bg-bad/10 text-[#FF8A94]'
+          safe ? 'border-ok/40 bg-ok/10 text-[#4BE0A8]' : 'border-bad/40 bg-bad/10 text-[#FDA4AF]'
         }`}
       >
         {safe ? <ShieldCheck size={20} aria-hidden /> : <CircleX size={20} aria-hidden />}
@@ -68,7 +68,7 @@ function Side({ side, title, safe }: { side: RunSide; title: string; safe: boole
       <div className="grid grid-cols-2 gap-3">
         <div>
           <div className="text-xs text-muted">Stolen / চুরি হয়েছে</div>
-          <div className={`text-[1.55rem] leading-tight font-display font-bold tabular-nums sm:text-[2.1rem] ${lost ? 'text-[#FF6B78]' : 'text-ok'}`}>
+          <div className={`text-[1.55rem] leading-tight font-display font-bold tabular-nums sm:text-[2.1rem] ${lost ? 'text-[#FB7185]' : 'text-ok'}`}>
             {lost ? <CountUp to={lost} format={(n) => `−${taka(n)}`} /> : '৳ 0'}
           </div>
         </div>
@@ -78,7 +78,7 @@ function Side({ side, title, safe }: { side: RunSide; title: string; safe: boole
         </div>
       </div>
       {lost ? (
-        <div role="alert" className="rounded-xl border border-bad/30 bg-bad/15 px-4 py-3 text-[0.95rem] text-[#FF8A94]">
+        <div role="alert" className="rounded-xl border border-bad/30 bg-bad/15 px-4 py-3 text-[0.95rem] text-[#FDA4AF]">
           MONEY STOLEN: {taka(lost)} sent to {side.unauthorized.map((t) => t.to).join(', ')}, which the user never asked for.
         </div>
       ) : (

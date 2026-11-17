@@ -5,10 +5,13 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { ToastProvider } from './components/Toast'
 import { startSmoothScroll } from './lib/motion'
-import '@fontsource-variable/instrument-sans/wght.css'
-import '@fontsource-variable/bricolage-grotesque/opsz.css'
-import '@fontsource-variable/anek-bangla/wght.css'
-import '@fontsource-variable/geist-mono/wght.css'
+import '@fontsource-variable/plus-jakarta-sans/wght.css'
+import '@fontsource-variable/jetbrains-mono/wght.css'
+// Hind Siliguri: only the Bangla subset (Latin characters fall through to Plus Jakarta Sans)
+import '@fontsource/hind-siliguri/bengali-400.css'
+import '@fontsource/hind-siliguri/bengali-500.css'
+import '@fontsource/hind-siliguri/bengali-600.css'
+import '@fontsource/hind-siliguri/bengali-700.css'
 import './index.css'
 
 startSmoothScroll()

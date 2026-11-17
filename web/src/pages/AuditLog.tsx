@@ -225,7 +225,7 @@ export default function AuditLog() {
       {stats && (
         <>
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5 xl:gap-4">
-            <Kpi wide icon={Layers} tint="#C6FF3D" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
+            <Kpi wide icon={Layers} tint="#D4FF2A" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
             <Kpi icon={CircleCheck} tint="#00D6A0" label="Allowed" value={String(stats.allow)} note={pct(stats.allow)} />
             <Kpi icon={CircleHelp} tint="#FFB547" label="Asked Human" value={String(stats.ask_human)} note={pct(stats.ask_human, 1)} />
             <Kpi icon={CircleX} tint="#FF526F" label="Blocked" value={String(stats.block)} note={pct(stats.block)} />
@@ -298,7 +298,7 @@ export default function AuditLog() {
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Minimum risk score: {minRisk.toFixed(2)}
-                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="h-10 cursor-pointer accent-[#C6FF3D]" />
+                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="h-10 cursor-pointer accent-[#D4FF2A]" />
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Rows per page

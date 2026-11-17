@@ -201,6 +201,39 @@ export interface Datasets {
   files: { file: string; items: number; reviewed: number; sources: string[]; size_bytes: number; texts_public: boolean }[]
 }
 
+export type SandboxSource = 'tool:email' | 'tool:web' | 'tool:file'
+
+export interface SandboxPreset {
+  id: string
+  kind: 'normal' | 'attack'
+  language: string
+  label: string
+  content: string
+  to: string
+  amount: number
+}
+
+export interface SandboxPresets {
+  user_request: string
+  contacts: Record<string, string>
+  presets: SandboxPreset[]
+}
+
+export interface SandboxInput {
+  user_request: string
+  content: string
+  source: SandboxSource
+  to: string
+  amount: number
+}
+
+export interface SandboxResult {
+  verdict: Verdict
+  thresholds: Thresholds
+  judge: string
+  found_order: { to: string; amount: number } | null
+}
+
 export class ApiError extends Error {
   status: number
 
@@ -215,7 +248,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     let detail = res.statusText
     try {
-      detail = (await res.json()).detail ?? detail
+      const d = (await res.json()).detail
+      // FastAPI validation errors are a list of {msg}; everything else is a string
+      detail = Array.isArray(d) ? d.map((x) => x?.msg ?? String(x)).join('; ') : (d ?? detail)
     } catch {
       /* not JSON */
     }
@@ -251,4 +286,7 @@ export const api = {
   datasetPreview: (file: string, limit = 15) =>
     request<DatasetPreview>(`/api/datasets/${encodeURIComponent(file)}${query({ limit })}`),
   datasetDownloadUrl: (file: string) => `/api/datasets/${encodeURIComponent(file)}/download`,
+  sandboxPresets: () => request<SandboxPresets>('/api/check/presets'),
+  sandboxCheck: (body: SandboxInput, signal?: AbortSignal) =>
+    request<SandboxResult>('/api/check', { method: 'POST', body: JSON.stringify(body), signal }),
 }

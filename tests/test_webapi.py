@@ -216,3 +216,40 @@ def test_gateway_endpoints_still_mounted(client):
     assert client.get("/health").json() == {"status": "ok"}
     assert client.head("/health").status_code == 200  # uptime monitors use HEAD
     assert "total" in client.get("/v1/stats").json()
+
+
+def sandbox(client, **overrides):
+    body = {"user_request": "Please pay my pending bills from my inbox.", "content": "", "source": "tool:email",
+            "to": "01000000102", "amount": 8000, **overrides}
+    return client.post("/api/check", json=body)
+
+
+def test_sandbox_presets_come_from_demo_emails(client):
+    data = client.get("/api/check/presets").json()
+    ids = [p["id"] for p in data["presets"]]
+    assert ids == ["e20", "e21", "e22", "e23"]
+    rent = data["presets"][0]
+    assert (rent["kind"], rent["to"], rent["amount"]) == ("normal", "01000000102", 8000)
+    assert data["presets"][1]["to"] == "01000000666" and data["presets"][1]["amount"] == 4500
+    assert "01000000102" in data["contacts"].values()
+
+
+def test_sandbox_blocks_fake_bill_and_allows_rent(client):
+    presets = {p["id"]: p for p in client.get("/api/check/presets").json()["presets"]}
+    fake = presets["e21"]
+    r = sandbox(client, content=fake["content"], to=fake["to"], amount=fake["amount"])
+    assert r.status_code == 200, r.text
+    assert r.json()["verdict"]["decision"] == "block"
+    assert r.json()["found_order"] == {"to": "01000000666", "amount": 4500}
+    rent = presets["e20"]
+    r = sandbox(client, content=rent["content"], to=rent["to"], amount=rent["amount"])
+    assert r.json()["verdict"]["decision"] == "allow"
+
+
+def test_sandbox_never_writes_the_audit_log_and_checks_input(client):
+    before = client.get("/api/overview").json()["decisions_logged"]
+    sandbox(client, to="০১০০০০০০১০২")  # Bangla digits are normalized
+    assert client.get("/api/overview").json()["decisions_logged"] == before
+    assert sandbox(client, to="not a number").status_code == 422
+    assert sandbox(client, amount=0).status_code == 422
+    assert sandbox(client, user_request="").status_code == 422

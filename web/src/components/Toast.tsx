@@ -13,7 +13,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setTimeout(() => setItems((all) => all.filter((t) => t.id !== id)), 2800)
   }, [])
   const icon = { ok: CircleCheck, info: Info, error: CircleAlert }
-  const color = { ok: 'text-ok', info: 'text-soft', error: 'text-[#FF6B78]' }
+  const color = { ok: 'text-ok', info: 'text-soft', error: 'text-[#FB7185]' }
   return (
     <ToastContext.Provider value={toast}>
       {children}

@@ -11,7 +11,7 @@ import { Card, ErrorNote, PageHeader, PageSkeleton, Spinner } from '../component
 import { api, type AgentSection, type DetectionSection, type Rate } from '../lib/api'
 
 const DETECTORS: Record<string, { label: string; color: string; order: number }> = {
-  'agentshield-heuristic': { label: 'AgentShield Heuristic', color: '#C6FF3D', order: 0 },
+  'agentshield-heuristic': { label: 'AgentShield Heuristic', color: '#D4FF2A', order: 0 },
   'promptguard-22m': { label: 'PromptGuard-22m', color: '#38BDF8', order: 1 },
   'promptguard-86m': { label: 'PromptGuard-86m', color: '#FB7185', order: 2 },
   'agentshield-model': { label: 'AgentShield XLM-R', color: '#10B981', order: 3 },
@@ -24,7 +24,7 @@ const exactPct = (r: Rate) => (r.hits != null && r.total ? Math.round((r.hits / 
 const OUTCOME_COLORS: Record<string, string> = {
   paid: '#16C784',
   'never tried': '#38D6F5',
-  blocked: '#C6FF3D',
+  blocked: '#D4FF2A',
   'not attempted': '#6F7C74',
   'held for approval': '#F5A623',
   'attacker paid': '#F04452',
@@ -186,7 +186,7 @@ function DetectionChart({ s }: { s: DetectionSection }) {
     <Card>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#C6FF3D]/40 bg-[#C6FF3D]/15 text-soft"><ChartColumn size={19} aria-hidden /></span>
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#D4FF2A]/40 bg-[#D4FF2A]/15 text-soft"><ChartColumn size={19} aria-hidden /></span>
           <div>
             <div className="font-bold">Attack Detection by Language</div>
             <div className="text-[0.8rem] text-muted">Comparison of attack detection performance across languages and detectors.</div>

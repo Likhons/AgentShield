@@ -39,7 +39,7 @@ export default function HeroArt() {
             <stop offset="100%" stopColor="#E4FF8A" stopOpacity=".75" />
           </linearGradient>
           <radialGradient id="glow" cx="50%" cy="46%" r="48%">
-            <stop offset="0%" stopColor="#C6FF3D" stopOpacity=".55" />
+            <stop offset="0%" stopColor="#D4FF2A" stopOpacity=".55" />
             <stop offset="60%" stopColor="#5C8F00" stopOpacity=".18" />
             <stop offset="100%" stopColor="#5C8F00" stopOpacity="0" />
           </radialGradient>
@@ -62,9 +62,9 @@ export default function HeroArt() {
           ))}
         </g>
         <ellipse className="pad-glow" cx="290" cy="212" rx="96" ry="22" fill="url(#padglow)" />
-        <ellipse cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#C6FF3D" strokeOpacity=".65" strokeWidth="1.8" />
+        <ellipse cx="290" cy="212" rx="86" ry="16" fill="none" stroke="#D4FF2A" strokeOpacity=".65" strokeWidth="1.8" />
         <ellipse cx="290" cy="212" rx="60" ry="10" fill="none" stroke="#D9FF8A" strokeOpacity=".75" strokeWidth="1.5" />
-        <ellipse cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#C6FF3D" strokeOpacity=".28" strokeWidth="1.2" />
+        <ellipse cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#D4FF2A" strokeOpacity=".28" strokeWidth="1.2" />
         <ellipse className="orbit" cx="290" cy="124" rx="108" ry="30" fill="none" stroke="#EEFFC2" strokeWidth="2"
           strokeLinecap="round" pathLength={1000} strokeDasharray="70 930" />
         <g className="shield-body">

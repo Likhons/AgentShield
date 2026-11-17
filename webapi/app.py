@@ -30,19 +30,21 @@ import yaml
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from agentshield.api.app import create_app
 from agentshield.audit.log import AuditLog
 from agentshield.checks.policy import DEFAULT_POLICY_PATH, PolicyRule
 from agentshield.config import get_settings
-from agentshield.core.models import AuditRecord, CheckName, DecisionThresholds
+from agentshield.core.models import (AuditRecord, CheckName, ContextItem, DecisionThresholds, GuardRequest,
+                                     SourceType, ToolCall)
 from agentshield.llm import LLMError
+from agentshield.llm.mock import find_money_order, normalize
 from benchmark.dataset import load_dataset, summarize
 from benchmark.report import agent_rows, detection_rows, latest_where, outcome_rows
 from demo_agent.recording import load_result, recording_path
-from demo_agent.run import ScenarioResult, run_scenario
-from demo_agent.scenarios import load_scenarios
+from demo_agent.run import ScenarioResult, build_engine, run_scenario
+from demo_agent.scenarios import load_json, load_scenarios
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASETS_DIR = ROOT / "datasets"
@@ -172,6 +174,22 @@ def load_dataset_files() -> list[dict[str, Any]]:
 class RunRequest(BaseModel):
     mode: Literal["mock", "groq", "recorded"] = "mock"
     approve: bool = False
+
+
+class SandboxRequest(BaseModel):
+    """One send_money call checked against text the visitor typed (landing page sandbox)."""
+
+    user_request: str = Field(min_length=1, max_length=600)
+    content: str = Field("", max_length=4000)
+    source: Literal["tool:email", "tool:web", "tool:file"] = "tool:email"
+    to: str = Field(min_length=1, max_length=20)
+    amount: int = Field(ge=1, le=10_000_000)
+
+
+# Sandbox presets: existing demo emails (demo_agent/data/emails.json), one real rent bill and the fake bills
+# from the bill scenarios, one per language. Nothing new is written here.
+SANDBOX_PRESET_IDS = ["e20", "e21", "e22", "e23"]
+SANDBOX_PER_MINUTE = 120
 
 
 # ---------------------------------------------------------------------------
@@ -456,5 +474,65 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             raise HTTPException(403, HIDDEN_NOTE)
         return Response(path.read_bytes(), media_type="application/jsonl",
                         headers={"Content-Disposition": f'attachment; filename="{path.name}"'})
+
+    # -- sandbox (landing page "Open the demo") ------------------------------------
+    # Visitors type their own request and email; the engine checks one send_money call. The intent judge is the
+    # offline keyword judge (provider "mock"), so no request ever spends Groq quota, and nothing is written to the
+    # audit log (public text stays out of the Audit Log page). A global per-minute cap keeps it cheap.
+    @lru_cache(maxsize=1)
+    def sandbox_engine():
+        return build_engine(provider="mock", audit=None)
+
+    sandbox_calls: deque[float] = deque()
+    sandbox_lock = threading.Lock()
+
+    def sandbox_contacts() -> dict[str, str]:
+        return load_json("account.json")["contacts"]
+
+    @app.get("/api/check/presets", tags=["sandbox"])
+    def sandbox_presets() -> dict[str, Any]:
+        emails = {e["id"]: e for e in load_json("emails.json")}
+        presets = []
+        for eid in SANDBOX_PRESET_IDS:
+            e = emails[eid]
+            content = f"From: {e['from']}\nSubject: {e['subject']}\n\n{e['body']}"
+            order = find_money_order(content)
+            presets.append({
+                "id": eid, "kind": e["kind"], "language": e["language"], "label": e["subject"],
+                "content": content, "to": order.to if order else "", "amount": order.amount if order else 0,
+            })
+        return {"user_request": load_scenarios()["attack_bill_bn"]["user_task"],
+                "contacts": sandbox_contacts(), "presets": presets}
+
+    @app.post("/api/check", tags=["sandbox"])
+    def sandbox_check(body: SandboxRequest) -> dict[str, Any]:
+        now = time.monotonic()
+        with sandbox_lock:
+            while sandbox_calls and now - sandbox_calls[0] > 60:
+                sandbox_calls.popleft()
+            if len(sandbox_calls) >= SANDBOX_PER_MINUTE:
+                raise HTTPException(429, "The sandbox is busy. Try again in a minute.")
+            sandbox_calls.append(now)
+        to = normalize(body.to).strip()
+        if not re.fullmatch(r"\d{6,15}", to):
+            raise HTTPException(422, "The recipient must be a phone number or account number (digits only).")
+        context = [ContextItem(content=body.user_request, source=SourceType.USER)]
+        if body.content.strip():
+            context.append(ContextItem(content=body.content, source=SourceType(body.source), origin="sandbox"))
+        request = GuardRequest(
+            session_id="sandbox",
+            user_request=body.user_request,
+            tool_call=ToolCall(tool_name="send_money", arguments={"to": to, "amount": body.amount}),
+            context=context,
+            known_recipients=list(sandbox_contacts().values()),
+        )
+        verdict = sandbox_engine().check(request)
+        found = find_money_order(body.content) if body.content else None
+        return {
+            "verdict": verdict.model_dump(mode="json"),
+            "thresholds": DecisionThresholds().model_dump(),
+            "judge": "offline keyword judge (no LLM call)",
+            "found_order": {"to": found.to, "amount": found.amount} if found else None,
+        }
 
     return app

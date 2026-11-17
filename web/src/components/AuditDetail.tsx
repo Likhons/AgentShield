@@ -99,7 +99,7 @@ export default function AuditDetail({ record, thresholds, onClose }: { record: A
               {record.checks.map((c) => (
                 <span
                   key={c.check}
-                  className={`rounded-md border px-2 py-0.5 font-mono text-[0.74rem] ${c.flagged ? 'border-bad/40 bg-bad/10 text-[#FF8A94]' : 'border-line bg-bg text-soft'}`}
+                  className={`rounded-md border px-2 py-0.5 font-mono text-[0.74rem] ${c.flagged ? 'border-bad/40 bg-bad/10 text-[#FDA4AF]' : 'border-line bg-bg text-soft'}`}
                 >
                   {c.check}: {c.skipped ? 'skipped' : c.risk_score.toFixed(2)}
                   {c.flagged ? ' ⚑' : ''}
