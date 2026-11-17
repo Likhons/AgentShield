@@ -1,14 +1,63 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { Braces, CircleHelp, Copy, Info, Layers, MessageSquare, Plus, Scale, Search, ShieldX, type LucideIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Braces, Check, CircleAlert, Copy, Languages, Plus, Search, Shield, ShieldBan, type LucideIcon } from 'lucide-react'
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import Modal from '../components/Modal'
 import { CountUp } from '../components/Motion'
-import { DecisionBadge, ErrorNote, PageHeader, PageSkeleton } from '../components/ui'
+import { ErrorNote, PageHeader, PageSkeleton } from '../components/ui'
 import { api, type Decision, type PolicyRule } from '../lib/api'
 import { stagger } from '../lib/motion'
 import { useToast } from '../lib/toast'
 
-type View = 'yaml' | 'inspect' | 'details'
+type View = 'json' | 'yaml'
+
+// Decision colours for the tags, the left bar and the reason box.
+const TONE: Record<Decision, { label: string; tag: string; bar: string; box: string; ink: string }> = {
+  block: {
+    label: 'BLOCK',
+    tag: 'border-bad/45 bg-bad/10 text-bad-ink shadow-[0_0_18px_-6px_var(--color-bad)]',
+    bar: 'bg-bad shadow-[0_0_14px_var(--color-bad)]',
+    box: 'border-bad/25 bg-bad/[0.07]',
+    ink: 'text-bad-ink',
+  },
+  ask_human: {
+    label: 'ASK',
+    tag: 'border-warn/45 bg-warn/10 text-warn-ink shadow-[0_0_18px_-6px_var(--color-warn)]',
+    bar: 'bg-warn shadow-[0_0_14px_var(--color-warn)]',
+    box: 'border-warn/25 bg-warn/[0.06]',
+    ink: 'text-warn-ink',
+  },
+  allow: {
+    label: 'ALLOW',
+    tag: 'border-ok/45 bg-ok/10 text-ok-ink shadow-[0_0_18px_-6px_var(--color-ok)]',
+    bar: 'bg-ok shadow-[0_0_14px_var(--color-ok)]',
+    box: 'border-ok/25 bg-ok/[0.06]',
+    ink: 'text-ok-ink',
+  },
+}
+
+function Tag({ decision, dot = false }: { decision: Decision; dot?: boolean }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 font-mono text-[0.74rem] font-bold tracking-wide ${TONE[decision].tag}`}>
+      {dot && <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />}
+      {TONE[decision].label}
+    </span>
+  )
+}
+
+function Precedence() {
+  const order: Decision[] = ['block', 'ask_human', 'allow']
+  return (
+    <div className="glass flex items-center gap-2 rounded-2xl! px-3 py-2 sm:px-4 sm:py-2.5" aria-label="Precedence: block, then ask, then allow">
+      <span className="mr-1 hidden font-mono text-[0.7rem] tracking-[0.16em] text-muted uppercase sm:inline">Precedence</span>
+      {order.map((d, i) => (
+        <Fragment key={d}>
+          {i > 0 && <span className="font-mono text-sm text-soft" aria-hidden>&gt;</span>}
+          <Tag decision={d} dot />
+        </Fragment>
+      ))}
+    </div>
+  )
+}
 
 function matches(rule: PolicyRule, q: string): boolean {
   if (!q.trim()) return true
@@ -18,17 +67,46 @@ function matches(rule: PolicyRule, q: string): boolean {
   return hay.includes(q.trim().toLowerCase())
 }
 
-function Kpi({ icon: Icon, tint, value, label }: { icon: LucideIcon; tint: string; value: number; label: string }) {
+function Kpi({ icon: Icon, tint, value, label, index }: { icon: LucideIcon; tint: string; value: number; label: string; index: number }) {
   return (
-    <div className="card flex flex-col items-start gap-2 p-3 transition hover:-translate-y-0.5 hover:border-line2 sm:flex-row sm:items-center sm:gap-3.5 sm:p-4">
-      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11" style={{ background: `color-mix(in srgb, ${tint} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 30%, transparent)` }}>
-        <Icon size={20} color={tint} aria-hidden />
-      </span>
-      <div>
-        <div className="text-[1.3rem] leading-none font-display font-bold tabular-nums sm:text-[1.75rem]"><CountUp to={value} /></div>
-        <div className="mt-1 text-[0.74rem] text-muted sm:text-[0.83rem]">{label}</div>
+    <div style={{ ['--i' as string]: index }} className="spring-in">
+      <div className="glass spotlight flex h-full items-start justify-between gap-3 overflow-hidden rounded-[20px]! p-4 sm:p-6">
+        {/* thin coloured edge on top, fading out to both sides */}
+        <span className="pointer-events-none absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${tint}, transparent)` }} aria-hidden />
+        <div className="relative min-w-0">
+          <div className="font-display text-[1.9rem] leading-none font-extrabold tabular-nums sm:text-[2.6rem]" style={{ color: tint }}>
+            <CountUp to={value} />
+          </div>
+          <div className="mt-2 text-[0.78rem] text-body sm:mt-3 sm:text-[0.95rem]">{label}</div>
+        </div>
+        <span
+          className="relative hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl sm:inline-flex"
+          style={{ background: `color-mix(in srgb, ${tint} 8%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 35%, transparent)` }}
+        >
+          <Icon size={19} color={tint} aria-hidden />
+        </span>
       </div>
     </div>
+  )
+}
+
+/** '{"argument":"to"}' -> '{"argument": "to"}' */
+const pretty = (v: unknown) => JSON.stringify(v).replace(/":/g, '": ').replace(/,"/g, ', "')
+
+const PLACEHOLDER = /(\{[a-z_]+\})/g
+
+/** Template placeholders such as {recipient} in mono, the rest as plain text. */
+function Template({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(PLACEHOLDER).map((part, i) =>
+        i % 2 === 1 ? (
+          <code key={i} className="rounded border border-fg/10 bg-well/30 px-1 font-mono text-[0.82em] text-soft">{part}</code>
+        ) : (
+          <Fragment key={i}>{part}</Fragment>
+        ),
+      )}
+    </>
   )
 }
 
@@ -43,46 +121,78 @@ function CopyText({ text }: { text: string }) {
   )
 }
 
-function RuleCard({ rule, onOpen }: { rule: PolicyRule; onOpen: (v: View) => void }) {
-  const accent = rule.decision === 'block' ? 'border-l-bad' : 'border-l-warn'
-  const actions: { v: View; icon: LucideIcon; label: string }[] = [
-    { v: 'inspect', icon: Braces, label: 'Inspect rule as JSON' },
-    { v: 'yaml', icon: Copy, label: 'Copy rule as YAML' },
-    { v: 'details', icon: Info, label: 'Rule details' },
-  ]
+function IconButton({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
   return (
-    <article className={`card border-l-[3px] ${accent} flex flex-col gap-3 p-4 sm:p-5`}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <button type="button" onClick={onClick} aria-label={label} title={label}
+      className="lift inline-flex h-10 w-10 items-center justify-center rounded-xl border border-fg/10 bg-well/25 text-body hover:border-accent/40 hover:text-soft">
+      {children}
+    </button>
+  )
+}
+
+function RuleCard({ rule, yaml, onInspect }: { rule: PolicyRule; yaml: string; onInspect: () => void }) {
+  const tone = TONE[rule.decision]
+  const toast = useToast()
+  const [copied, setCopied] = useState(false)
+  const copy = () =>
+    void navigator.clipboard?.writeText(yaml).then(() => {
+      toast(`Copied ${rule.id} as YAML`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  const chips: [string, string][] = [
+    ['tools', (rule.tools ?? []).join(', ') || 'any'],
+    ...Object.entries(rule.when ?? {}).map(([k, v]): [string, string] => [k, typeof v === 'string' ? v : pretty(v)]),
+  ]
+
+  return (
+    <article className="glass spotlight flex flex-col gap-3.5 overflow-hidden rounded-[22px]! py-5 pr-4 pl-6 sm:py-6 sm:pr-6 sm:pl-10">
+      <span className={`absolute inset-y-5 left-0 w-[3px] rounded-r-full ${tone.bar}`} aria-hidden />
+      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="font-mono text-[0.98rem] font-bold break-words">{rule.id}</h2>
-          {rule.description && <p className="mt-1 text-sm text-muted">{rule.description}</p>}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h2 className="font-mono text-[1rem] font-bold break-all sm:text-[1.06rem]">{rule.id}</h2>
+            {rule.risk !== undefined && (
+              <span className="rounded-md border border-fg/10 bg-well/25 px-2 py-0.5 font-mono text-[0.72rem] text-muted tabular-nums">risk {rule.risk.toFixed(2)}</span>
+            )}
+          </div>
+          {rule.description && <p className="mt-1.5 text-[0.95rem] text-body">{rule.description}</p>}
         </div>
-        <div className="flex items-center gap-2">
-          <DecisionBadge decision={rule.decision} />
-          {actions.map(({ v, icon: Icon, label }) => (
-            <button key={v} type="button" onClick={() => onOpen(v)} aria-label={label} title={label}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-card2/60 hover:border-line2">
-              <Icon size={16} aria-hidden />
-            </button>
-          ))}
+        <div className="flex shrink-0 items-center gap-2">
+          <Tag decision={rule.decision} />
+          <IconButton label="Inspect rule as JSON or YAML" onClick={onInspect}><Braces size={16} aria-hidden /></IconButton>
+          <IconButton label={copied ? 'Copied' : 'Copy rule as YAML'} onClick={copy}>
+            {copied ? <Check size={16} className="text-ok-ink" aria-hidden /> : <Copy size={16} aria-hidden />}
+          </IconButton>
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-1.5 text-sm">
-        <span className="mr-1 text-muted">Tools:</span>
-        {(rule.tools ?? []).map((t) => (
-          <code key={t} className="rounded-md border border-line2 bg-accent/15 px-2 py-0.5 font-mono text-[0.78rem] font-bold text-soft">{t}</code>
+
+      <ul className="relative flex flex-wrap gap-2" aria-label="Conditions">
+        {chips.map(([k, v]) => (
+          // key and value wrap as whole pieces on narrow screens instead of splitting "to" mid-word
+          <li key={k} className="flex min-w-0 flex-wrap gap-x-1.5 rounded-lg border border-fg/8 bg-well/35 px-2.5 py-1 font-mono text-[0.78rem]">
+            <span className="text-muted">{k}:</span>
+            <b className="min-w-0 break-words text-soft">{v}</b>
+          </li>
         ))}
-        {Object.entries(rule.when ?? {}).map(([k, v]) => (
-          <code key={k} className="rounded-md border border-line bg-card2 px-2 py-0.5 font-mono text-[0.76rem] text-soft">
-            {k}: {JSON.stringify(v)}
-          </code>
-        ))}
-      </div>
-      {rule.reason_bn && (
-        <p className="flex gap-2 border-t border-line pt-3 text-[0.95rem] leading-relaxed">
-          <MessageSquare size={15} className="mt-1 shrink-0 text-muted" aria-hidden />
-          <span><b>কারণ:</b> {rule.reason_bn}</span>
-        </p>
+      </ul>
+
+      {(rule.reason_bn || rule.reason_en) && (
+        <div className={`relative flex gap-3 rounded-xl border px-4 py-3 ${tone.box}`}>
+          <Languages size={17} className={`mt-1 shrink-0 ${tone.ink}`} aria-hidden />
+          <div className="min-w-0">
+            {rule.reason_bn && (
+              <p lang="bn" className="text-[0.98rem] leading-relaxed">
+                <b className={tone.ink}>কারণ:</b> <Template text={rule.reason_bn} />
+              </p>
+            )}
+            {rule.reason_en && (
+              <p className="mt-0.5 text-[0.84rem] leading-relaxed text-muted">
+                <Template text={rule.reason_en} />
+              </p>
+            )}
+          </div>
+        </div>
       )}
     </article>
   )
@@ -176,59 +286,84 @@ export default function Policies() {
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState<{ id: string; view: View } | null>(null)
   const [adding, setAdding] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
+
+  // Ctrl+K / Cmd+K jumps to the search field
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        searchRef.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
 
   const rules = useMemo(() => data?.rules ?? [], [data])
   const matched = rules.filter((r) => matches(r, search))
   const shown = matched.filter((r) => decision === 'all' || r.decision === decision)
   const target = open ? rules.find((r) => r.id === open.id) : undefined
+  const sub = (
+    <>
+      Deterministic rules from{' '}
+      <code className="rounded-md border border-fg/10 bg-well/30 px-1.5 py-0.5 font-mono text-[0.8rem] text-ink">default.yaml</code>. If several match, the most
+      severe decision wins (<span className="font-mono text-bad-ink">block</span> &gt; <span className="font-mono text-warn-ink">ask</span> &gt;{' '}
+      <span className="font-mono text-ok-ink">allow</span>).
+    </>
+  )
 
   return (
     <>
-      <PageHeader icon={Scale} title="Policies" sub="Deterministic rules from default.yaml. If several match, the most severe decision wins (block > ask > allow)." />
+      <PageHeader icon={Shield} title="Policies" sub={sub} right={<Precedence />} />
       {isPending && <PageSkeleton cards={3} />}
       {error && <ErrorNote error={error} />}
       {data && (
         <>
           <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-            <Kpi icon={Layers} tint="var(--color-soft)" value={rules.length} label="Total Policies" />
-            <Kpi icon={ShieldX} tint="var(--color-bad)" value={rules.filter((r) => r.decision === 'block').length} label="Block Policies" />
-            <Kpi icon={CircleHelp} tint="var(--color-warn)" value={rules.filter((r) => r.decision === 'ask_human').length} label="Ask Policies" />
+            <Kpi index={0} icon={Shield} tint="var(--color-soft)" value={rules.length} label="Total Policies" />
+            <Kpi index={1} icon={ShieldBan} tint="var(--color-bad)" value={rules.filter((r) => r.decision === 'block').length} label="Block Policies" />
+            <Kpi index={2} icon={CircleAlert} tint="var(--color-warn)" value={rules.filter((r) => r.decision === 'ask_human').length} label="Ask Policies" />
           </div>
 
-          <div className="my-4 flex flex-col gap-2.5 lg:flex-row lg:items-center">
-            <div role="radiogroup" aria-label="Decision filter" className="flex shrink-0 gap-1 rounded-xl border border-line bg-card/70 p-1">
+          <div className="my-5 flex flex-col gap-2.5 lg:flex-row lg:items-center lg:gap-4">
+            <div role="radiogroup" aria-label="Decision filter" className="glass flex shrink-0 gap-1 rounded-2xl! p-1.5">
               {([
                 ['all', `All (${matched.length})`],
                 ['block', `Block (${matched.filter((r) => r.decision === 'block').length})`],
                 ['ask_human', `Ask (${matched.filter((r) => r.decision === 'ask_human').length})`],
               ] as const).map(([id, label]) => (
                 <button key={id} type="button" role="radio" aria-checked={decision === id} onClick={() => setDecision(id)}
-                  className={`min-h-10 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap ${decision === id ? 'btn-primary' : 'text-body hover:bg-fg/5'}`}>
+                  className={`min-h-10 flex-1 rounded-xl px-4 text-sm font-semibold whitespace-nowrap transition-colors lg:flex-none ${decision === id ? 'btn-primary' : 'text-body hover:bg-fg/5'}`}>
                   {label}
                 </button>
               ))}
             </div>
-            <div className="flex flex-1 flex-col gap-2.5 sm:flex-row">
-            <label className="relative flex-1">
-              <span className="sr-only">Search policies</span>
-              <Search size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted" aria-hidden />
-              <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search policies, tools, or description…"
-                className="min-h-11 w-full rounded-xl border border-line bg-card2/80 pr-3 pl-9 text-sm placeholder:text-muted" />
-            </label>
-            <button type="button" onClick={() => setAdding(true)}
-              className="inline-flex min-h-11 items-center justify-center gap-2 btn-primary rounded-xl px-5 text-sm font-bold">
-              <Plus size={16} aria-hidden /> Add Policy
-            </button>
+            <div className="flex flex-1 flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
+              <label className="relative flex-1 lg:max-w-3xl">
+                <span className="sr-only">Search policies</span>
+                <Search size={17} className="pointer-events-none absolute top-1/2 left-4 z-10 -translate-y-1/2 text-muted" aria-hidden />
+                <input ref={searchRef} type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search policies, tools, or description…"
+                  className="glass min-h-12 w-full rounded-2xl! pr-16 pl-11 text-sm placeholder:text-muted" />
+                <kbd className="pointer-events-none absolute top-1/2 right-3 hidden -translate-y-1/2 rounded-md border border-fg/12 bg-well/40 px-1.5 py-0.5 font-mono text-[0.7rem] text-muted sm:block">
+                  {isMac ? '⌘K' : 'Ctrl K'}
+                </kbd>
+              </label>
+              <button type="button" onClick={() => setAdding(true)}
+                className="inline-flex min-h-12 items-center justify-center gap-2 btn-primary rounded-2xl px-6 text-[0.95rem] font-bold sm:ml-auto">
+                <Plus size={18} aria-hidden /> Add Policy
+              </button>
             </div>
           </div>
 
           {shown.length === 0 ? (
-            <p className="card px-4 py-5 text-sm text-muted">No policy rules match your current search or filter.</p>
+            <p className="glass px-5 py-6 text-sm text-muted">No policy rules match your current search or filter.</p>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               {shown.map((r, i) => (
                 <div key={r.id} className="stagger-item" style={stagger(i)}>
-                  <RuleCard rule={r} onOpen={(view) => setOpen({ id: r.id, view })} />
+                  <RuleCard rule={r} yaml={data.yaml[r.id] ?? ''} onInspect={() => setOpen({ id: r.id, view: 'json' })} />
                 </div>
               ))}
             </div>
@@ -237,24 +372,23 @@ export default function Policies() {
       )}
 
       {target && open && data && (
-        <Modal title={<>Rule <code className="font-mono">{target.id}</code> · {open.view === 'yaml' ? 'YAML' : open.view === 'inspect' ? 'JSON' : 'Details'}</>} onClose={() => setOpen(null)}>
-          {open.view === 'details' ? (
-            <ul className="flex flex-col gap-2 text-sm">
-              <li><b>Decision:</b> <code className="font-mono text-soft">{target.decision}</code> (risk <code className="font-mono">{target.risk ?? 0}</code>)</li>
-              <li><b>Tools:</b> <code className="font-mono text-soft">{(target.tools ?? []).join(', ')}</code></li>
-              <li><b>English template:</b> {target.reason_en}</li>
-              <li><b>Bangla template:</b> {target.reason_bn}</li>
-            </ul>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-end">
-                <CopyText text={open.view === 'yaml' ? data.yaml[target.id] : JSON.stringify(target, null, 2)} />
+        <Modal title={<>Rule <code className="font-mono">{target.id}</code></>} onClose={() => setOpen(null)}>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div role="tablist" aria-label="Format" className="flex gap-1 rounded-xl border border-line p-1">
+                {(['json', 'yaml'] as const).map((v) => (
+                  <button key={v} type="button" role="tab" aria-selected={open.view === v} onClick={() => setOpen({ ...open, view: v })}
+                    className={`min-h-9 rounded-lg px-3.5 font-mono text-xs font-bold uppercase ${open.view === v ? 'btn-primary' : 'text-body hover:bg-fg/5'}`}>
+                    {v}
+                  </button>
+                ))}
               </div>
-              <pre className="overflow-x-auto rounded-lg border border-line bg-bg p-3 font-mono text-[0.8rem] text-soft">
-                {open.view === 'yaml' ? data.yaml[target.id] : JSON.stringify(target, null, 2)}
-              </pre>
+              <CopyText text={open.view === 'yaml' ? data.yaml[target.id] : JSON.stringify(target, null, 2)} />
             </div>
-          )}
+            <pre className="overflow-x-auto rounded-lg border border-line bg-bg p-3 font-mono text-[0.8rem] text-soft">
+              {open.view === 'yaml' ? data.yaml[target.id] : JSON.stringify(target, null, 2)}
+            </pre>
+          </div>
         </Modal>
       )}
       {adding && data && (

@@ -6,7 +6,7 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
   return <section className={`card p-4 sm:p-5 ${className}`}>{children}</section>
 }
 
-export function PageHeader({ icon: Icon, title, sub, right }: { icon: LucideIcon; title: string; sub: string; right?: ReactNode }) {
+export function PageHeader({ icon: Icon, title, sub, right }: { icon: LucideIcon; title: string; sub: ReactNode; right?: ReactNode }) {
   return (
     <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3.5">
