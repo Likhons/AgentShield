@@ -25,7 +25,7 @@ type Tone = 'plain' | 'check' | 'ok' | 'bad'
 
 function Row({ on, tone = 'plain', scanning = false, className = '', children }: { on: boolean; tone?: Tone; scanning?: boolean; className?: string; children: ReactNode }) {
   const toneCls = {
-    plain: 'border-white/8 bg-white/[0.025]',
+    plain: 'border-fg/8 bg-fg/[0.025]',
     check: 'border-accent/45 bg-accent/[0.05] shadow-[0_0_32px_-14px_rgba(212,255,42,.55)]',
     ok: 'border-ok/40 bg-ok/[0.08]',
     bad: 'border-bad/60 bg-bad/[0.1] shadow-[0_0_44px_-10px_rgba(244,63,94,.65)]',
@@ -50,7 +50,7 @@ function Checking() {
 
 /** One of the four checks: dim until it has run, then shows its score (crimson flagged, emerald clear). */
 function Chip({ name, score, flagged, on }: { name: string; score: string; flagged: boolean; on: boolean }) {
-  const tone = !on ? 'border-white/8 text-muted' : flagged ? 'border-bad/50 bg-bad/[0.12] text-[#FDA4AF]' : 'border-ok/45 bg-ok/[0.1] text-[#6EE7B7]'
+  const tone = !on ? 'border-fg/8 text-muted' : flagged ? 'border-bad/50 bg-bad/[0.12] text-bad-soft' : 'border-ok/45 bg-ok/[0.1] text-ok-ink'
   return (
     <span className={`chip relative flex min-w-0 flex-col rounded-lg border px-2 py-1 ${tone} ${on ? 'is-in' : ''}`}>
       <span className="truncate text-[0.66rem] leading-tight opacity-80">{name}</span>
@@ -100,7 +100,7 @@ export default function HeroSimulation({ runKey, onReplay }: { runKey: number; o
           onClick={onReplay}
           aria-label="Replay the attack"
           title="Replay"
-          className="lift inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-soft hover:border-line2"
+          className="lift inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-fg/[0.03] text-soft hover:border-line2"
         >
           <RotateCcw size={16} className={runKey ? 'spin-once' : ''} aria-hidden />
         </button>
@@ -117,7 +117,7 @@ export default function HeroSimulation({ runKey, onReplay }: { runKey: number; o
           </div>
           <div className="mt-1.5 grid gap-1 text-[0.82rem]">
             <span>Landlord: November rent, 8,000 taka to 01000000102</span>
-            <span className={`sim-item text-[#FFC876] ${phase >= P.fakeEmail ? 'is-in' : ''}`}>
+            <span className={`sim-item text-warn-ink ${phase >= P.fakeEmail ? 'is-in' : ''}`}>
               billing@dhaka-power-bill.example: <span lang="bn">বকেয়া বিদ্যুৎ বিল ৪,৫০০ টাকা…</span> <span className="text-muted">(fake)</span>
             </span>
           </div>
@@ -140,7 +140,7 @@ export default function HeroSimulation({ runKey, onReplay }: { runKey: number; o
           <div className="relative flex items-center justify-between gap-2">
             <Call>send_money(01000000666, 4500)</Call>
             {blocked ? (
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-[#FB7185]"><X size={14} aria-hidden /> Blocked · 0.95</span>
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-bad-ink"><X size={14} aria-hidden /> Blocked · 0.95</span>
             ) : <Checking />}
           </div>
           <div className="relative mt-2 grid grid-cols-4 gap-1.5">
@@ -159,7 +159,7 @@ export default function HeroSimulation({ runKey, onReplay }: { runKey: number; o
         </Row>
       </ol>
 
-      <p className={`sim-item relative mt-3 border-t border-white/8 pt-3 text-[0.82rem] text-muted ${done ? 'is-in' : ''}`}>
+      <p className={`sim-item relative mt-3 border-t border-fg/8 pt-3 text-[0.82rem] text-muted ${done ? 'is-in' : ''}`}>
         Without AgentShield, the same model paid both bills and lost 4,500 taka.
       </p>
     </figure>

@@ -1,3 +1,5 @@
+import ThemeToggle from './ThemeToggle'
+import { useTheme } from '../lib/theme'
 import { useQuery } from '@tanstack/react-query'
 import { ChartColumn, Database, FileText, Menu, PlayCircle, Scale, ShieldCheck, X, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -59,8 +61,8 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                   className={({ isActive }) =>
                     `flex min-h-11 items-center gap-3 rounded-xl border px-3.5 text-[0.95rem] font-semibold transition-colors ${
                       isActive
-                        ? 'border-accent/30 bg-accent/10 text-accent shadow-[inset_3px_0_0_var(--color-accent)]'
-                        : 'border-transparent text-[#D6E0D9] hover:border-line hover:bg-white/5'
+                        ? 'border-accent/30 bg-accent/10 text-soft shadow-[inset_3px_0_0_var(--color-accent)]'
+                        : 'border-transparent text-body hover:border-line hover:bg-fg/5'
                     }`
                   }
                 >
@@ -106,6 +108,20 @@ function StatusCard() {
   )
 }
 
+/** Sidebar row: which theme is on, and the switch. */
+function ThemeRow() {
+  const day = useTheme() === 'light'
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-line px-3 py-2">
+      <span className="text-sm">
+        <span className="block font-semibold">{day ? 'Day mode' : 'Night mode'}</span>
+        <span className="block text-xs text-muted">{day ? 'Light, for bright rooms' : 'Dark, easy on the eyes'}</span>
+      </span>
+      <ThemeToggle />
+    </div>
+  )
+}
+
 export default function Layout() {
   const [open, setOpen] = useState(false)
   const location = useLocation()
@@ -141,7 +157,8 @@ export default function Layout() {
         <Brand />
         <div className="h-px bg-line" />
         <NavList />
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col gap-3">
+          <ThemeRow />
           <StatusCard />
         </div>
       </aside>
@@ -155,6 +172,7 @@ export default function Layout() {
               {current.label}
             </span>
           )}
+          <ThemeToggle />
           <button
             ref={menuButtonRef}
             type="button"

@@ -43,7 +43,7 @@ export function PanelTitle({ icon: Icon, title, sub, right }: { icon: LucideIcon
 const BADGE: Record<Decision, { label: string; cls: string }> = {
   allow: { label: 'ALLOW', cls: 'bg-ok/15 border-ok/35 text-ok' },
   ask_human: { label: 'ASK', cls: 'bg-warn/15 border-warn/35 text-warn' },
-  block: { label: 'BLOCK', cls: 'bg-bad/18 border-bad/35 text-[#FB7185]' },
+  block: { label: 'BLOCK', cls: 'bg-bad/18 border-bad/35 text-bad-ink' },
 }
 
 export function DecisionBadge({ decision }: { decision: Decision }) {
@@ -69,7 +69,7 @@ export function ErrorNote({ error }: { error: unknown }) {
   // an ApiError is a real answer from the server (e.g. "Live mode is off"); anything else means no answer at all
   const fromServer = error instanceof ApiError
   return (
-    <div role="alert" className="rounded-xl border border-bad/40 bg-bad/10 px-4 py-3 text-sm text-[#FDA4AF]">
+    <div role="alert" className="rounded-xl border border-bad/40 bg-bad/10 px-4 py-3 text-sm text-bad-soft">
       {fromServer ? msg : `Could not reach the API: ${msg}. Is it running? (uvicorn webapi.app:build_app --factory --port 8000)`}
     </div>
   )

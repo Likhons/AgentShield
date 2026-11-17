@@ -10,9 +10,9 @@ import Modal from '../Modal'
 
 const LANG = { bn: 'Bangla', banglish: 'Banglish', en: 'English' } as Record<string, string>
 const DECISION: Record<Decision, { label: string; cls: string; bar: string }> = {
-  allow: { label: 'ALLOW', cls: 'border-ok/50 bg-ok/12 text-[#6EE7B7]', bar: 'bg-ok' },
+  allow: { label: 'ALLOW', cls: 'border-ok/50 bg-ok/12 text-ok-ink', bar: 'bg-ok' },
   ask_human: { label: 'ASK HUMAN', cls: 'border-warn/50 bg-warn/12 text-warn', bar: 'bg-warn' },
-  block: { label: 'BLOCK', cls: 'border-bad/60 bg-bad/15 text-[#FB7185] shadow-[0_0_40px_-12px_rgba(244,63,94,.7)]', bar: 'bg-bad' },
+  block: { label: 'BLOCK', cls: 'border-bad/60 bg-bad/15 text-bad-ink shadow-[0_0_40px_-12px_rgba(244,63,94,.7)]', bar: 'bg-bad' },
 }
 const SOURCES: { value: SandboxSource; label: string }[] = [
   { value: 'tool:email', label: 'an email' },
@@ -29,7 +29,7 @@ function useDebounced<T>(value: T, ms: number) {
   return v
 }
 
-const box = 'rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm outline-none transition-colors focus:border-line2'
+const box = 'rounded-xl border border-fg/10 bg-well/30 px-3 py-2.5 text-sm outline-none transition-colors focus:border-line2'
 const field = `w-full ${box}`
 
 export default function SandboxModal({ onClose }: { onClose: () => void }) {
@@ -75,7 +75,7 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="Try AgentShield on your own text" onClose={onClose} wide>
       {presets.isError ? (
-        <p className="text-sm text-[#FECDD3]">The demo server did not answer. It may be waking up (about a minute on the free plan); close and try again.</p>
+        <p className="text-sm text-bad-pale">The demo server did not answer. It may be waking up (about a minute on the free plan); close and try again.</p>
       ) : !input ? (
         <p className="flex items-center gap-2 text-sm text-muted">
           <Loader2 size={16} className="animate-spin" aria-hidden /> Waking the demo server. The first request can take about a minute.
@@ -93,7 +93,7 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
                     onClick={() => applyPreset(p.id)}
                     aria-pressed={picked === p.id}
                     className={`lift min-h-9 rounded-full border px-3 text-xs font-semibold ${
-                      picked === p.id ? 'border-line2 bg-accent/12 text-soft' : 'border-white/10 hover:border-line2'
+                      picked === p.id ? 'border-line2 bg-accent/12 text-soft' : 'border-fg/10 hover:border-line2'
                     }`}
                   >
                     {p.kind === 'normal' ? 'Real rent bill' : 'Fake bill'} · {LANG[p.language] ?? p.language}
@@ -103,7 +103,7 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
                   type="button"
                   onClick={() => { setPicked(''); set({ content: '', to: '', amount: 1000 }) }}
                   aria-pressed={picked === ''}
-                  className={`lift min-h-9 rounded-full border px-3 text-xs font-semibold ${picked === '' ? 'border-line2 bg-accent/12 text-soft' : 'border-white/10 hover:border-line2'}`}
+                  className={`lift min-h-9 rounded-full border px-3 text-xs font-semibold ${picked === '' ? 'border-line2 bg-accent/12 text-soft' : 'border-fg/10 hover:border-line2'}`}
                 >
                   Write your own
                 </button>
@@ -120,7 +120,7 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
                 </label>
                 <select
                   aria-label="Where the text came from"
-                  className="min-h-8 rounded-lg border border-white/10 bg-black/40 px-2 text-xs"
+                  className="min-h-8 rounded-lg border border-fg/10 bg-well/40 px-2 text-xs"
                   value={input.source}
                   onChange={(e) => set({ source: e.target.value as SandboxSource })}
                 >
@@ -168,7 +168,7 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
                 {check.isFetching && <Loader2 size={14} className="animate-spin text-muted" aria-label="Checking" />}
               </div>
               {check.isError && !check.data ? (
-                <p className="mt-3 text-sm text-[#FECDD3]">{(check.error as Error).message}</p>
+                <p className="mt-3 text-sm text-bad-pale">{(check.error as Error).message}</p>
               ) : !v || !d ? (
                 <p className="mt-3 text-sm text-muted">{waking ? 'Checking… the first request can take about a minute while the server wakes.' : 'Fill in the request, the number and the amount.'}</p>
               ) : (
@@ -180,10 +180,10 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
                     <span className="font-mono text-sm tabular-nums text-ink">risk {v.risk_score.toFixed(2)}</span>
                   </div>
                   {/* risk gauge with the two thresholds */}
-                  <div className="relative mt-4 h-2 rounded-full bg-white/[0.06]" role="img" aria-label={`Risk ${v.risk_score.toFixed(2)} of 1`}>
+                  <div className="relative mt-4 h-2 rounded-full bg-fg/[0.06]" role="img" aria-label={`Risk ${v.risk_score.toFixed(2)} of 1`}>
                     <div className={`fill-bar h-full rounded-full ${d.bar}`} style={{ transform: `scaleX(${Math.max(0.02, v.risk_score)})` }} />
                     {t && [t.ask_human_at, t.block_at].map((x) => (
-                      <span key={x} className="absolute -top-1 h-4 w-px bg-white/40" style={{ left: `${x * 100}%` }} aria-hidden />
+                      <span key={x} className="absolute -top-1 h-4 w-px bg-fg/40" style={{ left: `${x * 100}%` }} aria-hidden />
                     ))}
                   </div>
                   {t && (
@@ -196,18 +196,18 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
                       <li key={c.check} className="text-sm">
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-semibold capitalize">{c.check}</span>
-                          <span className={`font-mono text-xs tabular-nums ${c.skipped ? 'text-muted' : c.flagged ? 'text-[#FDA4AF]' : 'text-ok'}`}>
+                          <span className={`font-mono text-xs tabular-nums ${c.skipped ? 'text-muted' : c.flagged ? 'text-bad-soft' : 'text-ok'}`}>
                             {c.skipped ? 'not needed' : `${c.risk_score.toFixed(2)} ${c.flagged ? 'flagged' : 'clear'}`}
                           </span>
                         </div>
-                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.06]" aria-hidden>
+                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden>
                           <div className={`fill-bar h-full rounded-full ${c.flagged ? 'bg-bad' : 'bg-ok'}`} style={{ transform: `scaleX(${c.skipped ? 0 : c.risk_score})` }} />
                         </div>
                       </li>
                     ))}
                   </ul>
                   <p className="mt-4 text-sm leading-relaxed">{v.reason_en}</p>
-                  <p lang="bn" className="mt-2 text-sm text-[#C9D4CD]">{v.reason_bn}</p>
+                  <p lang="bn" className="mt-2 text-sm text-body">{v.reason_bn}</p>
                 </>
               )}
             </div>
@@ -215,7 +215,7 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
               Runs the real AgentShield engine on the demo server. The intent check uses the offline keyword judge, so no
               LLM is called, and nothing you type is saved. Demo data is fake.
             </p>
-            <Link to="/playground" className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-soft hover:text-accent">
+            <Link to="/playground" className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-soft hover:text-soft">
               Open the full playground with a real agent <ArrowRight size={15} aria-hidden />
             </Link>
           </div>

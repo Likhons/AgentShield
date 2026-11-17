@@ -60,16 +60,16 @@ function CheckCard({ active }: { active: number }) {
               <li
                 key={c.name}
                 className={`pipe-step rounded-xl border px-3.5 py-2.5 ${
-                  current ? 'border-line2 bg-accent/[0.05]' : on ? 'border-white/8 bg-white/[0.02]' : 'border-white/6 opacity-45'
+                  current ? 'border-line2 bg-accent/[0.05]' : on ? 'border-fg/8 bg-fg/[0.02]' : 'border-fg/6 opacity-45'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="font-semibold">{c.name}</span>
-                  <span className={`font-mono text-xs tabular-nums ${on ? (c.flagged ? 'text-[#FDA4AF]' : 'text-ok') : 'text-muted'}`}>
+                  <span className={`font-mono text-xs tabular-nums ${on ? (c.flagged ? 'text-bad-soft' : 'text-ok') : 'text-muted'}`}>
                     {on ? `${c.score.toFixed(2)} ${c.flagged ? 'flagged' : 'clear'}` : 'waiting'}
                   </span>
                 </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[0.06]" aria-hidden>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden>
                   <div
                     className={`fill-bar h-full rounded-full ${c.flagged ? 'bg-bad' : 'bg-ok'}`}
                     style={{ transform: `scaleX(${on ? c.score : 0})` }}
@@ -81,11 +81,11 @@ function CheckCard({ active }: { active: number }) {
         </ul>
         <div
           className={`pipe-step mt-4 flex items-center justify-between rounded-xl border px-4 py-3 ${
-            decided ? 'border-bad/60 bg-bad/15 shadow-[0_0_44px_-10px_rgba(244,63,94,.65)]' : 'border-white/8 opacity-45'
+            decided ? 'border-bad/60 bg-bad/15 shadow-[0_0_44px_-10px_rgba(244,63,94,.65)]' : 'border-fg/8 opacity-45'
           }`}
         >
           <span className="font-bold">Decision</span>
-          <span className={`font-mono text-sm font-bold tabular-nums ${decided ? 'text-[#FB7185]' : 'text-muted'}`}>
+          <span className={`font-mono text-sm font-bold tabular-nums ${decided ? 'text-bad-ink' : 'text-muted'}`}>
             {decided ? 'BLOCK, risk 0.95' : '…'}
           </span>
         </div>
@@ -140,20 +140,20 @@ export default function Pipeline() {
                 onClick={() => pick(i)}
                 aria-current={on ? 'step' : undefined}
                 className={`glass spotlight lift pipe-step block w-full p-5 text-left ${
-                  on ? 'border-line2! bg-[rgb(18_27_22/0.8)]' : i < active ? '' : 'lg:opacity-60'
+                  on ? 'border-line2! bg-card2/80' : i < active ? '' : 'lg:opacity-60'
                 }`}
               >
                 <span className="relative flex items-center gap-2 font-mono text-[0.78rem] tracking-wide">
-                  <span className={on || i < active ? 'text-accent' : 'text-muted'}>{pad(i)}.</span>
+                  <span className={on || i < active ? 'text-soft' : 'text-muted'}>{pad(i)}.</span>
                   <span className="text-soft">{c.step}</span>
                 </span>
                 <h3 className="relative mt-2 text-[1.15rem] font-bold">{c.title}</h3>
-                <p className="relative mt-2 max-w-[48ch] text-[0.95rem] leading-relaxed text-[#B5C1B9]">{c.body}</p>
-                <p className={`relative mt-3 max-w-[48ch] rounded-lg border px-3 py-2 text-sm ${c.flagged ? 'border-bad/35 bg-bad/8 text-[#FECDD3]' : 'border-ok/30 bg-ok/8 text-[#D6E0D9]'}`}>
+                <p className="relative mt-2 max-w-[48ch] text-[0.95rem] leading-relaxed text-body">{c.body}</p>
+                <p className={`relative mt-3 max-w-[48ch] rounded-lg border px-3 py-2 text-sm ${c.flagged ? 'border-bad/35 bg-bad/8 text-bad-pale' : 'border-ok/30 bg-ok/8 text-body'}`}>
                   <span className="font-mono text-xs tabular-nums">{c.name} {c.score.toFixed(2)}</span> {c.result}
                 </p>
                 {/* phones have no sticky card: the bar sits in the step */}
-                <span className="relative mt-3 block h-1.5 overflow-hidden rounded-full bg-white/[0.06] lg:hidden" aria-hidden>
+                <span className="relative mt-3 block h-1.5 overflow-hidden rounded-full bg-fg/[0.06] lg:hidden" aria-hidden>
                   <span className={`block h-full rounded-full ${c.flagged ? 'bg-bad' : 'bg-ok'}`} style={{ width: `${c.score * 100}%` }} />
                 </span>
               </button>

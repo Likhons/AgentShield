@@ -20,13 +20,13 @@ function Hero() {
     <div className="grid items-center gap-4 xl:grid-cols-[1.15fr_1fr]">
       <div className="animate-rise">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-line2 bg-accent/15 px-3 py-1 text-xs font-semibold text-soft">
-          <Play size={10} fill="#D9FF8A" className="text-soft" aria-hidden /> Playground
+          <Play size={10} fill="currentColor" className="text-soft" aria-hidden /> Playground
         </span>
         <h1 className="mt-4 text-[clamp(1.62rem,6.2vw,2.05rem)] leading-[1.15] font-bold tracking-tight lg:text-[2.6rem]">
           <span className="block">Stop AI Agents from Acting&nbsp;on</span>
-          <span className="text-accent">Hidden Instructions</span>
+          <span className="text-soft">Hidden Instructions</span>
         </h1>
-        <p className="mt-4 max-w-[560px] text-[0.94rem] leading-relaxed text-[#BCC8C0] lg:text-base">
+        <p className="mt-4 max-w-[560px] text-[0.94rem] leading-relaxed text-body lg:text-base">
           AgentShield checks every tool call before it runs, so an AI agent cannot be tricked into sending money by text
           hidden in emails, web pages or files, in Bangla, Banglish and English.
         </p>
@@ -56,7 +56,7 @@ function Kpi({ icon: Icon, tint, num, label, note }: { icon: LucideIcon; tint: s
     <div className="card flex flex-col items-start gap-2 p-3.5 transition hover:-translate-y-0.5 hover:border-line2 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
       <span
         className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12"
-        style={{ background: `${tint}1F`, border: `1px solid ${tint}48` }}
+        style={{ background: `color-mix(in srgb, ${tint} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 28%, transparent)` }}
       >
         <Icon size={22} color={tint} aria-hidden />
       </span>
@@ -81,12 +81,12 @@ function Kpis() {
   const real = data.real_llm
   return (
     <div className="my-6 grid grid-cols-2 gap-2.5 sm:gap-4 xl:grid-cols-4">
-      <Kpi icon={ShieldCheck} tint="#D4FF2A" num={String(data.checks.length)} label="Checks per Tool Call"
+      <Kpi icon={ShieldCheck} tint="var(--color-soft)" num={String(data.checks.length)} label="Checks per Tool Call"
         note={data.checks.map((c) => c[0].toUpperCase() + c.slice(1)).join(' · ')} />
-      <Kpi icon={ListChecks} tint="#38D6F5" num={String(data.policy_rules)} label="Policy Rules" note="Deterministic · default.yaml" />
-      <Kpi icon={Bug} tint="#F04452" num={String(data.attack_samples.total)} label="Attack Samples"
+      <Kpi icon={ListChecks} tint="var(--color-info)" num={String(data.policy_rules)} label="Policy Rules" note="Deterministic · default.yaml" />
+      <Kpi icon={Bug} tint="var(--color-bad)" num={String(data.attack_samples.total)} label="Attack Samples"
         note={byLang.map(([k, v]) => `${langLabel(k)} ${v}`).join(' · ')} />
-      <Kpi icon={ChartColumn} tint="#16C784" num={real ? `${real.with.hits}/${real.with.total}` : '–'} label="Attacks that Moved Money"
+      <Kpi icon={ChartColumn} tint="var(--color-ok)" num={real ? `${real.with.hits}/${real.with.total}` : '–'} label="Attacks that Moved Money"
         note={real ? `Real LLM · ${real.without.hits}/${real.without.total} without AgentShield` : 'No real-LLM run yet'} />
     </div>
   )
@@ -187,7 +187,7 @@ function RunCard({
           checked={approve}
           disabled={effectiveMode === 'recorded'}
           onChange={(e) => setApprove(e.target.checked)}
-          className="mt-0.5 h-4.5 w-4.5 shrink-0 accent-[#D4FF2A]"
+          className="mt-0.5 h-4.5 w-4.5 shrink-0 accent-[var(--color-mark)]"
         />
         <span>
           I approve actions that ask for my approval (simulated human click)
@@ -205,7 +205,7 @@ function RunCard({
       >
         {running ? (
           <>
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden /> Agent is working…
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-fg/40 border-t-white" aria-hidden /> Agent is working…
           </>
         ) : (
           <>
@@ -220,14 +220,14 @@ function RunCard({
 // ---------------------------------------------------------------------------
 function HowItWorks() {
   const nodes = [
-    { icon: Mail, color: '#FB7185', title: 'Untrusted input', sub: 'email · web · file', cls: 'border-bad/40 bg-bad/8' },
-    { icon: ShieldCheck, color: '#EEFFC2', title: 'AgentShield', sub: 'checks each tool call', cls: 'border-accent2/70 bg-accent/18 shadow-[0_0_28px_rgba(212,255,42,.23)]' },
-    { icon: CircleCheck, color: '#16C784', title: 'Decision', sub: 'allow · ask · block', cls: 'border-ok/40 bg-ok/8' },
+    { icon: Mail, color: 'var(--color-bad)', title: 'Untrusted input', sub: 'email · web · file', cls: 'border-bad/40 bg-bad/8' },
+    { icon: ShieldCheck, color: 'var(--color-soft)', title: 'AgentShield', sub: 'checks each tool call', cls: 'border-accent2/70 bg-accent/18 shadow-[0_0_28px_rgba(212,255,42,.23)]' },
+    { icon: CircleCheck, color: 'var(--color-ok)', title: 'Decision', sub: 'allow · ask · block', cls: 'border-ok/40 bg-ok/8' },
   ]
   const decisions = [
-    { icon: CircleCheck, color: '#16C784', title: 'ALLOW', sub: "Action follows from the user's request", cls: 'border-ok/40 bg-ok/8' },
-    { icon: CircleHelp, color: '#F5A623', title: 'ASK', sub: 'Uncertain: the user approves or rejects', cls: 'border-warn/40 bg-warn/8' },
-    { icon: CircleX, color: '#F04452', title: 'BLOCK', sub: 'Clear attack or policy violation', cls: 'border-bad/40 bg-bad/8' },
+    { icon: CircleCheck, color: 'var(--color-ok)', title: 'ALLOW', sub: "Action follows from the user's request", cls: 'border-ok/40 bg-ok/8' },
+    { icon: CircleHelp, color: 'var(--color-warn)', title: 'ASK', sub: 'Uncertain: the user approves or rejects', cls: 'border-warn/40 bg-warn/8' },
+    { icon: CircleX, color: 'var(--color-bad)', title: 'BLOCK', sub: 'Clear attack or policy violation', cls: 'border-bad/40 bg-bad/8' },
   ]
   return (
     <Card className="h-full">
@@ -237,7 +237,7 @@ function HowItWorks() {
           <div key={title} className="contents">
             {i > 0 && <ArrowRight size={20} className="mx-auto shrink-0 rotate-90 text-muted md:rotate-0" aria-hidden />}
             <div className={`flex flex-1 flex-col items-center gap-1 rounded-xl border px-3 py-4 text-center ${cls}`}>
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/5">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-fg/5">
                 <Icon size={20} color={color} aria-hidden />
               </span>
               <b className="text-[0.95rem]">{title}</b>
@@ -280,7 +280,7 @@ function Pipeline() {
             style={{ '--scan-delay': `${i * 0.7}s` } as CSSProperties}
             className="pipe-node relative flex items-center gap-3 rounded-xl border border-line2/60 bg-card2/60 px-3.5 py-3"
           >
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-white/5">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-fg/5">
               <Icon size={18} aria-hidden />
             </span>
             <span className="rounded-md bg-accent text-accent-ink px-1.5 py-0.5 font-mono text-[0.72rem] font-bold">
@@ -331,7 +331,7 @@ function RecentEvaluations() {
                   <tr key={r.id} style={stagger(i)} className="stagger-item border-b border-line/60 transition hover:bg-accent/6">
                     <td className="py-2.5 pr-3 whitespace-nowrap text-muted">{utcTime(r.timestamp)}</td>
                     <td className="py-2.5 pr-3">{short(r.user_request, 48)}</td>
-                    <td className="py-2.5 pr-3"><code className="font-mono text-[0.8rem] text-[#4BE0A8]">{r.tool_name}</code></td>
+                    <td className="py-2.5 pr-3"><code className="font-mono text-[0.8rem] text-ok-ink">{r.tool_name}</code></td>
                     <td className="py-2.5 pr-3"><DecisionBadge decision={r.decision} /></td>
                     <td className="py-2.5 pr-3 text-muted">{short(r.reason_en, 90)}</td>
                     <td className="py-2.5">
@@ -354,7 +354,7 @@ function RecentEvaluations() {
                 <p className="text-sm font-semibold">{short(r.user_request, 90)}</p>
                 <p className="text-[0.8rem] text-muted">{short(r.reason_en, 110)}</p>
                 <div className="flex items-center justify-between">
-                  <code className="rounded-md border border-line bg-bg px-2 py-0.5 font-mono text-[0.78rem] text-[#4BE0A8]">{r.tool_name}</code>
+                  <code className="rounded-md border border-line bg-bg px-2 py-0.5 font-mono text-[0.78rem] text-ok-ink">{r.tool_name}</code>
                   <Link to={`/audit?id=${r.id}`} aria-label="Open in Audit Log" className="inline-flex h-10 w-11 items-center justify-center rounded-lg border border-line">
                     <ExternalLink size={15} aria-hidden />
                   </Link>

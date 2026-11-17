@@ -37,7 +37,7 @@ function useDebounced<T>(value: T, ms = 300): T {
 function Kpi({ icon: Icon, tint, label, value, note, wide = false }: { icon: LucideIcon; tint: string; label: string; value: string; note: string; wide?: boolean }) {
   return (
     <div className={`card flex items-center gap-3.5 p-4 ${wide ? 'col-span-2 md:col-span-1' : ''}`}>
-      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full" style={{ background: `${tint}22`, border: `1px solid ${tint}55` }}>
+      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${tint} 13%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 33%, transparent)` }}>
         <Icon size={20} color={tint} aria-hidden />
       </span>
       <div className="min-w-0">
@@ -225,14 +225,14 @@ export default function AuditLog() {
       {stats && (
         <>
           <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-5 xl:gap-4">
-            <Kpi wide icon={Layers} tint="#D4FF2A" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
-            <Kpi icon={CircleCheck} tint="#00D6A0" label="Allowed" value={String(stats.allow)} note={pct(stats.allow)} />
-            <Kpi icon={CircleHelp} tint="#FFB547" label="Asked Human" value={String(stats.ask_human)} note={pct(stats.ask_human, 1)} />
-            <Kpi icon={CircleX} tint="#FF526F" label="Blocked" value={String(stats.block)} note={pct(stats.block)} />
-            <Kpi icon={Zap} tint="#38D6F5" label="Median Latency" value={stats.median_latency_ms == null ? '–' : `${stats.median_latency_ms.toFixed(1)} ms`} note={`LLM judge: ${stats.llm_calls}/${stats.total}`} />
+            <Kpi wide icon={Layers} tint="var(--color-soft)" label="Checked Calls" value={String(stats.total)} note="100% SQLite logged" />
+            <Kpi icon={CircleCheck} tint="var(--color-ok)" label="Allowed" value={String(stats.allow)} note={pct(stats.allow)} />
+            <Kpi icon={CircleHelp} tint="var(--color-warn)" label="Asked Human" value={String(stats.ask_human)} note={pct(stats.ask_human, 1)} />
+            <Kpi icon={CircleX} tint="var(--color-bad)" label="Blocked" value={String(stats.block)} note={pct(stats.block)} />
+            <Kpi icon={Zap} tint="var(--color-info)" label="Median Latency" value={stats.median_latency_ms == null ? '–' : `${stats.median_latency_ms.toFixed(1)} ms`} note={`LLM judge: ${stats.llm_calls}/${stats.total}`} />
           </div>
           <p className="mt-3 inline-flex items-center gap-2 rounded-lg border border-line bg-card/70 px-3 py-1.5 text-[0.82rem] text-muted">
-            <Activity size={14} className="text-accent" aria-hidden />
+            <Activity size={14} className="text-soft" aria-hidden />
             LLM judge called for <b className="text-ink">{stats.llm_calls}</b> of <b className="text-ink">{stats.total}</b> checks.
           </p>
         </>
@@ -249,7 +249,7 @@ export default function AuditLog() {
               aria-checked={decision === c.id}
               onClick={() => setDecision(c.id)}
               className={`flex min-h-11 flex-col items-center justify-center rounded-lg px-1 text-[0.84rem] leading-tight font-semibold whitespace-nowrap transition sm:min-h-10 sm:flex-row sm:gap-1 sm:px-3.5 sm:text-sm ${
-                decision === c.id ? 'btn-primary' : 'text-[#D6E0D9] hover:bg-white/5'
+                decision === c.id ? 'btn-primary' : 'text-body hover:bg-fg/5'
               }`}
             >
               {c.name}
@@ -298,7 +298,7 @@ export default function AuditLog() {
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Minimum risk score: {minRisk.toFixed(2)}
-                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="h-10 cursor-pointer accent-[#D4FF2A]" />
+                  <input type="range" min={0} max={1} step={0.05} value={minRisk} onChange={(e) => setMinRisk(Number(e.target.value))} className="h-10 cursor-pointer accent-[var(--color-mark)]" />
                 </label>
                 <label className="flex flex-col gap-1 text-sm font-semibold">
                   Rows per page
@@ -401,7 +401,7 @@ export default function AuditLog() {
                       type="button"
                       aria-current={p === page ? 'page' : undefined}
                       onClick={() => setPage(p)}
-                      className={`h-10 min-w-10 rounded-lg px-2 text-sm font-semibold ${p === page ? 'btn-primary' : 'hover:bg-white/5'}`}
+                      className={`h-10 min-w-10 rounded-lg px-2 text-sm font-semibold ${p === page ? 'btn-primary' : 'hover:bg-fg/5'}`}
                     >
                       {p}
                     </button>

@@ -21,7 +21,7 @@ function matches(rule: PolicyRule, q: string): boolean {
 function Kpi({ icon: Icon, tint, value, label }: { icon: LucideIcon; tint: string; value: number; label: string }) {
   return (
     <div className="card flex flex-col items-start gap-2 p-3 transition hover:-translate-y-0.5 hover:border-line2 sm:flex-row sm:items-center sm:gap-3.5 sm:p-4">
-      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11" style={{ background: `${tint}1A`, border: `1px solid ${tint}4D` }}>
+      <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11" style={{ background: `color-mix(in srgb, ${tint} 10%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 30%, transparent)` }}>
         <Icon size={20} color={tint} aria-hidden />
       </span>
       <div>
@@ -139,13 +139,13 @@ function AddPolicy({ file }: { file: string }) {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Risk score: {f.risk.toFixed(2)}
-          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="h-10 cursor-pointer accent-[#D4FF2A]" />
+          <input type="range" min={0.1} max={1} step={0.05} value={f.risk} onChange={(e) => set('risk', Number(e.target.value))} className="h-10 cursor-pointer accent-[var(--color-mark)]" />
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold">Amount greater than (0 = none)
           <input type="number" min={0} step={1000} className={input} value={f.amountGt} onChange={(e) => set('amountGt', Math.max(0, Number(e.target.value)))} />
         </label>
         <label className="flex items-center gap-2 self-end text-sm font-semibold sm:min-h-10">
-          <input type="checkbox" checked={f.tainted} onChange={(e) => set('tainted', e.target.checked)} className="h-4 w-4 accent-[#D4FF2A]" />
+          <input type="checkbox" checked={f.tainted} onChange={(e) => set('tainted', e.target.checked)} className="h-4 w-4 accent-[var(--color-mark)]" />
           Require tainted context
         </label>
         <label className="flex flex-col gap-1 text-sm font-semibold sm:col-span-2">Reason (Bangla)<input className={input} value={f.reason_bn} onChange={(e) => set('reason_bn', e.target.value)} /></label>
@@ -156,7 +156,7 @@ function AddPolicy({ file }: { file: string }) {
         Validate & generate YAML
       </button>
       {validate.error && <ErrorNote error={validate.error} />}
-      {validate.data?.valid === false && <div role="alert" className="rounded-xl border border-bad/40 bg-bad/10 px-4 py-3 text-sm text-[#FDA4AF]">Validation error: {validate.data.error}</div>}
+      {validate.data?.valid === false && <div role="alert" className="rounded-xl border border-bad/40 bg-bad/10 px-4 py-3 text-sm text-bad-soft">Validation error: {validate.data.error}</div>}
       {validate.data?.yaml && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
@@ -190,9 +190,9 @@ export default function Policies() {
       {data && (
         <>
           <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-            <Kpi icon={Layers} tint="#D4FF2A" value={rules.length} label="Total Policies" />
-            <Kpi icon={ShieldX} tint="#FF526F" value={rules.filter((r) => r.decision === 'block').length} label="Block Policies" />
-            <Kpi icon={CircleHelp} tint="#FFB547" value={rules.filter((r) => r.decision === 'ask_human').length} label="Ask Policies" />
+            <Kpi icon={Layers} tint="var(--color-soft)" value={rules.length} label="Total Policies" />
+            <Kpi icon={ShieldX} tint="var(--color-bad)" value={rules.filter((r) => r.decision === 'block').length} label="Block Policies" />
+            <Kpi icon={CircleHelp} tint="var(--color-warn)" value={rules.filter((r) => r.decision === 'ask_human').length} label="Ask Policies" />
           </div>
 
           <div className="my-4 flex flex-col gap-2.5 lg:flex-row lg:items-center">
@@ -203,7 +203,7 @@ export default function Policies() {
                 ['ask_human', `Ask (${matched.filter((r) => r.decision === 'ask_human').length})`],
               ] as const).map(([id, label]) => (
                 <button key={id} type="button" role="radio" aria-checked={decision === id} onClick={() => setDecision(id)}
-                  className={`min-h-10 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap ${decision === id ? 'btn-primary' : 'text-[#D6E0D9] hover:bg-white/5'}`}>
+                  className={`min-h-10 rounded-lg px-3.5 text-sm font-semibold whitespace-nowrap ${decision === id ? 'btn-primary' : 'text-body hover:bg-fg/5'}`}>
                   {label}
                 </button>
               ))}

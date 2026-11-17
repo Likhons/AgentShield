@@ -79,7 +79,7 @@ export default function HeroArt() {
       {FEATURES.map(({ label, icon: Icon, pos }) => (
         <span
           key={label}
-          className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line2 bg-[#0E130F]/90 py-1 pr-3 pl-1.5 text-[0.74rem] font-semibold text-soft backdrop-blur lg:absolute lg:text-[0.8rem] ${pos}`}
+          className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border border-line2 bg-card/90 py-1 pr-3 pl-1.5 text-[0.74rem] font-semibold text-soft backdrop-blur lg:absolute lg:text-[0.8rem] ${pos}`}
         >
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent/25">
             <Icon size={13} aria-hidden />

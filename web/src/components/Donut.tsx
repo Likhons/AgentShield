@@ -15,7 +15,7 @@ export default function Donut({ slices, centerLabel }: { slices: Slice[]; center
     <div className="flex flex-col items-center gap-5 sm:flex-row sm:justify-center">
       <div className="relative h-[156px] w-[156px] shrink-0">
         <svg width="156" height="156" viewBox="0 0 160 160" role="img" aria-label={`${total} ${centerLabel}`}>
-          <circle cx="80" cy="80" r="58" fill="none" stroke="#1B231E" strokeWidth="20" />
+          <circle cx="80" cy="80" r="58" fill="none" stroke="var(--color-track)" strokeWidth="20" />
           {slices.map((s, i) => (
             <circle key={s.label} cx="80" cy="80" r="58" fill="none" stroke={s.color} strokeWidth="20" pathLength={100}
               strokeDasharray={`${pcts[i].toFixed(2)} ${(100 - pcts[i]).toFixed(2)}`} strokeDashoffset={(-starts[i]).toFixed(2)}

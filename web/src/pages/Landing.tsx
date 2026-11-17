@@ -2,6 +2,7 @@ import { ChartColumn, PlayCircle, ShieldCheck } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef, useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import DevTerminal from '../components/landing/DevTerminal'
+import ThemeToggle from '../components/ThemeToggle'
 import HeroSimulation from '../components/landing/HeroSimulation'
 import Pipeline from '../components/landing/Pipeline'
 import { CountUp, Reveal } from '../components/Motion'
@@ -81,18 +82,18 @@ function Hero() {
         <div>
           <Headline />
           <div className="landing-step" style={{ animationDelay: '0.45s' }}>
-            <p className="mt-5 max-w-[56ch] text-[1.05rem] leading-relaxed text-[#BCC8C0]">
+            <p className="mt-5 max-w-[56ch] text-[1.05rem] leading-relaxed text-body">
               AgentShield checks every action an AI agent is about to take, such as sending money, and stops the ones the
               user never asked for. It catches tricks hidden in emails, web pages and files, in Bangla, Banglish and English.
             </p>
-            <p lang="bn" className="mt-3 max-w-[56ch] text-[1.02rem] text-[#9AA79F]">
+            <p lang="bn" className="mt-3 max-w-[56ch] text-[1.02rem] text-sub">
               এআই এজেন্ট টাকা পাঠানোর আগে AgentShield প্রতিটি কাজ যাচাই করে।
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button type="button" onClick={runAttack} className="btn-primary lift inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 font-bold">
                 <PlayCircle size={18} aria-hidden /> Run the attack yourself
               </button>
-              <Link to="/benchmarks" className="lift inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.02] px-6 font-bold hover:border-line2 hover:bg-accent/[0.06]">
+              <Link to="/benchmarks" className="lift inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-fg/12 bg-fg/[0.02] px-6 font-bold hover:border-line2 hover:bg-accent/[0.06]">
                 <ChartColumn size={18} aria-hidden /> See the measurements
               </Link>
             </div>
@@ -111,20 +112,20 @@ function Hero() {
 
 function HowItWorks() {
   return (
-    <section id="how" className="relative scroll-mt-20 border-t border-white/6">
+    <section id="how" className="relative scroll-mt-20 border-t border-fg/6">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <Reveal>
           <h2 className="max-w-[28ch] text-[clamp(1.7rem,3.6vw,2.5rem)] leading-tight font-extrabold">
             Four checks run before every action, in about a millisecond.
           </h2>
-          <p className="mt-3 max-w-[62ch] text-[#BCC8C0]">
+          <p className="mt-3 max-w-[62ch] text-body">
             Follow the fake bill’s payment through them. The stricter of the score and the rules decides: allow, ask the
             user, or block. Every decision is explained in Bangla and English and kept in an audit log.
           </p>
         </Reveal>
         <Pipeline />
         <Reveal>
-          <p className="mt-12 max-w-[62ch] text-[0.95rem] text-[#BCC8C0]">
+          <p className="mt-12 max-w-[62ch] text-[0.95rem] text-body">
             The text filter alone would have paid the attacker. AI judges where judgment is needed; fixed rules decide
             where certainty is needed.
           </p>
@@ -138,8 +139,8 @@ function HowItWorks() {
 // results
 
 function Bar({ label, value, total, tone, shown }: { label: string; value: number; total: number; tone: 'bad' | 'ok' | 'muted'; shown: boolean }) {
-  const color = { bad: 'bg-bad', ok: 'bg-ok', muted: 'bg-[#4A574F]' }[tone]
-  const text = { bad: 'text-[#FB7185]', ok: 'text-[#6EE7B7]', muted: 'text-ink' }[tone]
+  const color = { bad: 'bg-bad', ok: 'bg-ok', muted: 'bg-muted/45' }[tone]
+  const text = { bad: 'text-bad-ink', ok: 'text-ok-ink', muted: 'text-ink' }[tone]
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
@@ -148,7 +149,7 @@ function Bar({ label, value, total, tone, shown }: { label: string; value: numbe
           <CountUp to={value} run={shown} /><span className="text-base text-muted">/{total}</span>
         </span>
       </div>
-      <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/[0.06]" role="img" aria-label={`${label}: ${value} of ${total}`}>
+      <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-fg/[0.06]" role="img" aria-label={`${label}: ${value} of ${total}`}>
         <div className={`fill-bar h-full rounded-full ${color}`} style={{ transform: `scaleX(${shown ? Math.max(0.015, value / total) : 0})` }} />
       </div>
     </div>
@@ -166,7 +167,7 @@ const PILLS = [
 function Results() {
   const [barsRef, barsShown] = useInView<HTMLDivElement>(0.3)
   return (
-    <section id="results" className="relative scroll-mt-20 border-t border-white/6">
+    <section id="results" className="relative scroll-mt-20 border-t border-fg/6">
       <div className="glow glow-emerald top-1/4 -left-40 h-[520px] w-[520px] opacity-70" aria-hidden />
       <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:items-center">
@@ -174,11 +175,11 @@ function Results() {
             <h2 className="text-[clamp(1.7rem,3.6vw,2.5rem)] leading-tight font-extrabold">
               Attacks stopped. Real bills still paid.
             </h2>
-            <p className="mt-3 max-w-[54ch] text-[#BCC8C0]">
+            <p className="mt-3 max-w-[54ch] text-body">
               A real model (qwen3.8-27b via Groq) worked through 20 Bangla and Banglish attacks and 20 normal bill payments,
               once without and once with AgentShield. Small samples: the benchmark page shows the confidence intervals.
             </p>
-            <Link to="/benchmarks" className="lift mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/12 px-5 text-sm font-bold hover:border-line2 hover:bg-accent/[0.06]">
+            <Link to="/benchmarks" className="lift mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl border border-fg/12 px-5 text-sm font-bold hover:border-line2 hover:bg-accent/[0.06]">
               <ChartColumn size={16} aria-hidden /> Open the benchmarks
             </Link>
           </Reveal>
@@ -235,14 +236,17 @@ export default function Landing() {
             <span className="icon-tile h-9 w-9"><ShieldCheck size={19} className="text-soft" aria-hidden /></span>
             <span className="font-display text-[1.1rem] font-extrabold tracking-[-0.03em]">AgentShield</span>
           </Link>
-          <div className="hidden items-center gap-6 text-sm text-[#D6E0D9] md:flex">
-            <a href="#how" className="inline-flex min-h-11 items-center transition-colors hover:text-accent">How it works</a>
-            <a href="#results" className="inline-flex min-h-11 items-center transition-colors hover:text-accent">Results</a>
-            <a href="#builders" className="inline-flex min-h-11 items-center transition-colors hover:text-accent">For developers</a>
+          <div className="hidden items-center gap-6 text-sm text-body md:flex">
+            <a href="#how" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">How it works</a>
+            <a href="#results" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">Results</a>
+            <a href="#builders" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">For developers</a>
           </div>
-          <button type="button" onClick={() => setDemoOpen(true)} className="btn-primary lift inline-flex min-h-10 items-center gap-2 rounded-xl px-4 text-sm font-bold">
-            <PlayCircle size={16} aria-hidden /> Open the demo
-          </button>
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle />
+            <button type="button" onClick={() => setDemoOpen(true)} className="btn-primary lift inline-flex min-h-10 items-center gap-2 rounded-xl px-3.5 text-sm font-bold whitespace-nowrap sm:px-4">
+              <PlayCircle size={16} aria-hidden /> <span className="hidden sm:inline">Open the demo</span><span className="sm:hidden">Demo</span>
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -250,14 +254,14 @@ export default function Landing() {
         <Hero />
         <HowItWorks />
         <Results />
-        <section id="builders" className="relative scroll-mt-20 border-t border-white/6">
+        <section id="builders" className="relative scroll-mt-20 border-t border-fg/6">
           <div className="glow glow-lime right-[-12%] bottom-0 h-[520px] w-[520px] opacity-80" aria-hidden />
           <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.4fr] lg:items-center lg:py-24">
             <Reveal>
               <h2 className="text-[clamp(1.7rem,3.6vw,2.5rem)] leading-tight font-extrabold">
                 One call before each tool runs.
               </h2>
-              <p className="mt-3 max-w-[50ch] text-[#BCC8C0]">
+              <p className="mt-3 max-w-[50ch] text-body">
                 Use the Python SDK, which wraps your agent’s tools, or call the HTTP gateway from any language or agent
                 framework. The answer comes with a risk score and a reason the user can read.
               </p>
@@ -269,13 +273,13 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="relative border-t border-white/6">
+      <footer className="relative border-t border-fg/6">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p>Built for the International AI Builders Congress 2026. Demo data is fake: numbers start with 010, domains end in .example.</p>
           <div className="flex gap-5">
-            <Link to="/playground" className="inline-flex min-h-11 min-w-11 items-center transition-colors hover:text-accent">Demo</Link>
-            <Link to="/benchmarks" className="inline-flex min-h-11 items-center transition-colors hover:text-accent">Benchmarks</Link>
-            <Link to="/policies" className="inline-flex min-h-11 items-center transition-colors hover:text-accent">Policies</Link>
+            <Link to="/playground" className="inline-flex min-h-11 min-w-11 items-center transition-colors hover:text-soft">Demo</Link>
+            <Link to="/benchmarks" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">Benchmarks</Link>
+            <Link to="/policies" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">Policies</Link>
           </div>
         </div>
       </footer>

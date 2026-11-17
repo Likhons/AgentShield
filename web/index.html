@@ -7,6 +7,15 @@
     <meta name="theme-color" content="#060908" />
     <meta name="description" content="AgentShield checks every action an AI agent is about to take and blocks the ones the user never asked for, in Bangla, Banglish and English." />
     <title>AgentShield</title>
+    <script>
+      // day / night: apply the saved theme before the first paint (lib/theme.ts keeps it in sync)
+      try {
+        var t = localStorage.getItem('agentshield-theme') === 'light' ? 'light' : 'dark'
+        document.documentElement.dataset.theme = t
+        document.documentElement.style.colorScheme = t
+        if (t === 'light') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f3f6f1')
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

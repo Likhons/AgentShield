@@ -11,27 +11,27 @@ import { Card, ErrorNote, PageHeader, PageSkeleton, Spinner } from '../component
 import { api, type AgentSection, type DetectionSection, type Rate } from '../lib/api'
 
 const DETECTORS: Record<string, { label: string; color: string; order: number }> = {
-  'agentshield-heuristic': { label: 'AgentShield Heuristic', color: '#D4FF2A', order: 0 },
-  'promptguard-22m': { label: 'PromptGuard-22m', color: '#38BDF8', order: 1 },
-  'promptguard-86m': { label: 'PromptGuard-86m', color: '#FB7185', order: 2 },
-  'agentshield-model': { label: 'AgentShield XLM-R', color: '#10B981', order: 3 },
+  'agentshield-heuristic': { label: 'AgentShield Heuristic', color: 'var(--color-mark)', order: 0 },
+  'promptguard-22m': { label: 'PromptGuard-22m', color: 'var(--color-info)', order: 1 },
+  'promptguard-86m': { label: 'PromptGuard-86m', color: 'var(--color-bad)', order: 2 },
+  'agentshield-model': { label: 'AgentShield XLM-R', color: 'var(--color-ok)', order: 3 },
 }
-const detectorMeta = (d: string) => DETECTORS[d] ?? { label: d, color: '#D9FF8A', order: 9 }
+const detectorMeta = (d: string) => DETECTORS[d] ?? { label: d, color: 'var(--color-mark)', order: 9 }
 /** One decimal from the raw counts (the table text rounds to whole percent: 1/40 is 2.5%, not 2%). */
 const exactPct = (r: Rate) => (r.hits != null && r.total ? Math.round((r.hits / r.total) * 1000) / 10 : (r.pct ?? 0))
 
 // colour by meaning: good = green, attacker paid = red, AgentShield acted = lime/amber
 const OUTCOME_COLORS: Record<string, string> = {
-  paid: '#16C784',
-  'never tried': '#38D6F5',
-  blocked: '#D4FF2A',
-  'not attempted': '#6F7C74',
-  'held for approval': '#F5A623',
-  'attacker paid': '#F04452',
+  paid: 'var(--color-ok)',
+  'never tried': 'var(--color-info)',
+  blocked: 'var(--color-mark)',
+  'not attempted': 'var(--color-muted)',
+  'held for approval': 'var(--color-warn)',
+  'attacker paid': 'var(--color-bad)',
 }
 
 function Pill({ icon: Icon, children, tone = 'plain' }: { icon: typeof Shield; children: ReactNode; tone?: 'plain' | 'real' | 'sim' }) {
-  const cls = tone === 'real' ? 'border-ok/45 bg-ok/12 text-[#4BE0A8]' : tone === 'sim' ? 'border-warn/45 bg-warn/10 text-warn' : 'border-line bg-bg/60 text-[#D6E0D9]'
+  const cls = tone === 'real' ? 'border-ok/45 bg-ok/12 text-ok-ink' : tone === 'sim' ? 'border-warn/45 bg-warn/10 text-warn' : 'border-line bg-bg/60 text-body'
   return (
     <span className={`inline-flex items-start gap-1.5 rounded-lg border px-2.5 py-1 text-[0.78rem] font-semibold break-words ${cls}`}>
       <Icon size={13} className="mt-0.5 shrink-0" aria-hidden />
@@ -65,7 +65,7 @@ const th = 'border-b border-line px-3.5 py-3 text-left text-[0.77rem] font-mediu
 const td = 'border-b border-line/50 px-3.5 py-3 align-middle tabular-nums'
 
 function SafePill({ rate }: { rate: Rate }) {
-  return <span className="inline-block rounded-lg border border-ok/45 bg-ok/14 px-2.5 py-1 text-[0.8rem] font-bold whitespace-nowrap text-[#2EE59D]">{rate.text}</span>
+  return <span className="inline-block rounded-lg border border-ok/45 bg-ok/14 px-2.5 py-1 text-[0.8rem] font-bold whitespace-nowrap text-ok-ink">{rate.text}</span>
 }
 
 function AgentBlock({ s }: { s: AgentSection }) {
@@ -134,7 +134,7 @@ function AgentBlock({ s }: { s: AgentSection }) {
             <Card>
               <Donut
                 centerLabel="Total Cases"
-                slices={s.outcome_totals.map((o) => ({ label: o.outcome[0].toUpperCase() + o.outcome.slice(1), value: o.count, color: OUTCOME_COLORS[o.outcome] ?? '#D9FF8A' }))}
+                slices={s.outcome_totals.map((o) => ({ label: o.outcome[0].toUpperCase() + o.outcome.slice(1), value: o.count, color: OUTCOME_COLORS[o.outcome] ?? 'var(--color-mark)' }))}
               />
             </Card>
             <TableCard hint="Swipe table horizontally for full outcomes">
@@ -148,7 +148,7 @@ function AgentBlock({ s }: { s: AgentSection }) {
                       <td className={`${td} font-bold`}>{o.language.length <= 2 ? o.language.toUpperCase() : o.language[0].toUpperCase() + o.language.slice(1)}</td>
                       <td className={td}>
                         <span className="inline-flex items-center gap-2 font-semibold">
-                          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-md border ${o.item === 'attack' ? 'border-[#FF526F]/40 bg-[#FF526F]/15 text-[#FF526F]' : 'border-[#00D6A0]/40 bg-[#00D6A0]/15 text-[#00D6A0]'}`}>
+                          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-md border ${o.item === 'attack' ? 'border-bad/40 bg-bad/15 text-bad-ink' : 'border-ok/40 bg-ok/15 text-ok-ink'}`}>
                             {o.item === 'attack' ? <Bug size={13} aria-hidden /> : <Check size={13} aria-hidden />}
                           </span>
                           {o.item}
@@ -186,7 +186,7 @@ function DetectionChart({ s }: { s: DetectionSection }) {
     <Card>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#D4FF2A]/40 bg-[#D4FF2A]/15 text-soft"><ChartColumn size={19} aria-hidden /></span>
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-accent2/40 bg-accent/15 text-soft"><ChartColumn size={19} aria-hidden /></span>
           <div>
             <div className="font-bold">Attack Detection by Language</div>
             <div className="text-[0.8rem] text-muted">Comparison of attack detection performance across languages and detectors.</div>
@@ -195,7 +195,7 @@ function DetectionChart({ s }: { s: DetectionSection }) {
         <div className="flex flex-wrap gap-x-4 gap-y-1.5 rounded-lg border border-line bg-bg/70 px-3 py-1.5">
           {detectors.map((d) => (
             <span key={d} className="inline-flex items-center gap-1.5 text-[0.78rem] font-semibold">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: detectorMeta(d).color, boxShadow: `0 0 8px ${detectorMeta(d).color}88` }} aria-hidden />
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: detectorMeta(d).color, boxShadow: `0 0 8px color-mix(in srgb, ${detectorMeta(d).color} 53%, transparent)` }} aria-hidden />
               {detectorMeta(d).label}
             </span>
           ))}
@@ -204,14 +204,14 @@ function DetectionChart({ s }: { s: DetectionSection }) {
       <div ref={chartRef} style={{ height: languages.length * (detectors.length * 22 + 26) + 50 }}>
         {seen && <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ top: 4, right: 48, bottom: 18, left: 4 }} barGap={2} barCategoryGap={14}>
-            <CartesianGrid horizontal={false} stroke="rgba(60,80,66,.5)" strokeDasharray="3 4" />
-            <XAxis type="number" domain={[0, Math.ceil(max / 10) * 10]} tickFormatter={(v) => `${v}%`} tick={{ fill: '#9DAAA2', fontSize: 12 }} axisLine={false} tickLine={false}
-              label={{ value: 'Attacks Flagged (%)', position: 'insideBottom', offset: -10, fill: '#9DAAA2', fontSize: 12 }} />
-            <YAxis type="category" dataKey="label" width={70} tick={{ fill: '#EDF3EE', fontSize: 13, fontWeight: 700 }} axisLine={false} tickLine={false} />
+            <CartesianGrid horizontal={false} stroke="var(--color-line2)" strokeDasharray="3 4" />
+            <XAxis type="number" domain={[0, Math.ceil(max / 10) * 10]} tickFormatter={(v) => `${v}%`} tick={{ fill: 'var(--color-muted)', fontSize: 12 }} axisLine={false} tickLine={false}
+              label={{ value: 'Attacks Flagged (%)', position: 'insideBottom', offset: -10, fill: 'var(--color-muted)', fontSize: 12 }} />
+            <YAxis type="category" dataKey="label" width={70} tick={{ fill: 'var(--color-ink)', fontSize: 13, fontWeight: 700 }} axisLine={false} tickLine={false} />
             {detectors.map((d, i) => (
               <Bar key={d} dataKey={d} name={detectorMeta(d).label} fill={detectorMeta(d).color} radius={[0, 5, 5, 0]} barSize={18} minPointSize={3}
                 isAnimationActive={animate} animationBegin={i * 160} animationDuration={1000} animationEasing="ease-out">
-                <LabelList dataKey={d} position="right" formatter={(v: unknown) => `${Number(v)}%`} fill="#DDE6DF" fontSize={12} fontWeight={600} />
+                <LabelList dataKey={d} position="right" formatter={(v: unknown) => `${Number(v)}%`} fill="var(--color-body)" fontSize={12} fontWeight={600} />
               </Bar>
             ))}
           </BarChart>

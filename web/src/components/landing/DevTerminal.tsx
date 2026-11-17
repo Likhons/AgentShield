@@ -59,7 +59,7 @@ function JsonLines({ json }: { json: Record<string, unknown> }) {
           <span key={i} className="json-line block whitespace-pre" style={{ ['--i' as string]: i }}>
             {m ? (
               <>
-                {m[1]}<span className="text-[#93C5FD]">"{m[2]}"</span>: <span className={/block/.test(m[3]) ? 'font-bold text-[#FB7185]' : 'text-soft'}>{m[3]}</span>
+                {m[1]}<span className="text-info-ink">"{m[2]}"</span>: <span className={/block/.test(m[3]) ? 'font-bold text-bad-ink' : 'text-soft'}>{m[3]}</span>
               </>
             ) : line}
           </span>
@@ -125,14 +125,14 @@ export default function DevTerminal() {
 
   return (
     <div className="glass spotlight overflow-hidden">
-      <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-white/8 px-3 py-2 sm:px-4">
+      <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-fg/8 px-3 py-2 sm:px-4">
         <div className="flex items-center gap-3">
           <span className="hidden gap-1.5 sm:flex" aria-hidden>
             <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-[#FFB547]/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]/70" />
           </span>
-          <div role="tablist" aria-label="Code example" className="flex gap-1 rounded-lg bg-white/[0.03] p-1">
+          <div role="tablist" aria-label="Code example" className="flex gap-1 rounded-lg bg-fg/[0.03] p-1">
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -152,7 +152,7 @@ export default function DevTerminal() {
         <button
           type="button"
           onClick={copy}
-          className="lift inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-xs font-semibold hover:border-line2"
+          className="lift inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-fg/10 px-3 text-xs font-semibold hover:border-line2"
           aria-live="polite"
         >
           {copied ? <Check size={14} className="text-ok" aria-hidden /> : <Copy size={14} aria-hidden />}
@@ -160,7 +160,7 @@ export default function DevTerminal() {
         </button>
       </div>
       <pre role="tabpanel" className="relative overflow-x-auto p-4 font-mono text-[0.78rem] leading-relaxed text-soft sm:p-5">{code}</pre>
-      <div className="relative border-t border-white/8 p-4 sm:px-5">
+      <div className="relative border-t border-fg/8 p-4 sm:px-5">
         <button
           type="button"
           onClick={test}
@@ -171,7 +171,7 @@ export default function DevTerminal() {
         </button>
         <div aria-live="polite">
           {response && (
-            <div key={runs} className="mt-4 rounded-xl border border-bad/30 bg-black/40 p-3.5">
+            <div key={runs} className="mt-4 rounded-xl border border-bad/30 bg-well/40 p-3.5">
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2 font-mono text-[0.7rem] text-muted">
                 <span className="text-ok">200 OK</span>
                 <span>{response.label}</span>

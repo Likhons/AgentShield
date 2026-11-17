@@ -25,8 +25,8 @@ function SourcePill({ sources }: { sources: string[] }) {
 function Progress({ pct, delay = 0 }: { pct: number; delay?: number }) {
   return (
     <div className="flex items-center gap-2.5">
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-[#1B231E]" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <GrowBar pct={pct} delay={delay} className="bg-gradient-to-r from-ok to-[#2EE59D]" />
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-track" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+        <GrowBar pct={pct} delay={delay} className="bg-gradient-to-r from-ok to-ok-ink" />
       </div>
       <span className="w-10 text-right text-xs text-muted tabular-nums">{pct}%</span>
     </div>
@@ -175,7 +175,7 @@ export default function Datasets() {
                         <td className="w-[40%] py-3">
                           <div className="flex items-center gap-2">
                             <span className="w-12 text-xs text-muted tabular-nums">{share.toFixed(1)}%</span>
-                            <div className="h-2 flex-1 rounded-full bg-[#1B231E]"><GrowBar pct={Math.min(100, Math.max(4, share * 1.6))} className="bg-accent" delay={i * 110} /></div>
+                            <div className="h-2 flex-1 rounded-full bg-track"><GrowBar pct={Math.min(100, Math.max(4, share * 1.6))} className="bg-accent" delay={i * 110} /></div>
                           </div>
                         </td>
                       </tr>
@@ -200,7 +200,7 @@ export default function Datasets() {
               </ul>
             </Card>
             <Card className="flex items-center justify-center">
-              <Donut centerLabel="Total Samples" slices={[{ label: 'Attack', value: totalAttack, color: '#F04452' }, { label: 'Benign', value: totalBenign, color: '#16C784' }]} />
+              <Donut centerLabel="Total Samples" slices={[{ label: 'Attack', value: totalAttack, color: 'var(--color-bad)' }, { label: 'Benign', value: totalBenign, color: 'var(--color-ok)' }]} />
             </Card>
           </div>
 
