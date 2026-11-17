@@ -242,7 +242,7 @@ export default function Layout() {
       {/* desktop sidebar */}
       <aside data-lenis-prevent className="sidebar-glass fixed inset-y-0 left-0 z-20 hidden w-[240px] flex-col gap-6 overflow-y-auto px-4 py-6 lg:flex">
         <Brand />
-        <div className="h-px bg-line" />
+        <div className="side-rule" aria-hidden />
         <NavList />
         <div className="mt-auto flex flex-col gap-3">
           <ThemeRow />
@@ -303,6 +303,7 @@ export default function Layout() {
             <X size={18} aria-hidden />
           </button>
         </div>
+        <div className="side-rule" aria-hidden />
         <NavList onNavigate={() => setOpen(false)} />
         <div className="mt-auto">
           <StatusCard />
