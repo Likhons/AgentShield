@@ -97,6 +97,8 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
   const waking = presets.isLoading || (check.isFetching && !check.data)
   // real bills first, then the fake ones, so the control reads: real | fake (three languages) | blank
   const ordered = presets.data ? [...presets.data.presets].sort((a, b) => Number(a.kind !== 'normal') - Number(b.kind !== 'normal')) : []
+  const fakes = ordered.filter((p) => p.kind !== 'normal')
+  const fakePicked = fakes.some((p) => p.id === picked)
 
   return (
     <Modal
@@ -145,7 +147,17 @@ export default function SandboxModal({ onClose }: { onClose: () => void }) {
                     {p.kind !== 'normal' && (i === 0 || ordered[i - 1].kind === 'normal') && (
                       <>
                         {i > 0 && <span className="my-1.5 w-px shrink-0 bg-line2" aria-hidden />}
-                        <span className="flex shrink-0 items-center pr-0.5 pl-2 text-[0.76rem] text-muted">Fake bill</span>
+                        {/* the group name is a button too: it picks the Bangla fake bill (the one from the recorded run) */}
+                        <button
+                          type="button"
+                          onClick={() => applyPreset((fakes.find((x) => x.language === 'bn') ?? fakes[0]).id)}
+                          aria-label="Fake bill (Bangla)"
+                          className={`flex min-h-9 shrink-0 items-center gap-1 rounded-lg pr-1 pl-2 text-[0.78rem] transition-colors duration-300 hover:text-ink ${
+                            fakePicked ? 'text-ink' : 'text-muted'
+                          }`}
+                        >
+                          Fake bill <span className="text-muted" aria-hidden>›</span>
+                        </button>
                       </>
                     )}
                     <button
