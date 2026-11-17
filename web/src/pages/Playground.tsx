@@ -135,7 +135,7 @@ const SOURCE_LABEL: Record<string, string> = { 'tool:email': 'email', 'tool:web'
 
 /** Score colour by the engine's own bands (ask from 0.4, block from 0.75, sent by the API). */
 function scoreTone(score: number | null, t: Thresholds) {
-  if (score === null) return { badge: 'border-fg/10 bg-fg/5 text-muted', bar: 'bg-muted', card: 'border-fg/8' }
+  if (score === null) return { badge: 'border-fg/10 bg-fg/5 text-muted', bar: 'bg-muted', card: 'border-tile-line' }
   if (score >= t.block_at) return { badge: 'border-bad/40 bg-bad/12 text-bad-ink', bar: 'bg-bad', card: 'border-bad/35' }
   if (score >= t.ask_human_at) return { badge: 'border-warn/40 bg-warn/12 text-warn-ink', bar: 'bg-warn', card: 'border-warn/35' }
   return { badge: 'border-ok/40 bg-ok/12 text-ok-ink', bar: 'bg-ok', card: 'border-ok/30' }
@@ -184,7 +184,7 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
       <div className="relative">
         <h2 className="text-[1.3rem] font-bold">Run a Safety Scenario</h2>
         <p className="mt-1 text-sm text-muted">Test the same task on an unprotected agent and on an agent protected by AgentShield.</p>
-        <div role="radiogroup" aria-label="Agent mode" className="mt-4 inline-flex max-w-full gap-1 rounded-xl border border-fg/8 bg-fg/[0.03] p-1">
+        <div role="radiogroup" aria-label="Agent mode" className="mt-4 inline-flex max-w-full gap-1 rounded-xl border border-tile-line bg-fg/[0.03] p-1">
           {MODES.map(({ id, label }) => {
             const off = disabled(id)
             const active = mode === id
@@ -224,14 +224,14 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
       </div>
 
       {/* what the agent will be given */}
-      <div className="relative rounded-2xl border border-fg/8 bg-well/25 p-4">
+      <div className="relative rounded-2xl border border-tile-line bg-well/25 p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <span className="flex items-center gap-2"><FileCode2 size={15} className="text-soft" aria-hidden /><MonoLabel>Live context payload</MonoLabel></span>
           <span className={`rounded-md border px-2 py-0.5 font-mono text-[0.72rem] ${firstSource ? 'border-bad/40 bg-bad/10 text-bad-ink' : 'border-ok/35 bg-ok/10 text-ok-ink'}`}>
             {firstSource ? `untrusted: ${firstSource}` : 'trusted: user only'}
           </span>
         </div>
-        <div className="rounded-xl border border-fg/8 bg-card2/70 px-3.5 py-2.5 text-sm">
+        <div className="rounded-xl border border-tile-line bg-tile px-3.5 py-2.5 text-sm">
           <span className="font-mono text-[0.78rem] text-muted">user_prompt:</span> <b>“{scenario?.user_task}”</b>
         </div>
         {untrusted.length === 0 ? (
@@ -239,7 +239,7 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
         ) : (
           <ul className="mt-2 flex flex-col gap-2">
             {shown.map((u) => (
-              <li key={`${u.origin}-${u.title}`} className={`rounded-xl border px-3.5 py-2.5 ${u.kind === 'attack' ? 'border-bad/30 bg-bad/[0.07]' : 'border-fg/8 bg-card2/50'}`}>
+              <li key={`${u.origin}-${u.title}`} className={`rounded-xl border px-3.5 py-2.5 ${u.kind === 'attack' ? 'border-bad/30 bg-bad/[0.07]' : 'border-tile-line bg-tile'}`}>
                 <div className={`font-mono text-[0.72rem] ${u.kind === 'attack' ? 'text-bad-soft' : 'text-muted'}`}>
                   untrusted_content · {SOURCE_LABEL[u.source] ?? u.source} · {short(u.origin, 40)}
                 </div>
@@ -255,7 +255,7 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
         )}
       </div>
 
-      <label className={`relative flex cursor-pointer items-start gap-3 rounded-xl border border-fg/8 bg-card2/40 px-4 py-3 ${mode === 'recorded' ? 'cursor-not-allowed opacity-45' : ''}`}>
+      <label className={`relative flex cursor-pointer items-start gap-3 rounded-xl border border-tile-line bg-tile px-4 py-3 ${mode === 'recorded' ? 'cursor-not-allowed opacity-45' : ''}`}>
         <input
           type="checkbox"
           checked={approve}
@@ -297,13 +297,13 @@ function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setAppr
 // ---------------------------------------------------------------------------
 // how it works: input -> gateway -> decision, live for the selected scenario and the last run
 
-function FlowLink({ flowing }: { flowing: boolean }) {
+function FlowLink({ flowing, delay = 0 }: { flowing: boolean; delay?: number }) {
   return (
-    <div className={`flex justify-center py-1 ${flowing ? 'is-flowing' : ''}`} aria-hidden>
-      <div className="connector h-7 w-[2px]">
-        <span className="packet left-1/2 -ml-1" />
-        <span className="packet left-1/2 -ml-1" />
-        <span className="packet left-1/2 -ml-1" />
+    <div className={`flex justify-center py-0.5 ${flowing ? 'is-flowing' : ''}`} aria-hidden>
+      <div className="connector-y h-10 w-3" style={{ ['--d' as string]: `${delay}s` }}>
+        <span className="packet-y" />
+        <span className="packet-y" />
+        <span className="packet-y" />
       </div>
     </div>
   )
@@ -334,7 +334,7 @@ function HowItWorks({ scenario, scanning, decided, thresholds }: {
   const hasUntrusted = (scenario?.untrusted?.length ?? 0) > 0
   const status = scanning ? 'Inspecting' : decided ? 'Decided' : 'Standing by'
   const d = decided?.decision
-  const dTone = d === 'block' ? 'border-bad/45 bg-bad/[0.1]' : d === 'ask_human' ? 'border-warn/45 bg-warn/[0.08]' : d === 'allow' ? 'border-ok/40 bg-ok/[0.08]' : 'border-fg/8 bg-card2/40'
+  const dTone = d === 'block' ? 'border-bad/45 bg-bad/[0.1]' : d === 'ask_human' ? 'border-warn/45 bg-warn/[0.08]' : d === 'allow' ? 'border-ok/40 bg-ok/[0.08]' : 'border-tile-line bg-tile'
   const dTag = d === 'block' ? 'border-bad/45 bg-bad/12 text-bad-ink' : d === 'ask_human' ? 'border-warn/45 bg-warn/12 text-warn-ink' : d === 'allow' ? 'border-ok/40 bg-ok/12 text-ok-ink' : 'border-fg/10 text-muted'
   const t = thresholds
   return (
@@ -352,7 +352,7 @@ function HowItWorks({ scenario, scanning, decided, thresholds }: {
         <FlowNode
           icon={MailWarning} iconCls="border-warn/40 bg-warn/10 text-warn-ink" title="Untrusted Input" sub="Email · Web Page · Document"
           tag={hasUntrusted ? 'TAINTED' : 'CLEAN'} tagCls={hasUntrusted ? 'border-warn/45 bg-warn/12 text-warn-ink' : 'border-ok/40 bg-ok/12 text-ok-ink'}
-          cls="border-fg/8 bg-card2/40"
+          cls="border-tile-line bg-tile"
         />
         <FlowLink flowing={scanning} />
         <FlowNode
@@ -360,14 +360,14 @@ function HowItWorks({ scenario, scanning, decided, thresholds }: {
           sub={decided ? `4 checks · ${decided.latency < 10 ? decided.latency.toFixed(1) : Math.round(decided.latency)} ms` : '4 checks before every tool call'}
           tag="INSPECT" tagCls="border-accent/45 bg-accent/12 text-soft" cls={`border-accent/30 bg-accent/[0.05] ${scanning ? 'is-lit' : ''}`}
         />
-        <FlowLink flowing={scanning} />
+        <FlowLink flowing={scanning} delay={0.9} />
         <FlowNode
           icon={scanning || !d ? Hourglass : d === 'allow' ? CircleCheck : d === 'ask_human' ? CircleHelp : ShieldX}
           iconCls={scanning || !d ? 'border-fg/10 bg-fg/5 text-muted' : d === 'allow' ? 'border-ok/40 bg-ok/10 text-ok-ink' : d === 'ask_human' ? 'border-warn/40 bg-warn/10 text-warn-ink' : 'border-bad/40 bg-bad/10 text-bad-ink'}
           title={scanning ? 'Decision: …' : d ? `Decision: ${DECISION_WORD[d]}` : 'Decision: waiting'}
           sub={!scanning && decided ? `risk ${decided.risk.toFixed(2)}` : scanning ? 'checking' : 'run a scenario'}
           bn={!scanning && d ? DECISION_BN[d] : undefined}
-          tag={!scanning && d ? DECISION_TONE[d].label : '—'} tagCls={scanning ? 'border-fg/10 text-muted' : dTag} cls={scanning ? 'border-fg/8 bg-card2/40' : dTone}
+          tag={!scanning && d ? DECISION_TONE[d].label : '—'} tagCls={scanning ? 'border-fg/10 text-muted' : dTag} cls={scanning ? 'border-tile-line bg-tile' : dTone}
         />
       </div>
       <div className="relative mt-5 grid grid-cols-3 gap-2 border-t border-line pt-5 font-mono text-[0.72rem] sm:text-[0.78rem]">
@@ -473,8 +473,8 @@ function PipelineCards({ data, scanning, thresholds }: { data: PipelineData | nu
           return (
             <li
               key={n}
-              className={`ignite tilt relative flex flex-col gap-3 rounded-2xl border p-4 ${on ? tone.card : 'border-fg/8'} ${
-                verdict ? (data.decision === 'block' ? 'bg-bad/[0.1]' : data.decision === 'ask_human' ? 'bg-warn/[0.08]' : 'bg-ok/[0.08]') : 'bg-card2/40'
+              className={`ignite tilt relative flex flex-col gap-3 rounded-2xl border p-4 ${on ? tone.card : 'border-tile-line'} ${
+                verdict ? (data.decision === 'block' ? 'bg-bad/[0.1]' : data.decision === 'ask_human' ? 'bg-warn/[0.08]' : 'bg-ok/[0.08]') : 'bg-tile'
               } ${on ? 'is-lit' : ''}`}
             >
               <div className="flex items-center justify-between gap-2">
@@ -544,7 +544,7 @@ function RecentEvaluations({ scanning }: { scanning: boolean }) {
           <h2 className="text-[1.3rem] font-bold">Recent Evaluations</h2>
           <p className="mt-1 text-sm text-muted">Click any row to inspect the full JSON audit trace and taint lineage.</p>
         </div>
-        <div role="tablist" aria-label="Filter by decision" className="inline-flex gap-1 rounded-xl border border-fg/8 bg-fg/[0.03] p-1">
+        <div role="tablist" aria-label="Filter by decision" className="inline-flex gap-1 rounded-xl border border-tile-line bg-fg/[0.03] p-1">
           {(['all', 'block', 'allow'] as const).map((f) => (
             <button
               key={f}
@@ -609,7 +609,7 @@ function RecentEvaluations({ scanning }: { scanning: boolean }) {
             </div>
             <ul className="flex flex-col gap-2.5 md:hidden">
               {scanning && (
-                <li className="flex flex-col gap-2 rounded-xl border border-line2 bg-card2/50 px-3.5 py-3">
+                <li className="flex flex-col gap-2 rounded-xl border border-line2 bg-tile px-3.5 py-3">
                   <span className="font-mono text-xs text-soft">now · evaluating…</span>
                   <FlowBar value={0} tone="bg-mark" busy />
                 </li>
@@ -619,7 +619,7 @@ function RecentEvaluations({ scanning }: { scanning: boolean }) {
                   <button
                     type="button"
                     onClick={() => setOpen(r)}
-                    className={`flex w-full flex-col gap-2 rounded-xl border border-fg/8 bg-card2/50 px-3.5 py-3 text-left ${fresh.has(r.id) ? 'row-new' : ''}`}
+                    className={`flex w-full flex-col gap-2 rounded-xl border border-tile-line bg-tile px-3.5 py-3 text-left ${fresh.has(r.id) ? 'row-new' : ''}`}
                   >
                     <span className="flex w-full items-center justify-between gap-2">
                       <span className="font-mono text-xs text-muted">{clock(r.timestamp)} UTC</span>

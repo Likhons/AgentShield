@@ -34,6 +34,8 @@
   --color-fg: #eceae2;        /* thin overlays: bg-fg/5, border-fg/8 */
   --color-well: #000000;      /* inset fields: bg-well/30 */
   --color-track: #20231d;     /* empty part of a bar */
+  --color-tile: rgb(23 26 21 / 0.45);         /* small cards inside a panel */
+  --color-tile-line: rgb(236 234 226 / 0.08);
   --color-mark: #c2ef6a;      /* lime as a mark (chart bar, caret), not as text */
   --color-info: #7cc0e0;
   --color-ok-ink: #8fdcae;    /* decision colours as text */
@@ -451,18 +453,34 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
   animation: laser-sweep 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
 }
 
-/* how-it-works connectors: data packets travel along them (horizontal on wide screens, down on phones) */
-.connector { position: relative; flex: 0 0 auto; overflow: hidden; border-radius: 9999px; background: var(--color-line2); }
-@keyframes packet-x { from { transform: translateX(-12px); } to { transform: translateX(46px); } }
-@keyframes packet-y { from { transform: translateY(-12px); } to { transform: translateY(30px); } }
-.packet {
-  position: absolute; width: 8px; height: 8px; border-radius: 9999px; background: var(--color-mark);
-  box-shadow: 0 0 10px var(--color-mark), 0 0 2px #fff; opacity: 0;
+/* vertical links in "How AgentShield Works" (every width): at rest a soft light drips down the line,
+   the second link a beat later so it reads input -> gateway -> decision; while a run is scanned packets race down */
+.connector-y { position: relative; flex: 0 0 auto; clip-path: inset(0 -12px); }
+.connector-y::before, .connector-y::after {
+  content: ""; position: absolute; left: 50%; width: 2px; margin-left: -1px; border-radius: 9999px;
 }
-.is-flowing .packet { opacity: 1; animation: packet-y 0.9s linear infinite; }
-@media (min-width: 768px) { .is-flowing .packet { animation-name: packet-x; } }
-.packet:nth-child(2) { animation-delay: 0.3s !important; }
-.packet:nth-child(3) { animation-delay: 0.6s !important; }
+.connector-y::before { top: 0; bottom: 0; background: var(--color-line2); }
+.connector-y::after {
+  top: 0; height: 45%;
+  background: linear-gradient(180deg, transparent, var(--color-mark), transparent);
+  animation: line-drip 1.8s var(--ease-out-soft) var(--d, 0s) infinite both;
+  filter: drop-shadow(0 0 4px var(--color-mark));
+}
+@keyframes line-drip {
+  0% { transform: translateY(-100%); opacity: 0; }
+  20%, 75% { opacity: 1; }
+  100% { transform: translateY(230%); opacity: 0; }
+}
+.is-flowing .connector-y::after { animation-duration: 0.9s; }
+html[data-theme='light'] .connector-y::after { background: linear-gradient(180deg, transparent, var(--color-accent2), transparent); }
+@keyframes packet-down { from { transform: translateY(-10px); } to { transform: translateY(42px); } }
+.packet-y {
+  position: absolute; top: 0; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 9999px;
+  background: var(--color-mark); box-shadow: 0 0 10px var(--color-mark), 0 0 2px #fff; opacity: 0;
+}
+.is-flowing .packet-y { opacity: 1; animation: packet-down 0.9s linear infinite; }
+.is-flowing .packet-y:nth-child(2) { animation-delay: 0.3s; }
+.is-flowing .packet-y:nth-child(3) { animation-delay: 0.6s; }
 
 /* evaluation pipeline: cards ignite one after another, the verdict badge slams down */
 .ignite { transition: transform 0.6s var(--ease-spring), border-color 0.5s var(--ease-spring), background-color 0.5s var(--ease-spring), box-shadow 0.6s var(--ease-spring), opacity 0.5s; }
@@ -496,6 +514,16 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 
 /* gateway card: ping bars grow from the bottom */
 .spark-bar { transform-origin: bottom center; transition: transform 0.6s var(--ease-spring); }
+
+/* gateway heartbeat: five bars bounce like an equalizer while /health answers, each on its own rhythm */
+.eq-bar { height: 100%; transform-origin: bottom center; transform: scaleY(0.25); transition: transform 0.4s var(--ease-spring), background-color 0.3s; }
+@keyframes eq-bounce { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
+.eq.is-live .eq-bar { animation: eq-bounce 1s ease-in-out infinite; }
+.eq.is-live .eq-bar:nth-child(1) { animation-duration: 0.9s; animation-delay: -0.2s; }
+.eq.is-live .eq-bar:nth-child(2) { animation-duration: 1.2s; animation-delay: -0.5s; }
+.eq.is-live .eq-bar:nth-child(3) { animation-duration: 0.8s; animation-delay: -0.1s; }
+.eq.is-live .eq-bar:nth-child(4) { animation-duration: 1.1s; animation-delay: -0.7s; }
+.eq.is-live .eq-bar:nth-child(5) { animation-duration: 0.95s; animation-delay: -0.35s; }
 
 /* hero art: energy pulses flow along the circuit paths; the pedestal sends out rings */
 @keyframes energy { to { stroke-dashoffset: -220; } }
@@ -565,6 +593,8 @@ html[data-theme='light'] {
   --color-fg: #121310;
   --color-well: #ffffff;
   --color-track: #e6e3d8;
+  --color-tile: #f3f1e9;
+  --color-tile-line: rgb(18 19 16 / 0.14);
   --color-mark: #8cc63f;
   --color-info: #2d6a8f;
   --color-ok-ink: #1d6a40;
@@ -597,6 +627,9 @@ html[data-theme='light'] .icon-tile {
 }
 html[data-theme='light'] .btn-primary { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 10px 26px -16px rgb(79 127 34 / 0.55); }
 html[data-theme='light'] .btn-primary:not(:disabled):hover { background: #b9e85c; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 12px 28px -14px rgb(79 127 34 / 0.6); }
+/* day mode: tiles sit a step below the near-white panel, with a hairline and a soft lift so they read as boxes.
+   :where keeps this weaker than .ignite.is-lit, so lit cards keep their glow. */
+:where(html[data-theme='light']) .bg-tile { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 1px 2px rgb(18 19 16 / 0.06); }
 html[data-theme='light'] .glass {
   background: rgb(251 250 245 / 0.92);
   border-color: rgb(18 19 16 / 0.08);
@@ -703,7 +736,10 @@ html[data-theme='light'] .glass-blur { background: rgb(251 250 245 / 0.78); }
   .marquee-track { width: auto; }
   .marquee-row { flex-wrap: wrap; justify-content: center; row-gap: 0.5rem; }
   .marquee-row[aria-hidden] { display: none; }
-  .laser, .packet, .flow-bar.is-busy::before { display: none; }
+  .laser, .packet-y, .connector-y::after, .flow-bar.is-busy::before { display: none; }
+  .eq.is-live .eq-bar { animation: none; }
+  .eq.is-live .eq-bar:nth-child(odd) { transform: scaleY(0.6); }
+  .eq.is-live .eq-bar:nth-child(even) { transform: scaleY(0.9); }
   .tilt { transform: none !important; }
   .chip { opacity: 1; transform: none; }
 }

@@ -19,7 +19,7 @@ function CheckTiles({ v }: { v: Verdict }) {
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2 2xl:grid-cols-4">
       {v.checks.map((c) => (
-        <div key={c.check} className="rounded-xl border border-fg/8 bg-well/30 px-3 py-2">
+        <div key={c.check} className="rounded-xl border border-tile-line bg-well/30 px-3 py-2">
           <div className="flex items-center justify-between gap-2 font-mono text-[0.74rem]">
             <span className="text-muted">{c.check}</span>
             <b className={`tabular-nums ${c.skipped ? 'text-muted' : c.flagged ? 'text-bad-ink' : 'text-ok-ink'}`}>{c.skipped ? '—' : c.risk_score.toFixed(2)}</b>
@@ -37,7 +37,7 @@ function StepItem({ step, index, shielded, unauthorized }: { step: Step; index: 
   const v = step.verdict
   const stopped = v !== null && v.decision !== 'allow'
   const open = step.tool === 'send_money' || stopped
-  const tone = stopped ? (v!.decision === 'block' ? 'border-bad/45 bg-bad/[0.07]' : 'border-warn/40 bg-warn/[0.06]') : unauthorized ? 'border-bad/45 bg-bad/[0.07]' : 'border-fg/8 bg-card2/40'
+  const tone = stopped ? (v!.decision === 'block' ? 'border-bad/45 bg-bad/[0.07]' : 'border-warn/40 bg-warn/[0.06]') : unauthorized ? 'border-bad/45 bg-bad/[0.07]' : 'border-tile-line bg-tile'
 
   return (
     <details open={open} style={stagger(index + 3)} className={`stagger-item group rounded-2xl border ${tone}`}>
@@ -58,7 +58,7 @@ function StepItem({ step, index, shielded, unauthorized }: { step: Step; index: 
         </span>
       </summary>
       <div className="flex flex-col gap-3 px-4 pb-4">
-        <pre className="overflow-x-auto rounded-xl border border-fg/8 bg-well/40 px-3.5 py-2.5 font-mono text-[0.82rem] whitespace-pre-wrap text-warn-ink">
+        <pre className="overflow-x-auto rounded-xl border border-tile-line bg-well/40 px-3.5 py-2.5 font-mono text-[0.82rem] whitespace-pre-wrap text-warn-ink">
           {JSON.stringify(step.args).replace(/,"/g, ', "').replace(/":/g, '": ')}
         </pre>
         {v && shielded && (
@@ -78,7 +78,7 @@ function StepItem({ step, index, shielded, unauthorized }: { step: Step; index: 
                   <div className={`text-[0.82rem] font-bold ${v.decision === 'block' ? 'text-bad-ink' : 'text-warn-ink'}`} lang="bn">কারণ (বাংলা):</div>
                   <p lang="bn" className="mt-1 text-[0.95rem]">{v.reason_bn}</p>
                 </div>
-                <div className="rounded-xl border border-fg/8 bg-well/30 px-4 py-3">
+                <div className="rounded-xl border border-tile-line bg-well/30 px-4 py-3">
                   <div className="font-mono text-[0.7rem] tracking-[0.14em] text-muted uppercase">Reason (English):</div>
                   <p className="mt-1 text-[0.9rem] leading-relaxed text-body">{v.reason_en}</p>
                 </div>
@@ -136,7 +136,7 @@ function Side({ side, shielded }: { side: RunSide; shielded: boolean }) {
             {breached ? <CountUp to={lost} format={(n) => `−${taka(n)}`} /> : '৳ 0'}
           </div>
         </div>
-        <div className="rounded-2xl border border-fg/8 bg-well/30 p-4">
+        <div className="rounded-2xl border border-tile-line bg-well/30 p-4">
           <div className="flex items-center justify-between gap-2 text-[0.8rem] text-muted">
             <span>Balance / <span lang="bn">ব্যালেন্স</span></span>
             <Wallet size={15} className="text-soft" aria-hidden />
@@ -159,7 +159,7 @@ function Side({ side, shielded }: { side: RunSide; shielded: boolean }) {
         </div>
       )}
 
-      <div className="flex items-center gap-3 rounded-xl border border-fg/8 bg-well/25 px-3.5 py-2.5">
+      <div className="flex items-center gap-3 rounded-xl border border-tile-line bg-well/25 px-3.5 py-2.5">
         <span className={`shrink-0 rounded-md px-2 py-0.5 font-mono text-[0.7rem] font-bold ${shielded ? 'bg-accent/20 text-soft' : 'bg-fg/8 text-muted'}`}>USER</span>
         <span className="min-w-0 text-[0.95rem] font-semibold">{side.task}</span>
       </div>
@@ -175,7 +175,7 @@ function Side({ side, shielded }: { side: RunSide; shielded: boolean }) {
           />
         ))}
       </div>
-      <details className="group rounded-2xl border border-fg/8 bg-card2/40">
+      <details className="group rounded-2xl border border-tile-line bg-tile">
         <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2.5 px-4 py-2.5 font-semibold [&::-webkit-details-marker]:hidden">
           <ChevronRight size={15} className="text-muted transition-transform group-open:rotate-90" aria-hidden />
           Agent’s final answer

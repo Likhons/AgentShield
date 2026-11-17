@@ -93,9 +93,11 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
 const PING_EVERY_MS = 15_000
 const PING_KEEP = 14
 
-/** Round trip to the gateway's /health, measured in the browser every 15 s while the app is open. */
+/** Round trip to the gateway's /health, measured in the browser every 15 s while the app is open.
+ *  online: null until the first answer, then whether the last check got one. */
 function usePing() {
   const [pings, setPings] = useState<number[]>([])
+  const [online, setOnline] = useState<boolean | null>(null)
   useEffect(() => {
     let alive = true
     const ping = async () => {
@@ -103,25 +105,40 @@ function usePing() {
       const t0 = performance.now()
       try {
         const r = await fetch('/health', { cache: 'no-store' })
-        if (!r.ok) return
+        if (!alive) return
+        if (!r.ok) return setOnline(false)
         const ms = Math.round(performance.now() - t0)
-        if (alive) setPings((p) => [...p.slice(-(PING_KEEP - 1)), ms])
+        setPings((p) => [...p.slice(-(PING_KEEP - 1)), ms])
+        setOnline(true)
       } catch {
-        /* offline: keep the last values */
+        if (alive) setOnline(false) // keep the last values, show the gateway as unreachable
       }
     }
     void ping()
     const id = window.setInterval(ping, PING_EVERY_MS)
     return () => { alive = false; clearInterval(id) }
   }, [])
-  return pings
+  return { pings, online }
+}
+
+/** Five bars that bounce like an equalizer while the gateway answers; they lie flat when it does not. */
+function Heartbeat({ live }: { live: boolean }) {
+  return (
+    <span className={`eq ${live ? 'is-live' : ''} flex h-4 shrink-0 items-end gap-[2px]`} aria-hidden>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <span key={i} className={`eq-bar w-[3px] rounded-full ${live ? 'bg-ok' : 'bg-fg/20'}`} />
+      ))}
+    </span>
+  )
 }
 
 function StatusCard() {
   const { data } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
-  const pings = usePing()
+  const { pings, online } = usePing()
   const last = pings.at(-1)
   const max = Math.max(...pings, 1)
+  const live = !!data && online !== false
+  const label = online === false ? 'Gateway Unreachable' : data ? 'Gateway Ready' : 'Connecting…'
   const rows: [string, string | number][] = data
     ? [
         ['model', data.agent_llm],
@@ -131,39 +148,41 @@ function StatusCard() {
       ]
     : []
   return (
-    <div className="glass spotlight p-4">
+    <div className="glass spotlight min-w-0 p-4">
       <div className="relative mb-3 flex items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-[0.84rem] font-bold whitespace-nowrap">
+        <span className="flex min-w-0 items-center gap-2 text-[0.84rem] font-bold">
           <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
-            {data && <span className="absolute inset-0 animate-ping rounded-full bg-ok/60" />}
-            <span className={`relative h-2.5 w-2.5 rounded-full ${data ? 'bg-ok' : 'bg-muted'}`} />
+            {live && <span className="absolute inset-0 animate-ping rounded-full bg-ok/60" />}
+            <span className={`relative h-2.5 w-2.5 rounded-full ${online === false ? 'bg-bad' : data ? 'bg-ok' : 'bg-muted'}`} />
           </span>
-          {data ? 'Gateway Ready' : 'Connecting…'}
+          <span className="truncate">{label}</span>
         </span>
-        {last !== undefined && (
-          <span className="shrink-0 rounded-full border border-ok/35 bg-ok/10 px-2 py-0.5 font-mono text-[0.68rem] font-semibold whitespace-nowrap text-ok-ink tabular-nums" title="Round trip to /health from this browser">
-            {last} ms
-          </span>
-        )}
+        <Heartbeat live={live} />
       </div>
       {/* ping history: one bar per check, newest on the right */}
-      <div className="relative mb-3 flex h-9 items-end gap-[3px]" role="img" aria-label={last !== undefined ? `API ping, last ${last} milliseconds` : 'API ping not measured yet'}>
+      <div className="relative flex h-9 items-end gap-[3px]" role="img" aria-label={last !== undefined ? `API ping, last ${last} milliseconds` : 'API ping not measured yet'}>
         {Array.from({ length: PING_KEEP }, (_, i) => {
           const v = pings[i - (PING_KEEP - pings.length)]
           return (
             <span
               key={i}
-              className={`spark-bar flex-1 rounded-sm ${v === undefined ? 'bg-fg/8' : i === PING_KEEP - 1 ? 'bg-ok' : 'bg-ok/45'}`}
+              className={`spark-bar min-w-0 flex-1 rounded-sm ${v === undefined ? 'bg-fg/8' : i === PING_KEEP - 1 ? 'bg-ok' : 'bg-ok/45'}`}
               style={{ height: '100%', transform: `scaleY(${v === undefined ? 0.12 : Math.max(0.12, v / max)})` }}
             />
           )
         })}
       </div>
+      <div className="relative mt-2 mb-3 flex items-center justify-between gap-2 font-mono text-[0.7rem] text-muted">
+        <span className="truncate">round trip</span>
+        <span className="shrink-0 rounded-full border border-ok/35 bg-ok/10 px-2 py-0.5 text-[0.68rem] font-semibold text-ok-ink tabular-nums" title="Round trip to /health from this browser">
+          {last !== undefined ? `${last} ms` : '– ms'}
+        </span>
+      </div>
       <dl className="relative flex flex-col gap-1.5 text-[0.8rem]">
         {rows.map(([k, v]) => (
-          <div key={k} className="flex justify-between gap-2">
+          <div key={k} className="flex min-w-0 justify-between gap-2">
             <dt className="font-mono text-[0.74rem] text-muted">{k}</dt>
-            <dd className="font-mono text-[0.76rem] font-semibold tabular-nums">{v}</dd>
+            <dd className="truncate font-mono text-[0.76rem] font-semibold tabular-nums">{v}</dd>
           </div>
         ))}
       </dl>
