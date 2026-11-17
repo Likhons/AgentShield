@@ -18,9 +18,9 @@ import { useToast } from '../lib/toast'
 // Every number on this page comes from the API: /api/overview, /api/audit, and the run itself.
 
 const DECISION_TONE: Record<Decision, { bar: string; text: string; glow: string; label: string }> = {
-  allow: { bar: 'bg-ok', text: 'text-ok-ink', glow: 'rgb(16 185 129 / 0.7)', label: 'ALLOW' },
-  ask_human: { bar: 'bg-warn', text: 'text-warn-ink', glow: 'rgb(245 158 11 / 0.7)', label: 'ASK HUMAN' },
-  block: { bar: 'bg-bad', text: 'text-bad-ink', glow: 'rgb(244 63 94 / 0.75)', label: 'BLOCK' },
+  allow: { bar: 'bg-ok', text: 'text-ok-ink', glow: 'rgb(95 207 142 / 0.45)', label: 'ALLOW' },
+  ask_human: { bar: 'bg-warn', text: 'text-warn-ink', glow: 'rgb(242 181 68 / 0.45)', label: 'ASK HUMAN' },
+  block: { bar: 'bg-bad', text: 'text-bad-ink', glow: 'rgb(242 104 90 / 0.5)', label: 'BLOCK' },
 }
 
 /** A bar that loads: fills to `value` (0..1) with a flowing light; `busy` shows a scanning pulse instead. */
@@ -363,7 +363,7 @@ function PipelineCards({ result, scanning, runId }: { result: RunResult | undefi
             return (
               <li
                 key={n}
-                style={{ ['--glow' as string]: on ? (isVerdict && tone ? tone.glow : flagged ? 'rgb(244 63 94 / 0.6)' : 'rgb(16 185 129 / 0.55)') : undefined }}
+                style={{ ['--glow' as string]: on ? (isVerdict && tone ? tone.glow : flagged ? 'rgb(242 104 90 / 0.42)' : 'rgb(95 207 142 / 0.4)') : undefined }}
                 className={`ignite tilt relative flex flex-col gap-3 rounded-xl border bg-card2/60 px-3.5 py-3.5 ${on ? 'is-lit border-line2' : 'border-fg/8'} ${v && !on ? 'opacity-50' : ''}`}
               >
                 <div className="flex items-center gap-3">

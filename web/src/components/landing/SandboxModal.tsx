@@ -12,7 +12,7 @@ const LANG = { bn: 'Bangla', banglish: 'Banglish', en: 'English' } as Record<str
 const DECISION: Record<Decision, { label: string; cls: string; bar: string }> = {
   allow: { label: 'ALLOW', cls: 'border-ok/50 bg-ok/12 text-ok-ink', bar: 'bg-ok' },
   ask_human: { label: 'ASK HUMAN', cls: 'border-warn/50 bg-warn/12 text-warn', bar: 'bg-warn' },
-  block: { label: 'BLOCK', cls: 'border-bad/60 bg-bad/15 text-bad-ink shadow-[0_0_40px_-12px_rgba(244,63,94,.7)]', bar: 'bg-bad' },
+  block: { label: 'BLOCK', cls: 'border-bad/60 bg-bad/15 text-bad-ink shadow-[0_0_40px_-12px_rgba(242,104,90,.42)]', bar: 'bg-bad' },
 }
 const SOURCES: { value: SandboxSource; label: string }[] = [
   { value: 'tool:email', label: 'an email' },

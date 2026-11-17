@@ -128,9 +128,9 @@ export default function DevTerminal() {
       <div className="relative flex flex-wrap items-center justify-between gap-2 border-b border-fg/8 px-3 py-2 sm:px-4">
         <div className="flex items-center gap-3">
           <span className="hidden gap-1.5 sm:flex" aria-hidden>
-            <span className="h-2.5 w-2.5 rounded-full bg-[#F43F5E]/70" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#FFB547]/70" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#10B981]/70" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#F2685A]/70" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#F2B544]/70" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#5FCF8E]/70" />
           </span>
           <div role="tablist" aria-label="Code example" className="flex gap-1 rounded-lg bg-fg/[0.03] p-1">
             {TABS.map((t) => (

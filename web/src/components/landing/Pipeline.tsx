@@ -81,7 +81,7 @@ function CheckCard({ active }: { active: number }) {
         </ul>
         <div
           className={`pipe-step mt-4 flex items-center justify-between rounded-xl border px-4 py-3 ${
-            decided ? 'border-bad/60 bg-bad/15 shadow-[0_0_44px_-10px_rgba(244,63,94,.65)]' : 'border-fg/8 opacity-45'
+            decided ? 'border-bad/60 bg-bad/15 shadow-[0_0_44px_-10px_rgba(242,104,90,.4)]' : 'border-fg/8 opacity-45'
           }`}
         >
           <span className="font-bold">Decision</span>

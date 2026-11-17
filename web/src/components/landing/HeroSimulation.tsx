@@ -26,9 +26,9 @@ type Tone = 'plain' | 'check' | 'ok' | 'bad'
 function Row({ on, tone = 'plain', scanning = false, className = '', children }: { on: boolean; tone?: Tone; scanning?: boolean; className?: string; children: ReactNode }) {
   const toneCls = {
     plain: 'border-fg/8 bg-fg/[0.025]',
-    check: 'border-accent/45 bg-accent/[0.05] shadow-[0_0_32px_-14px_rgba(212,255,42,.55)]',
+    check: 'border-accent/45 bg-accent/[0.05] shadow-[0_0_32px_-14px_rgba(194,239,106,.28)]',
     ok: 'border-ok/40 bg-ok/[0.08]',
-    bad: 'border-bad/60 bg-bad/[0.1] shadow-[0_0_44px_-10px_rgba(244,63,94,.65)]',
+    bad: 'border-bad/60 bg-bad/[0.1] shadow-[0_0_44px_-10px_rgba(242,104,90,.4)]',
   }[tone]
   return (
     <li className={`sim-item relative rounded-xl border px-3.5 py-2.5 ${toneCls} ${on ? 'is-in' : ''} ${className}`}>
