@@ -231,7 +231,7 @@ export default function Layout() {
       </aside>
 
       {/* mobile / tablet top bar */}
-      <header className="sidebar-glass sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line px-4 lg:hidden">
+      <header data-scroll-header className="sidebar-glass sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line px-4 lg:hidden">
         <Brand />
         <div className="flex items-center gap-2">
           {current && (

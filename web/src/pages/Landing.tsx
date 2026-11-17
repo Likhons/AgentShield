@@ -240,12 +240,12 @@ export default function Landing() {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-3 focus:py-2">
         Skip to main content
       </a>
-      <header className="fixed inset-x-0 top-3 z-30 px-3 sm:px-6">
+      <header data-scroll-header className="fixed inset-x-0 top-3 z-30 px-3 sm:px-6">
         <nav aria-label="Main" className="glass mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl! px-3 sm:px-4">
           <Link to="/" aria-label="AgentShield home" className="flex min-h-11 items-center">
             <Logo size={30} />
           </Link>
-          <div className="hidden items-center gap-7 text-[0.95rem] md:flex">
+          <div className="hidden items-center gap-4 text-[0.88rem] whitespace-nowrap md:flex lg:gap-7 lg:text-[0.95rem]">
             <a href="#how" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">How it works</a>
             <a href="#results" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">Results</a>
             <a href="#builders" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">For developers</a>
@@ -254,7 +254,7 @@ export default function Landing() {
           <div className="flex items-center gap-2.5">
             <ThemeToggle />
             <button type="button" onClick={() => setDemoOpen(true)} className="btn-primary lift inline-flex min-h-10 items-center gap-2 rounded-xl px-3.5 text-sm font-bold whitespace-nowrap sm:px-4">
-              <PlayCircle size={16} aria-hidden /> <span className="hidden sm:inline">Open the demo</span><span className="sm:hidden">Demo</span>
+              <PlayCircle size={16} aria-hidden /> <span className="hidden lg:inline">Open the demo</span><span className="lg:hidden">Demo</span>
             </button>
           </div>
         </nav>

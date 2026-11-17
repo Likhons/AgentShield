@@ -13,8 +13,57 @@ let lenis: Lenis | null = null
 let locks = 0
 
 export function startSmoothScroll() {
+  if (!anchorsBound) {
+    anchorsBound = true
+    document.addEventListener('click', onAnchorClick)
+  }
   if (lenis || reducedMotion()) return
-  lenis = new Lenis({ autoRaf: true, anchors: { offset: -80 }, lerp: 0.12 })
+  // in-page links are handled by onAnchorClick (it knows about the fixed header and section padding)
+  lenis = new Lenis({ autoRaf: true, lerp: 0.12 })
+}
+
+let anchorsBound = false
+
+/** Page position of an element's layout box (transforms such as a reveal's translateY do not count). */
+function layoutTop(el: HTMLElement): number {
+  let y = 0
+  let node: HTMLElement | null = el
+  while (node) {
+    y += node.offsetTop
+    node = node.offsetParent as HTMLElement | null
+  }
+  return y
+}
+
+/** Where to scroll so a section's content (not its padded edge) sits just below the fixed or sticky header. */
+export function anchorTarget(el: HTMLElement): number {
+  // landing sections keep their padding on an inner .mx-auto wrapper; other targets are used as they are
+  const inner = (el.querySelector(':scope > .mx-auto') as HTMLElement | null) ?? null
+  const contentTop = inner ? layoutTop(inner) + parseFloat(getComputedStyle(inner).paddingTop) : layoutTop(el)
+  const header = [...document.querySelectorAll<HTMLElement>('[data-scroll-header]')].find((h) => h.getClientRects().length > 0)
+  const gap = (header ? header.getBoundingClientRect().bottom : 0) + 24
+  return Math.max(0, contentTop - gap)
+}
+
+export function scrollToAnchor(el: HTMLElement) {
+  if (lenis) {
+    lenis.resize()
+    lenis.scrollTo(anchorTarget(el), { duration: 1.1 })
+  } else {
+    window.scrollTo({ top: anchorTarget(el), behavior: reducedMotion() ? 'auto' : 'smooth' })
+  }
+}
+
+function onAnchorClick(e: MouseEvent) {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+  const a = (e.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null
+  const id = a?.getAttribute('href')?.slice(1)
+  if (!a || !id || id === 'main') return // the skip link keeps its native jump and focus
+  const el = document.getElementById(id)
+  if (!el) return
+  e.preventDefault()
+  scrollToAnchor(el)
+  history.replaceState(null, '', `#${id}`)
 }
 
 /** Dialogs, drawers and sheets call this so the page behind them does not move. Nested locks are counted.
