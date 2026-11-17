@@ -192,6 +192,28 @@ SANDBOX_PRESET_IDS = ["e20", "e21", "e22", "e23"]
 SANDBOX_PER_MINUTE = 120
 
 
+def scenario_context(scenario: dict) -> dict[str, Any]:
+    """The untrusted text a scenario puts in front of the agent (demo data: emails, web pages, files), and any
+    payment it asks for, found with the same rule the offline agent uses. Shown as the playground's payload."""
+    emails = {e["id"]: e for e in load_json("emails.json")}
+    pages = {w["id"]: w for w in load_json("web_pages.json")}
+    files = load_json("files.json")
+    untrusted = (
+        [{"source": "tool:email", "origin": emails[i]["from"], "title": emails[i]["subject"], "text": emails[i]["body"],
+          "kind": emails[i].get("kind", "normal")} for i in scenario["emails"]]
+        + [{"source": "tool:web", "origin": pages[i]["url"], "title": pages[i]["title"], "text": pages[i]["content"],
+            "kind": pages[i].get("kind", "normal")} for i in scenario["web_pages"]]
+        + [{"source": "tool:file", "origin": name, "title": name, "text": files[name], "kind": "normal"}
+           for name in scenario["files"]]
+    )
+    requests = []
+    for item in untrusted:
+        order = find_money_order(f"{item['title']}\n{item['text']}")
+        if order:
+            requests.append({"to": order.to, "amount": order.amount, "origin": item["origin"], "kind": item["kind"]})
+    return {"untrusted": untrusted, "requests": requests}
+
+
 # ---------------------------------------------------------------------------
 # app
 # ---------------------------------------------------------------------------
@@ -270,6 +292,7 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             "description": items[n]["description"],
             "user_task": items[n]["user_task"],
             "has_recording": recording_path(n, True, "groq").exists() and recording_path(n, False, "groq").exists(),
+            **scenario_context(items[n]),
         } for n in names]
 
     @app.post("/api/scenarios/{name}/run", tags=["playground"])

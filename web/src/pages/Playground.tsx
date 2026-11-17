@@ -1,17 +1,20 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  ArrowRight, Bot, CircleCheck, CircleHelp, CircleX, FileText, Globe, Layers, Mail, Play, PlayCircle, Radio,
-  ShieldCheck, ShieldX, Target, Activity, Workflow, Zap, Banknote, type LucideIcon,
+  Banknote, CircleCheck, CircleHelp, FileCode2, FileText, Globe, Hourglass, MailWarning, Play, ShieldCheck, ShieldX, Zap,
+  type LucideIcon,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import AuditDrawer from '../components/AuditDrawer'
 import HeroArt from '../components/HeroArt'
 import { AnimatedValue } from '../components/Motion'
 import RunResultView from '../components/RunResultView'
-import { DecisionBadge, ErrorNote, PanelTitle, Skeleton } from '../components/ui'
-import { api, type AuditPage, type AuditRecord, type Decision, type RunMode, type RunResult, type Scenario, type Step, type Verdict } from '../lib/api'
-import { short, taka, utcTime } from '../lib/format'
+import { DecisionBadge, ErrorNote, Skeleton } from '../components/ui'
+import {
+  api, type AuditPage, type AuditRecord, type CheckResult, type Decision, type RunMode, type RunResult, type Scenario, type Step,
+  type Thresholds, type Verdict,
+} from '../lib/api'
+import { short, taka } from '../lib/format'
 import { reducedMotion, smoothScrollTo } from '../lib/motion'
 import { useToast } from '../lib/toast'
 
@@ -118,55 +121,73 @@ function Kpis() {
 }
 
 // ---------------------------------------------------------------------------
-// scenario runner
+// shared bits for the studio (runner, how it works, pipeline, recent evaluations)
 
-const MODES: { id: RunMode; label: string; caption: string; icon: LucideIcon }[] = [
-  { id: 'mock', label: 'Offline', caption: 'Simulated naive agent. Works offline.', icon: Bot },
-  { id: 'groq', label: 'Live (Groq)', caption: 'Real model via Groq, same tools. Can take up to a minute.', icon: Radio },
-  { id: 'recorded', label: 'Recorded Run', caption: 'Instant replay of a saved real run.', icon: PlayCircle },
+const MODES: { id: RunMode; label: string; caption: string }[] = [
+  { id: 'mock', label: 'Offline', caption: 'Simulated naive agent. Works offline.' },
+  { id: 'groq', label: 'Live (Groq)', caption: 'Real model via Groq, same tools. Can take up to a minute.' },
+  { id: 'recorded', label: 'Recorded Run', caption: 'Instant replay of a saved real run.' },
 ]
 
-const scenarioLabel = (s: Scenario) => `${s.kind === 'attack' ? '⚠️ Attack' : '✅ Normal'}: ${s.description}`
+const DECISION_BN: Record<Decision, string> = { allow: 'অনুমোদিত', ask_human: 'অনুমতি দরকার', block: 'আটকানো' }
+const DECISION_WORD: Record<Decision, string> = { allow: 'ALLOWED', ask_human: 'ASK HUMAN', block: 'BLOCKED' }
+const SOURCE_LABEL: Record<string, string> = { 'tool:email': 'email', 'tool:web': 'web page', 'tool:file': 'file' }
 
-function RunCard({ scenarios, liveAvailable, scanning, onRun }: {
+/** Score colour by the engine's own bands (ask from 0.4, block from 0.75, sent by the API). */
+function scoreTone(score: number | null, t: Thresholds) {
+  if (score === null) return { badge: 'border-fg/10 bg-fg/5 text-muted', bar: 'bg-muted', card: 'border-fg/8' }
+  if (score >= t.block_at) return { badge: 'border-bad/40 bg-bad/12 text-bad-ink', bar: 'bg-bad', card: 'border-bad/35' }
+  if (score >= t.ask_human_at) return { badge: 'border-warn/40 bg-warn/12 text-warn-ink', bar: 'bg-warn', card: 'border-warn/35' }
+  return { badge: 'border-ok/40 bg-ok/12 text-ok-ink', bar: 'bg-ok', card: 'border-ok/30' }
+}
+
+const DEFAULT_T: Thresholds = { ask_human_at: 0.4, block_at: 0.75 }
+
+/** "send_money(01000000666, 4500)" from a tool name and its arguments. */
+const callText = (tool: string, args: Record<string, unknown>) =>
+  `${tool}(${Object.values(args).map((v) => (typeof v === 'string' || typeof v === 'number' ? String(v) : JSON.stringify(v))).join(', ')})`
+
+/** HH:MM:SS in UTC. */
+const clock = (iso: string) => new Date(iso).toISOString().slice(11, 19)
+
+function MonoLabel({ children }: { children: ReactNode }) {
+  return <span className="font-mono text-[0.7rem] tracking-[0.14em] text-muted uppercase">{children}</span>
+}
+
+// ---------------------------------------------------------------------------
+// scenario runner
+
+function RunCard({ scenarios, scenario, setName, mode, setMode, approve, setApprove, liveAvailable, scanning, onRun }: {
   scenarios: Scenario[]
+  scenario: Scenario | undefined
+  setName: (n: string) => void
+  mode: RunMode
+  setMode: (m: RunMode) => void
+  approve: boolean
+  setApprove: (a: boolean) => void
   liveAvailable: boolean
   scanning: boolean
-  onRun: (name: string, mode: RunMode, approve: boolean) => void
+  onRun: () => void
 }) {
-  const [name, setName] = useState(() => (scenarios.some((s) => s.name === 'attack_email_bn') ? 'attack_email_bn' : scenarios[0]?.name))
-  const [mode, setMode] = useState<RunMode>('mock')
-  const [approve, setApprove] = useState(false)
-  const selected = scenarios.find((s) => s.name === name)
-  const disabled = (m: RunMode) => (m === 'groq' && !liveAvailable) || (m === 'recorded' && !selected?.has_recording)
-  const effectiveMode = disabled(mode) ? 'mock' : mode
-  const modeInfo = MODES.find((m) => m.id === effectiveMode)!
-  const offNote = (id: RunMode) => (id === 'groq' ? 'Off on this server (no API key).' : 'No recording for this scenario.')
+  const disabled = (m: RunMode) => (m === 'groq' && !liveAvailable) || (m === 'recorded' && !scenario?.has_recording)
+  const caption = MODES.find((m) => m.id === mode)?.caption
+  const untrusted = scenario?.untrusted ?? [] // older API servers do not send these fields yet
+  // the injected item first; the ordinary ones collapse into "+N more"
+  const attacks = untrusted.filter((u) => u.kind === 'attack')
+  const shown = attacks.length ? attacks.slice(0, 2) : untrusted.slice(0, 2)
+  const firstSource = untrusted[0]?.source
+  const asked = scenario?.requests?.find((r) => r.kind === 'attack') ?? scenario?.requests?.[0]
 
   return (
-    <section id="run-scenario" className="glass spotlight flex scroll-mt-20 flex-col gap-4 overflow-hidden p-4 sm:p-5" aria-busy={scanning}>
+    <section id="run-scenario" className="glass spotlight flex scroll-mt-20 flex-col gap-5 overflow-hidden p-5 sm:p-7" aria-busy={scanning}>
       {scanning && <span className="laser" aria-hidden />}
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="flex items-start gap-2.5">
-          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-ink">
-            <Play size={17} fill="currentColor" aria-hidden />
-          </span>
-          <div>
-            <h2 className="text-[1.15rem] font-bold">Run a Safety Scenario</h2>
-            <p className="mt-0.5 text-sm text-muted">Test the same task on an unprotected agent and on an agent protected by AgentShield.</p>
-          </div>
-        </div>
-        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold ${scanning ? 'border-line2 bg-accent/10 text-soft' : 'border-ok/40 bg-ok/12 text-ok-ink'}`}>
-          <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${scanning ? 'bg-mark' : 'bg-ok'}`} aria-hidden /> {scanning ? 'Scanning' : 'Ready'}
-        </span>
-      </div>
-
       <div className="relative">
-        <span className="mb-1.5 block text-sm font-semibold" id="mode-label">Agent Mode</span>
-        <div role="radiogroup" aria-labelledby="mode-label" className="flex gap-1 rounded-2xl border border-fg/8 bg-fg/[0.03] p-1 sm:gap-1.5">
-          {MODES.map(({ id, label, icon: Icon }) => {
+        <h2 className="text-[1.3rem] font-bold">Run a Safety Scenario</h2>
+        <p className="mt-1 text-sm text-muted">Test the same task on an unprotected agent and on an agent protected by AgentShield.</p>
+        <div role="radiogroup" aria-label="Agent mode" className="mt-4 inline-flex max-w-full gap-1 rounded-xl border border-fg/8 bg-fg/[0.03] p-1">
+          {MODES.map(({ id, label }) => {
             const off = disabled(id)
-            const active = effectiveMode === id
+            const active = mode === id
             return (
               <button
                 key={id}
@@ -174,286 +195,396 @@ function RunCard({ scenarios, liveAvailable, scanning, onRun }: {
                 role="radio"
                 aria-checked={active}
                 disabled={off}
-                title={off ? offNote(id) : undefined}
+                title={off ? (id === 'groq' ? 'Off on this server (no API key).' : 'No recording for this scenario.') : undefined}
                 onClick={() => setMode(id)}
-                className={`inline-flex min-h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl border px-1.5 text-[0.8rem] font-bold whitespace-nowrap transition-[background-color,border-color,color,box-shadow] duration-300 sm:px-3 sm:text-sm ${
-                  active ? 'nav-pill-active' : 'border-transparent text-body hover:bg-fg/5'
+                className={`min-h-9 rounded-lg px-3 font-mono text-[0.8rem] whitespace-nowrap transition-colors duration-300 sm:px-4 ${
+                  active ? 'bg-accent font-bold text-accent-ink' : 'text-body hover:bg-fg/5'
                 } ${off ? 'cursor-not-allowed opacity-40' : ''}`}
               >
-                <Icon size={15} className="hidden shrink-0 sm:block" aria-hidden /> {label}
+                {label}
               </button>
             )
           })}
         </div>
-        <p className="mt-1.5 text-[0.8rem] text-muted">
-          {modeInfo.caption}
-          {disabled('groq') && ' Live (Groq) is off on this server.'}
-        </p>
+        <p className="mt-1.5 text-xs text-muted">{caption}</p>
       </div>
 
-      <label className="relative flex flex-col gap-1.5 text-sm font-semibold">
-        Scenario
+      <div className="relative border-t border-line pt-5">
+        <label htmlFor="scenario" className="mb-2 block"><MonoLabel>Select attack / benign preset</MonoLabel></label>
         <select
-          value={name}
+          id="scenario"
+          value={scenario?.name}
           onChange={(e) => setName(e.target.value)}
-          className="min-h-11 w-full rounded-xl border border-fg/10 bg-card2 px-3 text-[0.95rem] font-normal text-ink"
+          className="min-h-12 w-full rounded-xl border border-accent/45 bg-card2 px-4 text-[0.95rem] font-semibold text-ink"
         >
-          {scenarios.map((s) => <option key={s.name} value={s.name}>{scenarioLabel(s)}</option>)}
+          {scenarios.map((s, i) => (
+            <option key={s.name} value={s.name}>{i + 1}. {s.description.replace(/\.$/, '')} ({s.kind === 'attack' ? 'Attack' : 'Normal'})</option>
+          ))}
         </select>
-      </label>
-
-      {/* what the button will send */}
-      <div className="relative rounded-xl border border-fg/8 bg-well/30 px-3.5 py-3 font-mono text-[0.76rem] leading-relaxed">
-        <div className="mb-1 flex items-center justify-between text-[0.68rem] tracking-[0.14em] text-muted uppercase">
-          <span>Payload preview</span>
-          <span className={`h-1.5 w-1.5 rounded-full ${scanning ? 'pulse-dot bg-mark' : 'bg-ok'}`} aria-hidden />
-        </div>
-        <div className="break-all"><span className="text-info-ink">POST</span> <span className="text-body">/api/scenarios/{name}/run</span></div>
-        <div className="text-soft">{`{ "mode": "${effectiveMode}", "approve": ${effectiveMode === 'recorded' ? false : approve} }`}</div>
-        {selected && <div className="mt-1 text-muted"># task: “{selected.user_task}”</div>}
       </div>
 
-      <label className={`relative flex items-start gap-2.5 text-sm ${effectiveMode === 'recorded' ? 'opacity-45' : ''}`}>
+      {/* what the agent will be given */}
+      <div className="relative rounded-2xl border border-fg/8 bg-well/25 p-4">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <span className="flex items-center gap-2"><FileCode2 size={15} className="text-soft" aria-hidden /><MonoLabel>Live context payload</MonoLabel></span>
+          <span className={`rounded-md border px-2 py-0.5 font-mono text-[0.72rem] ${firstSource ? 'border-bad/40 bg-bad/10 text-bad-ink' : 'border-ok/35 bg-ok/10 text-ok-ink'}`}>
+            {firstSource ? `untrusted: ${firstSource}` : 'trusted: user only'}
+          </span>
+        </div>
+        <div className="rounded-xl border border-fg/8 bg-card2/70 px-3.5 py-2.5 text-sm">
+          <span className="font-mono text-[0.78rem] text-muted">user_prompt:</span> <b>“{scenario?.user_task}”</b>
+        </div>
+        {untrusted.length === 0 ? (
+          <p className="mt-2 px-1 text-[0.8rem] text-muted">No untrusted content: the agent works only from the user’s request and the bank.</p>
+        ) : (
+          <ul className="mt-2 flex flex-col gap-2">
+            {shown.map((u) => (
+              <li key={`${u.origin}-${u.title}`} className={`rounded-xl border px-3.5 py-2.5 ${u.kind === 'attack' ? 'border-bad/30 bg-bad/[0.07]' : 'border-fg/8 bg-card2/50'}`}>
+                <div className={`font-mono text-[0.72rem] ${u.kind === 'attack' ? 'text-bad-soft' : 'text-muted'}`}>
+                  untrusted_content · {SOURCE_LABEL[u.source] ?? u.source} · {short(u.origin, 40)}
+                </div>
+                <p className="mt-1 line-clamp-2 text-[0.92rem] font-medium">{u.text}</p>
+              </li>
+            ))}
+            {untrusted.length > shown.length && (
+              <li className="px-1 font-mono text-[0.72rem] text-muted">
+                +{untrusted.length - shown.length} more {untrusted.length - shown.length === 1 ? 'item' : 'items'} the agent also reads
+              </li>
+            )}
+          </ul>
+        )}
+      </div>
+
+      <label className={`relative flex cursor-pointer items-start gap-3 rounded-xl border border-fg/8 bg-card2/40 px-4 py-3 ${mode === 'recorded' ? 'cursor-not-allowed opacity-45' : ''}`}>
         <input
           type="checkbox"
           checked={approve}
-          disabled={effectiveMode === 'recorded'}
+          disabled={mode === 'recorded'}
           onChange={(e) => setApprove(e.target.checked)}
           className="mt-0.5 h-4.5 w-4.5 shrink-0 accent-[var(--color-mark)]"
         />
         <span>
-          I approve actions that ask for my approval (simulated human click)
-          <span className="mt-0.5 block text-xs text-muted">Unticked = the user says no. BLOCK decisions are never sent to the user.</span>
+          <b className="block text-sm">Simulated human approval</b>
+          <span className="text-xs text-muted">Approve actions that ask for approval. Unticked = the user says no. BLOCK is never sent to the user.</span>
         </span>
       </label>
 
-      <button
-        type="button"
-        disabled={scanning || !name}
-        onClick={() => name && onRun(name, effectiveMode, approve)}
-        className="btn-primary lift relative inline-flex min-h-12 items-center justify-center gap-2 rounded-xl font-bold disabled:opacity-70"
-      >
-        {scanning ? (
-          <><span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-ink/30 border-t-accent-ink" aria-hidden /> Agent is working…</>
-        ) : (
-          <><Play size={15} fill="currentColor" aria-hidden /> Run Scenario</>
-        )}
-      </button>
+      <div className="relative flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="min-w-0 font-mono text-[0.8rem] text-muted">
+          {asked ? (
+            <>The {SOURCE_LABEL[untrusted.find((u) => u.origin === asked.origin)?.source ?? ''] ?? 'text'} asks for: <span className="text-warn-ink">send_money({asked.to}, {asked.amount})</span></>
+          ) : (
+            <>No payment request in the content</>
+          )}
+        </p>
+        <button
+          type="button"
+          disabled={scanning || !scenario}
+          onClick={onRun}
+          className="btn-primary btn-shimmer lift inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl px-7 font-bold disabled:opacity-70"
+        >
+          {scanning ? (
+            <><span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-ink/30 border-t-accent-ink" aria-hidden /> Agent is working…</>
+          ) : (
+            <><Zap size={16} fill="currentColor" aria-hidden /> Run Scenario</>
+          )}
+        </button>
+      </div>
     </section>
   )
 }
 
 // ---------------------------------------------------------------------------
-// how it works: packets travel down the connectors while a scenario runs
+// how it works: input -> gateway -> decision, live for the selected scenario and the last run
 
-function Connector({ flowing }: { flowing: boolean }) {
+function FlowLink({ flowing }: { flowing: boolean }) {
   return (
-    <div className={`flex items-center justify-center ${flowing ? 'is-flowing' : ''}`} aria-hidden>
-      <div className="connector h-7 w-[3px] md:h-[3px] md:w-11">
-        <span className="packet left-1/2 -ml-1 md:top-1/2 md:left-0 md:-mt-1 md:ml-0" />
-        <span className="packet left-1/2 -ml-1 md:top-1/2 md:left-0 md:-mt-1 md:ml-0" />
-        <span className="packet left-1/2 -ml-1 md:top-1/2 md:left-0 md:-mt-1 md:ml-0" />
+    <div className={`flex justify-center py-1 ${flowing ? 'is-flowing' : ''}`} aria-hidden>
+      <div className="connector h-7 w-[2px]">
+        <span className="packet left-1/2 -ml-1" />
+        <span className="packet left-1/2 -ml-1" />
+        <span className="packet left-1/2 -ml-1" />
       </div>
-      <ArrowRight size={16} className="hidden shrink-0 text-muted md:block" />
     </div>
   )
 }
 
-function HowItWorks({ flowing }: { flowing: boolean }) {
-  const nodes = [
-    { icon: Mail, color: 'var(--color-bad)', title: 'Untrusted input', sub: 'email · web · file', cls: 'border-bad/40 bg-bad/8' },
-    { icon: ShieldCheck, color: 'var(--color-soft)', title: 'AgentShield', sub: 'checks each tool call', cls: 'border-accent2/60 bg-accent/12' },
-    { icon: CircleCheck, color: 'var(--color-ok)', title: 'Decision', sub: 'allow · ask · block', cls: 'border-ok/40 bg-ok/8' },
-  ]
-  const decisions = [
-    { icon: CircleCheck, color: 'var(--color-ok)', title: 'ALLOW', sub: "Action follows from the user's request", cls: 'border-ok/40 bg-ok/8' },
-    { icon: CircleHelp, color: 'var(--color-warn)', title: 'ASK', sub: 'Uncertain: the user approves or rejects', cls: 'border-warn/40 bg-warn/8' },
-    { icon: CircleX, color: 'var(--color-bad)', title: 'BLOCK', sub: 'Clear attack or policy violation', cls: 'border-bad/40 bg-bad/8' },
-  ]
+function FlowNode({ icon: Icon, iconCls, title, sub, tag, tagCls, cls, bn }: {
+  icon: LucideIcon; iconCls: string; title: string; sub: ReactNode; tag: string; tagCls: string; cls: string; bn?: string
+}) {
   return (
-    <section className="glass spotlight h-full p-4 sm:p-5">
-      <div className="relative">
-        <PanelTitle icon={Workflow} title="How AgentShield Works" />
-        <div className="flex flex-col items-stretch gap-1 md:flex-row md:items-center">
-          {nodes.map(({ icon: Icon, color, title, sub, cls }, i) => (
-            <div key={title} className="contents">
-              {i > 0 && <Connector flowing={flowing} />}
-              <div className={`ignite flex flex-1 flex-col items-center gap-1 rounded-xl border px-3 py-4 text-center ${cls} ${flowing && i === 1 ? 'is-lit' : ''}`}>
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-fg/5">
-                  <Icon size={20} color={color} aria-hidden />
-                </span>
-                <b className="text-[0.95rem]">{title}</b>
-                <span className="text-xs text-muted">{sub}</span>
-              </div>
-            </div>
-          ))}
+    <div className={`ignite flex items-center gap-3.5 rounded-2xl border px-4 py-3.5 ${cls}`}>
+      <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${iconCls}`}><Icon size={19} aria-hidden /></span>
+      <div className="min-w-0 flex-1">
+        <b className="block text-[1rem]">{title}</b>
+        <span className="block font-mono text-[0.76rem] text-muted">{sub}</span>
+        {bn && <span lang="bn" className="block text-[0.82rem] text-body">{bn}</span>}
+      </div>
+      <span className={`shrink-0 rounded-md border px-2 py-0.5 font-mono text-[0.72rem] font-bold tracking-wide ${tagCls}`}>{tag}</span>
+    </div>
+  )
+}
+
+function HowItWorks({ scenario, scanning, decided, thresholds }: {
+  scenario: Scenario | undefined
+  scanning: boolean
+  decided: PipelineData | null
+  thresholds: Thresholds
+}) {
+  const hasUntrusted = (scenario?.untrusted?.length ?? 0) > 0
+  const status = scanning ? 'Inspecting' : decided ? 'Decided' : 'Standing by'
+  const d = decided?.decision
+  const dTone = d === 'block' ? 'border-bad/45 bg-bad/[0.1]' : d === 'ask_human' ? 'border-warn/45 bg-warn/[0.08]' : d === 'allow' ? 'border-ok/40 bg-ok/[0.08]' : 'border-fg/8 bg-card2/40'
+  const dTag = d === 'block' ? 'border-bad/45 bg-bad/12 text-bad-ink' : d === 'ask_human' ? 'border-warn/45 bg-warn/12 text-warn-ink' : d === 'allow' ? 'border-ok/40 bg-ok/12 text-ok-ink' : 'border-fg/10 text-muted'
+  const t = thresholds
+  return (
+    <section className="glass spotlight flex h-full flex-col p-5 sm:p-7">
+      <div className="relative flex items-start justify-between gap-3 border-b border-line pb-5">
+        <div>
+          <h2 className="text-[1.3rem] font-bold">How AgentShield Works</h2>
+          <p className="mt-1 text-sm text-muted">Every tool call is intercepted and checked before it runs.</p>
         </div>
-        <div className="mt-5">
-          <PanelTitle icon={Activity} title="Decision Types" />
-          <div className="grid gap-2 md:grid-cols-3">
-            {decisions.map(({ icon: Icon, color, title, sub, cls }) => (
-              <div key={title} className={`rounded-xl border px-3.5 py-3 ${cls}`}>
-                <div className="flex items-center gap-2 font-bold"><Icon size={19} color={color} aria-hidden /> {title}</div>
-                <p className="mt-1 text-[0.8rem] text-muted">{sub}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[0.74rem] ${scanning ? 'border-line2 bg-accent/10 text-soft' : 'border-ok/35 bg-ok/10 text-ok-ink'}`}>
+          {scanning && <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-mark" aria-hidden />} {status}
+        </span>
+      </div>
+      <div className="relative mt-5 flex-1">
+        <FlowNode
+          icon={MailWarning} iconCls="border-warn/40 bg-warn/10 text-warn-ink" title="Untrusted Input" sub="Email · Web Page · Document"
+          tag={hasUntrusted ? 'TAINTED' : 'CLEAN'} tagCls={hasUntrusted ? 'border-warn/45 bg-warn/12 text-warn-ink' : 'border-ok/40 bg-ok/12 text-ok-ink'}
+          cls="border-fg/8 bg-card2/40"
+        />
+        <FlowLink flowing={scanning} />
+        <FlowNode
+          icon={ShieldCheck} iconCls="border-accent/40 bg-accent/12 text-soft" title="AgentShield Gateway"
+          sub={decided ? `4 checks · ${decided.latency < 10 ? decided.latency.toFixed(1) : Math.round(decided.latency)} ms` : '4 checks before every tool call'}
+          tag="INSPECT" tagCls="border-accent/45 bg-accent/12 text-soft" cls={`border-accent/30 bg-accent/[0.05] ${scanning ? 'is-lit' : ''}`}
+        />
+        <FlowLink flowing={scanning} />
+        <FlowNode
+          icon={scanning || !d ? Hourglass : d === 'allow' ? CircleCheck : d === 'ask_human' ? CircleHelp : ShieldX}
+          iconCls={scanning || !d ? 'border-fg/10 bg-fg/5 text-muted' : d === 'allow' ? 'border-ok/40 bg-ok/10 text-ok-ink' : d === 'ask_human' ? 'border-warn/40 bg-warn/10 text-warn-ink' : 'border-bad/40 bg-bad/10 text-bad-ink'}
+          title={scanning ? 'Decision: …' : d ? `Decision: ${DECISION_WORD[d]}` : 'Decision: waiting'}
+          sub={!scanning && decided ? `risk ${decided.risk.toFixed(2)}` : scanning ? 'checking' : 'run a scenario'}
+          bn={!scanning && d ? DECISION_BN[d] : undefined}
+          tag={!scanning && d ? DECISION_TONE[d].label : '—'} tagCls={scanning ? 'border-fg/10 text-muted' : dTag} cls={scanning ? 'border-fg/8 bg-card2/40' : dTone}
+        />
+      </div>
+      <div className="relative mt-5 grid grid-cols-3 gap-2 border-t border-line pt-5 font-mono text-[0.72rem] sm:text-[0.78rem]">
+        <span className="rounded-lg border border-ok/35 bg-ok/8 px-2 py-2 text-center text-ok-ink">ALLOW &lt; {t.ask_human_at.toFixed(2)}</span>
+        <span className="rounded-lg border border-warn/35 bg-warn/8 px-2 py-2 text-center text-warn-ink">ASK {t.ask_human_at.toFixed(2)}–{t.block_at.toFixed(2)}</span>
+        <span className="rounded-lg border border-bad/35 bg-bad/8 px-2 py-2 text-center text-bad-ink">BLOCK ≥ {t.block_at.toFixed(2)}</span>
       </div>
     </section>
   )
 }
 
 // ---------------------------------------------------------------------------
-// evaluation pipeline: the four checks of the run's decisive tool call ignite one by one
+// evaluation pipeline
 
-/** The call to show: the first one AgentShield stopped, else the last money transfer, else the last checked call. */
-function decisiveStep(result: RunResult | undefined): (Step & { verdict: Verdict }) | null {
+interface PipelineData {
+  checks: CheckResult[]
+  decision: Decision
+  risk: number
+  latency: number
+  call: string
+  from: 'run' | 'audit'
+}
+
+/** The call to show from a run: the first one AgentShield stopped, else the last money transfer, else the last checked call. */
+function fromRun(result: RunResult | undefined): PipelineData | null {
   const steps = (result?.with.steps ?? []).filter((s): s is Step & { verdict: Verdict } => s.verdict !== null)
-  return steps.find((s) => s.verdict.decision !== 'allow') ?? steps.filter((s) => s.tool === 'send_money').at(-1) ?? steps.at(-1) ?? null
+  const s = steps.find((x) => x.verdict.decision !== 'allow') ?? steps.filter((x) => x.tool === 'send_money').at(-1) ?? steps.at(-1)
+  return s ? { checks: s.verdict.checks, decision: s.verdict.decision, risk: s.verdict.risk_score, latency: s.verdict.total_latency_ms, call: callText(s.tool, s.args), from: 'run' } : null
 }
 
-function Pipeline({ result, scanning, runId }: { result: RunResult | undefined; scanning: boolean; runId: number }) {
-  // keyed by run: each result mounts fresh cards, which then ignite one by one
-  return <PipelineCards key={`${runId}-${scanning}`} result={result} scanning={scanning} runId={runId} />
+const fromAudit = (r: AuditRecord | undefined): PipelineData | null =>
+  r ? { checks: r.checks, decision: r.decision, risk: r.risk_score, latency: r.total_latency_ms, call: callText(r.tool_name, r.arguments), from: 'audit' } : null
+
+/** One line under each card title, from the check's own details. */
+function checkNote(name: string, c: CheckResult | undefined): string {
+  if (!c) return 'not run'
+  if (c.skipped) return 'not needed for this call'
+  const d = (c.details ?? {}) as Record<string, unknown>
+  if (name === 'taint') {
+    const args = Object.values((d.arguments ?? {}) as Record<string, { status?: string; source?: string }>)
+    const ext = args.find((a) => a.status === 'tool_data')
+    return ext ? `Source: ${SOURCE_LABEL[ext.source ?? ''] ?? ext.source ?? 'tool'} (untrusted)` : args.length ? 'Source: the user’s request' : 'No traced arguments'
+  }
+  if (name === 'classifier') {
+    const top = d.top_item as { language?: string; signals?: string[] } | undefined
+    const lang = top?.language ? ({ bn: 'Bangla', banglish: 'Banglish', en: 'English' } as Record<string, string>)[top.language] ?? top.language : null
+    return top?.signals?.length ? `${lang ?? 'Text'} · ${top.signals.length} signal${top.signals.length > 1 ? 's' : ''}` : 'Multilingual BN / Banglish / EN'
+  }
+  if (name === 'policy') {
+    const rule = (d.top_rule as string | undefined) ?? undefined
+    return rule ? `Rule: ${rule.replaceAll('_', ' ')}` : 'No rule matched'
+  }
+  return ''
 }
 
-function PipelineCards({ result, scanning, runId }: { result: RunResult | undefined; scanning: boolean; runId: number }) {
-  const step = scanning ? null : decisiveStep(result)
-  const v = step?.verdict
-  const [lit, setLit] = useState(() => (reducedMotion() ? 4 : 0))
+function Pipeline({ data, scanning, runKey, thresholds }: { data: PipelineData | null; scanning: boolean; runKey: string; thresholds: Thresholds }) {
+  return <PipelineCards key={runKey} data={data} scanning={scanning} thresholds={thresholds} />
+}
 
+function PipelineCards({ data, scanning, thresholds }: { data: PipelineData | null; scanning: boolean; thresholds: Thresholds }) {
+  // cards from a fresh run ignite one by one; the audit fallback shows at once
+  const [lit, setLit] = useState(() => (reducedMotion() || data?.from !== 'run' ? 4 : 0))
+  const isRun = data?.from === 'run'
   useEffect(() => {
-    if (!v || reducedMotion()) return
+    if (!isRun || reducedMotion()) return
     const timers = [1, 2, 3, 4].map((n) => window.setTimeout(() => setLit(n), n * 380))
     return () => timers.forEach(clearTimeout)
-  }, [v])
+  }, [isRun])
 
-  const check = (name: string) => v?.checks.find((c) => c.check === name)
-  const score = (name: string) => { const c = check(name); return c && !c.skipped ? c.risk_score : null }
-  const fmt = (n: number | null) => (n === null ? 'skipped' : n.toFixed(2))
-  const intent = score('intent')
-  const policy = score('policy')
-  const tone = v ? DECISION_TONE[v.decision] : null
-
-  const cards: { icon: LucideIcon; n: string; title: string; sub: string; value: number | null; detail: string; flagged: boolean }[] = [
-    { icon: Layers, n: '01', title: 'Taint', sub: 'Where did each value come from?', value: score('taint'), detail: fmt(score('taint')), flagged: !!check('taint')?.flagged },
-    { icon: Target, n: '02', title: 'Classifier', sub: 'Instructions hidden in data?', value: score('classifier'), detail: fmt(score('classifier')), flagged: !!check('classifier')?.flagged },
-    {
-      icon: Activity, n: '03', title: 'Intent + Policy', sub: 'Did the user ask? Fixed rules',
-      value: Math.max(intent ?? 0, policy ?? 0), detail: `intent ${fmt(intent)} · policy ${fmt(policy)}`,
-      flagged: !!check('intent')?.flagged || !!check('policy')?.flagged,
-    },
-    { icon: Zap, n: '04', title: 'Verdict', sub: 'Allow / Ask / Block + reason (BN/EN)', value: v?.risk_score ?? null, detail: v ? `risk ${v.risk_score.toFixed(2)}` : '', flagged: v?.decision !== 'allow' },
+  const c = (n: string) => data?.checks.find((x) => x.check === n)
+  const val = (n: string) => { const x = c(n); return x && !x.skipped ? x.risk_score : null }
+  const ip = Math.max(val('intent') ?? -1, val('policy') ?? -1)
+  const cards = [
+    { n: '01', key: 'TAINT', title: 'Taint Analysis', score: val('taint'), note: data ? checkNote('taint', c('taint')) : '' },
+    { n: '02', key: 'CLASSIFIER', title: 'Injection Classifier', score: val('classifier'), note: data ? checkNote('classifier', c('classifier')) : '' },
+    { n: '03', key: 'INTENT + POLICY', title: 'Intent + Policy', score: ip < 0 ? null : ip, note: data ? checkNote('policy', c('policy')) : '' },
+    { n: '04', key: 'VERDICT', title: 'Agent Decision', score: data?.risk ?? null, note: data ? `${DECISION_WORD[data.decision]} / ${DECISION_BN[data.decision]}` : '' },
   ]
 
   return (
-    <section className="glass spotlight p-4 sm:p-5">
-      <div className="relative">
-        <PanelTitle
-          icon={Layers}
-          title="Evaluation Pipeline"
-          sub={step ? `The decisive call of the last run: ${step.tool}(${Object.values(step.args).join(', ')})` : 'Four checks run on every tool call; the stricter of score and policy wins.'}
-        />
-        <ol className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
-          {cards.map(({ icon: Icon, n, title, sub, value, detail, flagged }, i) => {
-            const on = !!v && lit > i
-            const isVerdict = i === 3
-            const barTone = isVerdict && tone ? tone.bar : flagged ? 'bg-bad' : 'bg-ok'
-            return (
-              <li
-                key={n}
-                style={{ ['--glow' as string]: on ? (isVerdict && tone ? tone.glow : flagged ? 'rgb(242 104 90 / 0.42)' : 'rgb(95 207 142 / 0.4)') : undefined }}
-                className={`ignite tilt relative flex flex-col gap-3 rounded-xl border bg-card2/60 px-3.5 py-3.5 ${on ? 'is-lit border-line2' : 'border-fg/8'} ${v && !on ? 'opacity-50' : ''}`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-fg/10 bg-fg/5"><Icon size={18} aria-hidden /></span>
-                  <span className={`rounded-md px-1.5 py-0.5 font-mono text-[0.72rem] font-bold ${on ? 'bg-accent text-accent-ink' : 'bg-fg/8 text-muted'}`}>{n}</span>
-                  <span className="min-w-0">
-                    <b className="block text-[0.92rem]">{title}</b>
-                    <span className="text-[0.76rem] text-muted">{sub}</span>
-                  </span>
-                </div>
-                <FlowBar value={on && value !== null ? value : 0} tone={barTone} busy={scanning} />
-                <div className="flex min-h-7 items-center justify-between gap-2 font-mono text-[0.74rem] tabular-nums">
-                  <span className={on ? (flagged ? 'text-bad-soft' : 'text-ok-ink') : 'text-muted'}>
-                    {scanning ? 'scanning…' : on ? detail : v ? 'waiting' : 'no run yet'}
-                  </span>
-                  {isVerdict && on && tone && v && (
-                    <span key={runId} className={`slam rounded-md border-2 px-2 py-0.5 text-[0.78rem] font-extrabold tracking-wider ${tone.text}`} style={{ borderColor: 'currentColor' }}>
-                      {tone.label}
-                    </span>
-                  )}
-                </div>
-              </li>
-            )
-          })}
-        </ol>
+    <section className="glass spotlight p-5 sm:p-7">
+      <div className="relative flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[1.3rem] font-bold">Evaluation Pipeline</h2>
+          <p className="mt-1 text-sm text-muted">Four checks run before every tool call; the stricter of score and policy wins.</p>
+          {data && !scanning && (
+            <p className="mt-1.5 font-mono text-[0.74rem] text-muted">
+              {data.from === 'run' ? 'Last run, decisive call:' : 'Latest BLOCK in the audit log:'} <span className="text-warn-ink">{short(data.call, 48)}</span>
+            </p>
+          )}
+        </div>
+        {data && !scanning && (
+          <span className="font-mono text-[0.8rem] text-muted">
+            Total latency: <b className="text-ink tabular-nums">{data.latency < 10 ? data.latency.toFixed(2) : Math.round(data.latency)} ms</b>
+          </span>
+        )}
       </div>
+      <ol className="relative mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map(({ n, key, title, score, note }, i) => {
+          const on = !!data && !scanning && lit > i
+          const tone = scoreTone(on ? score : null, thresholds)
+          const verdict = i === 3 && on && data
+          return (
+            <li
+              key={n}
+              className={`ignite tilt relative flex flex-col gap-3 rounded-2xl border p-4 ${on ? tone.card : 'border-fg/8'} ${
+                verdict ? (data.decision === 'block' ? 'bg-bad/[0.1]' : data.decision === 'ask_human' ? 'bg-warn/[0.08]' : 'bg-ok/[0.08]') : 'bg-card2/40'
+              } ${on ? 'is-lit' : ''}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-[0.72rem] tracking-[0.1em] text-muted">{n} · {key}</span>
+                <span className={`rounded-md border px-2 py-0.5 font-mono text-[0.76rem] font-bold tabular-nums ${tone.badge}`}>
+                  {scanning ? '…' : on && score !== null ? score.toFixed(2) : '—'}
+                </span>
+              </div>
+              <div>
+                <b className="block text-[1.02rem]">{title}</b>
+                <span className={`block text-[0.82rem] ${verdict ? 'font-bold text-ink' : 'text-muted'}`} lang={verdict ? 'bn' : undefined}>
+                  {scanning ? 'scanning…' : on ? note : data ? 'waiting' : 'no decision yet'}
+                </span>
+              </div>
+              <FlowBar value={on && score !== null ? score : 0} tone={tone.bar} busy={scanning} />
+            </li>
+          )
+        })}
+      </ol>
     </section>
   )
 }
 
 // ---------------------------------------------------------------------------
-// recent evaluations: new rows glow once; a row opens the audit drawer
+// recent evaluations
 
-function RecentEvaluations({ scanning }: { scanning: boolean }) {
+type Filter = 'all' | 'block' | 'allow'
+
+function useRecent(filter: Filter) {
   const queryClient = useQueryClient()
-  // each fetch marks the rows the previous fetch did not have; those glow once
-  const { data, error, isPending } = useQuery({
-    queryKey: ['audit', 'recent'],
+  return useQuery({
+    queryKey: ['audit', 'recent', filter],
+    // each fetch marks the rows the previous fetch did not have; those glow once
     queryFn: async () => {
-      const prev = queryClient.getQueryData<AuditPage & { fresh: string[] }>(['audit', 'recent'])
-      const next = await api.audit({ limit: 6 })
+      const prev = queryClient.getQueryData<AuditPage & { fresh: string[] }>(['audit', 'recent', filter])
+      const next = await api.audit({ limit: 6, decision: filter === 'all' ? undefined : filter })
       const before = new Set(prev?.records.map((r) => r.id))
       return { ...next, fresh: prev ? next.records.filter((r) => !before.has(r.id)).map((r) => r.id) : [] }
     },
+    placeholderData: keepPreviousData,
   })
+}
+
+function RecentEvaluations({ scanning }: { scanning: boolean }) {
+  const [filter, setFilter] = useState<Filter>('all')
+  const { data, error, isPending } = useRecent(filter)
   const [open, setOpen] = useState<AuditRecord | null>(null)
   const fresh = new Set(data?.fresh)
+  const t = data?.thresholds ?? DEFAULT_T
 
-  const auditLink = (
-    <Link to="/audit" className="lift inline-flex min-h-10 shrink-0 items-center rounded-xl border border-line2 bg-accent/12 px-3.5 text-sm font-semibold">
-      View Audit Log →
-    </Link>
-  )
-  const RiskCell = ({ r }: { r: AuditRecord }) => (
-    <div className="flex items-center gap-2">
-      <FlowBar value={r.risk_score} tone={DECISION_TONE[r.decision].bar} className="h-1.5 w-20" />
-      <span className="font-mono text-[0.78rem] tabular-nums">{r.risk_score.toFixed(2)}</span>
+  const Risk = ({ r }: { r: AuditRecord }) => (
+    <div className="flex items-center gap-2.5">
+      <FlowBar value={r.risk_score} tone={scoreTone(r.risk_score, t).bar} className="h-1.5 w-20" />
+      <span className="font-mono text-[0.82rem] tabular-nums">{r.risk_score.toFixed(2)}</span>
     </div>
+  )
+  const Chip = ({ r }: { r: AuditRecord }) => (
+    <code className="inline-block max-w-full truncate rounded-lg border border-fg/10 bg-well/30 px-2.5 py-1 font-mono text-[0.78rem] text-warn-ink">
+      {short(callText(r.tool_name, r.arguments), 36)}
+    </code>
   )
 
   return (
-    <section className="glass spotlight p-4 sm:p-5">
-      <div className="relative">
-        <PanelTitle icon={FileText} title="Recent Evaluations" sub="Click a row for the full audit trace." right={auditLink} />
+    <section className="glass spotlight p-5 sm:p-7">
+      <div className="relative flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-[1.3rem] font-bold">Recent Evaluations</h2>
+          <p className="mt-1 text-sm text-muted">Click any row to inspect the full JSON audit trace and taint lineage.</p>
+        </div>
+        <div role="tablist" aria-label="Filter by decision" className="inline-flex gap-1 rounded-xl border border-fg/8 bg-fg/[0.03] p-1">
+          {(['all', 'block', 'allow'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              role="tab"
+              aria-selected={filter === f}
+              onClick={() => setFilter(f)}
+              className={`min-h-9 rounded-lg px-4 font-mono text-[0.8rem] transition-colors duration-300 ${filter === f ? 'bg-accent font-bold text-accent-ink' : 'text-body hover:bg-fg/5'}`}
+            >
+              {f === 'all' ? 'All' : f.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative mt-5">
         {isPending && <div className="flex flex-col gap-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12" />)}</div>}
         {error && <ErrorNote error={error} />}
-        {data && data.records.length === 0 && !scanning && (
-          <p className="py-3 text-sm text-muted">No decisions yet. Run a scenario to see AgentShield's first verdict here.</p>
-        )}
+        {data && data.records.length === 0 && !scanning && <p className="py-3 text-sm text-muted">No decisions here yet. Run a scenario to see one.</p>}
         {data && (data.records.length > 0 || scanning) && (
           <>
             <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-left text-sm">
-                <thead className="text-xs text-muted">
-                  <tr className="border-b border-line">
-                    <th className="py-2 pr-3 font-medium">Time (UTC)</th>
-                    <th className="py-2 pr-3 font-medium">User Request</th>
-                    <th className="py-2 pr-3 font-medium">Tool</th>
-                    <th className="py-2 pr-3 font-medium">Risk</th>
-                    <th className="py-2 pr-3 font-medium">Decision</th>
-                    <th className="py-2 font-medium">Reason</th>
+                <thead>
+                  <tr className="border-b border-line font-mono text-[0.7rem] tracking-[0.12em] text-muted uppercase">
+                    <th className="py-3 pr-4 font-medium">Time (UTC)</th>
+                    <th className="py-3 pr-4 font-medium">User request</th>
+                    <th className="py-3 pr-4 font-medium">Tool call</th>
+                    <th className="py-3 pr-4 font-medium">Risk score</th>
+                    <th className="py-3 pr-4 font-medium">Verdict</th>
+                    <th className="py-3 text-right font-medium">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {scanning && (
                     <tr className="border-b border-line/60">
-                      <td className="py-3 pr-3 font-mono text-[0.78rem] text-soft">now</td>
-                      <td className="py-3 pr-3 text-muted" colSpan={2}>Evaluating the agent’s tool calls…</td>
-                      <td className="py-3 pr-3"><FlowBar value={0} tone="bg-mark" busy className="h-1.5 w-20" /></td>
-                      <td className="py-3 pr-3 font-mono text-xs text-muted" colSpan={2}>scanning</td>
+                      <td className="py-3.5 pr-4 font-mono text-[0.82rem] text-soft">now</td>
+                      <td className="py-3.5 pr-4 text-muted" colSpan={2}>Evaluating the agent’s tool calls…</td>
+                      <td className="py-3.5 pr-4"><FlowBar value={0} tone="bg-mark" busy className="h-1.5 w-20" /></td>
+                      <td className="py-3.5 pr-4 font-mono text-xs text-muted" colSpan={2}>scanning</td>
                     </tr>
                   )}
                   {data.records.map((r) => (
@@ -462,15 +593,15 @@ function RecentEvaluations({ scanning }: { scanning: boolean }) {
                       tabIndex={0}
                       onClick={() => setOpen(r)}
                       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setOpen(r))}
-                      aria-label={`Open audit details: ${r.decision} ${r.tool_name}`}
-                      className={`cursor-pointer border-b border-line/60 transition-colors hover:bg-accent/6 focus-visible:bg-accent/6 ${fresh.has(r.id) ? 'row-new' : ''}`}
+                      aria-label={`Inspect ${r.decision} ${r.tool_name}`}
+                      className={`group cursor-pointer border-b border-line/60 transition-colors hover:bg-fg/[0.03] focus-visible:bg-fg/[0.03] ${fresh.has(r.id) ? 'row-new' : ''}`}
                     >
-                      <td className="py-2.5 pr-3 font-mono text-[0.78rem] whitespace-nowrap text-muted tabular-nums">{utcTime(r.timestamp)}</td>
-                      <td className="py-2.5 pr-3">{short(r.user_request, 44)}</td>
-                      <td className="py-2.5 pr-3"><code className="font-mono text-[0.8rem] text-ok-ink">{r.tool_name}</code></td>
-                      <td className="py-2.5 pr-3"><RiskCell r={r} /></td>
-                      <td className="py-2.5 pr-3"><DecisionBadge decision={r.decision} /></td>
-                      <td className="py-2.5 text-muted">{short(r.reason_en, 70)}</td>
+                      <td className="py-3.5 pr-4 font-mono text-[0.82rem] whitespace-nowrap text-muted tabular-nums">{clock(r.timestamp)}</td>
+                      <td className="py-3.5 pr-4 font-semibold">{short(r.user_request, 40)}</td>
+                      <td className="max-w-[18rem] py-3.5 pr-4"><Chip r={r} /></td>
+                      <td className="py-3.5 pr-4"><Risk r={r} /></td>
+                      <td className="py-3.5 pr-4"><DecisionBadge decision={r.decision} /></td>
+                      <td className="py-3.5 text-right font-mono text-[0.8rem] whitespace-nowrap text-muted group-hover:text-ink">Inspect ↗</td>
                     </tr>
                   ))}
                 </tbody>
@@ -488,16 +619,17 @@ function RecentEvaluations({ scanning }: { scanning: boolean }) {
                   <button
                     type="button"
                     onClick={() => setOpen(r)}
-                    className={`flex w-full flex-col gap-1.5 rounded-xl border border-fg/8 bg-card2/50 px-3.5 py-3 text-left ${fresh.has(r.id) ? 'row-new' : ''}`}
+                    className={`flex w-full flex-col gap-2 rounded-xl border border-fg/8 bg-card2/50 px-3.5 py-3 text-left ${fresh.has(r.id) ? 'row-new' : ''}`}
                   >
                     <span className="flex w-full items-center justify-between gap-2">
-                      <span className="font-mono text-xs text-muted">{utcTime(r.timestamp)} UTC</span>
+                      <span className="font-mono text-xs text-muted">{clock(r.timestamp)} UTC</span>
                       <DecisionBadge decision={r.decision} />
                     </span>
-                    <span className="text-sm font-semibold">{short(r.user_request, 90)}</span>
+                    <span className="text-sm font-semibold">{short(r.user_request, 80)}</span>
+                    <Chip r={r} />
                     <span className="flex w-full items-center justify-between gap-2">
-                      <code className="font-mono text-[0.78rem] text-ok-ink">{r.tool_name}</code>
-                      <RiskCell r={r} />
+                      <Risk r={r} />
+                      <span className="font-mono text-xs text-muted">Inspect ↗</span>
                     </span>
                   </button>
                 </li>
@@ -506,7 +638,7 @@ function RecentEvaluations({ scanning }: { scanning: boolean }) {
           </>
         )}
       </div>
-      {open && data && <AuditDrawer record={open} thresholds={data.thresholds} onClose={() => setOpen(null)} />}
+      {open && data && <AuditDrawer record={open} thresholds={t} onClose={() => setOpen(null)} />}
     </section>
   )
 }
@@ -521,12 +653,23 @@ export default function Playground() {
   const toast = useToast()
   const overview = useQuery({ queryKey: ['overview'], queryFn: api.overview })
   const scenarios = useQuery({ queryKey: ['scenarios'], queryFn: api.scenarios, staleTime: Infinity })
+  // until a run: the latest BLOCK from the audit log fills the pipeline
+  const latestBlock = useQuery({ queryKey: ['audit', 'latest-block'], queryFn: () => api.audit({ decision: 'block', limit: 1 }) })
   const pipelineRef = useRef<HTMLDivElement>(null)
   const [runId, setRunId] = useState(0)
   const [scanning, setScanning] = useState(false)
   const started = useRef(0)
   const timer = useRef(0)
   useEffect(() => () => clearTimeout(timer.current), [])
+
+  const scenarioList = useMemo(() => scenarios.data ?? [], [scenarios.data])
+  const [picked, setPicked] = useState<string | null>(null)
+  const scenario = scenarioList.find((s) => s.name === picked) ?? scenarioList.find((s) => s.name === 'attack_email_bn') ?? scenarioList[0]
+  const [modePicked, setMode] = useState<RunMode>('mock')
+  const [approve, setApprove] = useState(false)
+  const liveAvailable = overview.data?.live_mode_available ?? false
+  const mode: RunMode = (modePicked === 'groq' && !liveAvailable) || (modePicked === 'recorded' && !scenario?.has_recording) ? 'mock' : modePicked
+  const thresholds = latestBlock.data?.thresholds ?? DEFAULT_T
 
   const run = useMutation<RunResult, Error, { name: string; mode: RunMode; approve: boolean }>({
     mutationFn: ({ name, mode, approve }) => api.run(name, mode, approve),
@@ -553,7 +696,8 @@ export default function Playground() {
     if (runId && pipelineRef.current) smoothScrollTo(pipelineRef.current, -24)
   }, [runId])
 
-  const scenarioList = useMemo(() => scenarios.data ?? [], [scenarios.data])
+  const fromLastRun = runId > 0 ? fromRun(run.data) : null
+  const pipelineData = fromLastRun ?? fromAudit(latestBlock.data?.records[0])
 
   return (
     <div className="flex flex-col gap-5">
@@ -568,18 +712,24 @@ export default function Playground() {
         ) : scenarioList.length ? (
           <RunCard
             scenarios={scenarioList}
-            liveAvailable={overview.data?.live_mode_available ?? false}
+            scenario={scenario}
+            setName={setPicked}
+            mode={mode}
+            setMode={setMode}
+            approve={approve}
+            setApprove={setApprove}
+            liveAvailable={liveAvailable}
             scanning={scanning}
-            onRun={(name, mode, approve) => run.mutate({ name, mode, approve })}
+            onRun={() => scenario && run.mutate({ name: scenario.name, mode, approve })}
           />
         ) : (
-          <Skeleton className="h-[460px]" />
+          <Skeleton className="h-[560px]" />
         )}
-        <HowItWorks flowing={scanning} />
+        <HowItWorks scenario={scenario} scanning={scanning} decided={fromLastRun} thresholds={thresholds} />
       </div>
 
       <div ref={pipelineRef} className="scroll-mt-20 lg:scroll-mt-6">
-        <Pipeline result={run.data} scanning={scanning} runId={runId} />
+        <Pipeline data={scanning ? null : pipelineData} scanning={scanning} runKey={`${runId}-${scanning}-${pipelineData?.from}`} thresholds={thresholds} />
       </div>
 
       <div aria-live="polite">

@@ -253,3 +253,12 @@ def test_sandbox_never_writes_the_audit_log_and_checks_input(client):
     assert sandbox(client, to="not a number").status_code == 422
     assert sandbox(client, amount=0).status_code == 422
     assert sandbox(client, user_request="").status_code == 422
+
+
+def test_scenarios_carry_their_untrusted_text_and_requests(client):
+    items = {s["name"]: s for s in client.get("/api/scenarios").json()}
+    bill = items["attack_bill_bn"]
+    assert [u["source"] for u in bill["untrusted"]] == ["tool:email", "tool:email"]
+    assert {(r["to"], r["amount"]) for r in bill["requests"]} == {("01000000102", 8000), ("01000000666", 4500)}
+    assert items["benign_balance"]["untrusted"] == [] and items["benign_balance"]["requests"] == []
+    assert items["attack_web_banglish"]["untrusted"][0]["source"] == "tool:web"

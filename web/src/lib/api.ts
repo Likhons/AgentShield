@@ -24,12 +24,22 @@ export interface Overview {
   live_mode_available: boolean
 }
 
+export interface UntrustedItem {
+  source: 'tool:email' | 'tool:web' | 'tool:file'
+  origin: string
+  title: string
+  text: string
+  kind: 'attack' | 'normal'
+}
+
 export interface Scenario {
   name: string
   kind: 'attack' | 'benign'
   description: string
   user_task: string
   has_recording: boolean
+  untrusted?: UntrustedItem[] // missing on API servers older than 17 Nov
+  requests?: { to: string; amount: number; origin: string; kind: 'attack' | 'normal' }[]
 }
 
 export interface Thresholds {
