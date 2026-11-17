@@ -249,10 +249,10 @@ export default function Landing() {
             <Logo size={30} />
           </Link>
           <div className="hidden items-center gap-7 text-[0.95rem] md:flex">
-            <a href="#about" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">About</a>
             <a href="#how" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">How it works</a>
             <a href="#results" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">Results</a>
             <a href="#builders" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">For developers</a>
+            <a href="#about" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">About</a>
           </div>
           <div className="flex items-center gap-2.5">
             <ThemeToggle />
@@ -265,7 +265,6 @@ export default function Landing() {
 
       <main id="main" className="relative">
         <Hero />
-        <About />
         <HowItWorks />
         <Results />
         <section id="builders" className="relative scroll-mt-20 border-t border-fg/6">
@@ -285,6 +284,7 @@ export default function Landing() {
             </Reveal>
           </div>
         </section>
+        <About />
       </main>
 
       <footer className="footer-dots relative border-t border-fg/6">
