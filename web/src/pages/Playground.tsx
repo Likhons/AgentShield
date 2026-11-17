@@ -734,7 +734,9 @@ export default function Playground() {
 
       <div aria-live="polite">
         {run.error && !scanning && <ErrorNote error={run.error} />}
-        {run.data && !scanning && runId > 0 && <RunResultView key={runId} result={run.data} />}
+        {run.data && !scanning && runId > 0 && (
+          <RunResultView key={runId} result={run.data} rerunning={scanning} onRerun={() => run.variables && run.mutate(run.variables)} />
+        )}
       </div>
 
       <RecentEvaluations scanning={scanning} />
