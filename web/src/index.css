@@ -652,6 +652,11 @@ html[data-theme='light'] .shield-art {
   --sa-pad: #c2ef6a; --sa-pad-op: 0.55; --sa-pad2: #8cc63f;
 }
 
+/* logo: the action dot in the gate of the split shield */
+.logo-dot { fill: var(--color-accent); filter: drop-shadow(0 0 3px rgb(194 239 106 / 0.55)); }
+html[data-theme='light'] .logo-dot { fill: #9fd14a; stroke: rgb(18 19 16 / 0.28); stroke-width: 0.6; filter: none; }
+a:hover .logo-mark .logo-dot, .logo-mark:hover .logo-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }

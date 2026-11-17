@@ -1,7 +1,8 @@
-import { ChartColumn, PlayCircle, ShieldCheck } from 'lucide-react'
+import { ChartColumn, PlayCircle } from 'lucide-react'
 import { lazy, Suspense, useEffect, useRef, useState, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import DevTerminal from '../components/landing/DevTerminal'
+import Logo from '../components/Logo'
 import ThemeToggle from '../components/ThemeToggle'
 import HeroSimulation from '../components/landing/HeroSimulation'
 import Pipeline from '../components/landing/Pipeline'
@@ -243,9 +244,8 @@ export default function Landing() {
       </a>
       <header className="fixed inset-x-0 top-3 z-30 px-3 sm:px-6">
         <nav aria-label="Main" className="glass mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl! px-3 sm:px-4">
-          <Link to="/" className="flex min-h-11 items-center gap-2.5">
-            <span className="icon-tile h-9 w-9"><ShieldCheck size={19} className="text-soft" aria-hidden /></span>
-            <span className="font-display text-[1.1rem] font-extrabold tracking-[-0.03em]">AgentShield</span>
+          <Link to="/" aria-label="AgentShield home" className="flex min-h-11 items-center">
+            <Logo size={30} />
           </Link>
           <div className="hidden items-center gap-7 text-[0.95rem] md:flex">
             <a href="#how" className="inline-flex min-h-11 items-center font-semibold text-muted transition-colors duration-300 hover:text-ink">How it works</a>

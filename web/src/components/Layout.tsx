@@ -1,7 +1,8 @@
+import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import { useTheme } from '../lib/theme'
 import { useQuery } from '@tanstack/react-query'
-import { ChartColumn, Database, FileText, Menu, PlayCircle, Scale, ShieldCheck, X, type LucideIcon } from 'lucide-react'
+import { ChartColumn, Database, FileText, Menu, PlayCircle, Scale, X, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
@@ -34,14 +35,8 @@ const ALL_ITEMS = SECTIONS.flatMap((s) => s.items)
 
 function Brand() {
   return (
-    <Link to="/" aria-label="AgentShield home" className="flex items-center gap-3">
-      <span className="icon-tile h-10 w-10">
-        <ShieldCheck size={21} className="text-soft" aria-hidden />
-      </span>
-      <div className="leading-tight">
-        <div className="text-[1.15rem] font-display font-bold tracking-tight">AgentShield</div>
-        <div className="text-xs text-soft">AI Agent Safety Platform</div>
-      </div>
+    <Link to="/" aria-label="AgentShield home" className="flex min-h-11 items-center">
+      <Logo sub="AI Agent Safety Platform" size={34} />
     </Link>
   )
 }
