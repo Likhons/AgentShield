@@ -2,7 +2,7 @@
 
 **Runtime security gateway for AI agents.** AgentShield checks every tool call an agent wants to make before it runs, and blocks actions the user never asked for, especially ones triggered by hidden instructions in Bangla, Banglish or English inside untrusted data (emails, web pages, files).
 
-> Status: core working end to end; benchmarks done for the preliminary submission. Live demos: web dashboard https://agent-shield-azure.vercel.app (the API sleeps on Render's free tier: the first request can take about 50 s) and the first Streamlit version https://agentshield-demo.streamlit.app. All numbers, sources and caveats: [docs/results.md](docs/results.md).
+> Status: core working end to end; benchmarks done for the preliminary submission. Live demos: web dashboard https://agent-shield-demo.vercel.app (the API sleeps on Render's free tier: the first request can take about 50 s) and the first Streamlit version https://agentshield-demo.streamlit.app. All numbers, sources and caveats: [docs/results.md](docs/results.md).
 
 ## Results (measured, small samples, 95% intervals in docs/results.md)
 - **Real LLM agent** (qwen3.8-27b via Groq, 20 Bangla/Banglish attacks + 20 normal bill payments, 1 run each): attacks moved money in **4 of 20** cases without AgentShield and **0 of 20** with it. The landlord's real rent was paid in **16 of 20** cases both without and with AgentShield: it blocked every attacker payment and held no legitimate one.

@@ -118,7 +118,7 @@ AgentShield itself does not use or expose MCP: it calls LLMs over plain HTTPS an
 TBD: 2–3 minute walkthrough of the working software (script in `docs/pitch.md` §5, to be updated).
 
 ### Demo / live links
-- Live demo, web dashboard: https://agent-shield-azure.vercel.app (Playground with offline, recorded and live real-model runs, Benchmarks, Audit Log, Policies, Datasets, Network; the API runs on Render's free tier, so the first request after 15 idle minutes can take about 50 s)
+- Live demo, web dashboard: https://agent-shield-demo.vercel.app (Playground with offline, recorded and live real-model runs, Benchmarks, Audit Log, Policies, Datasets, Network; the API runs on Render's free tier, so the first request after 15 idle minutes can take about 50 s)
 - Live demo, Streamlit (first version): https://agentshield-demo.streamlit.app (offline simulated agent and recorded real-model runs; no Network page)
 - [Team: decide which link goes into the single live-link field. The Network page exists only on the web dashboard.]
 - GitHub repository: **TBD**: a new public repo, or the private repo with a judge access note (our 16 Nov reading of the portal FAQ: private links are accepted and marked "Restricted"; confirm). Decide what to do with `datasets/attacks.jsonl` first, see `docs/ethics_impact.md` §9.
@@ -173,7 +173,7 @@ Phased plan (vulnerable demo agent → core checks → datasets and benchmark �
 Working prototype: core gateway, SDK, HTTP API, demo agent, dashboards and benchmarks run end to end; live demos online. The network check is a prototype tested on simulated data.
 
 ### Publicly hosted environment
-Vercel (web dashboard): https://agent-shield-azure.vercel.app, with the dashboard API on Render (free tier, Singapore). Streamlit Community Cloud (first version): https://agentshield-demo.streamlit.app
+Vercel (web dashboard): https://agent-shield-demo.vercel.app, with the dashboard API on Render (free tier, Singapore). Streamlit Community Cloud (first version): https://agentshield-demo.streamlit.app
 
 ### Not used (leave empty)
 RAG / vector databases, local LLM runtimes (Ollama etc.), workflow automation tools (n8n etc.), tunneling. MCP is not used in the product (development use is disclosed above).
