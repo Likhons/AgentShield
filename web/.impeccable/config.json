@@ -10,7 +10,16 @@
           "src/index.css"
         ],
         "createdAt": "2026-11-17T08:51:54.523Z",
-        "reason": "Claude triage: the only left border in index.css is .md blockquote (Markdown quote convention in rendered results.md), not a card side-tab; predates this session (3ccad7a)"
+        "reason": "user confirmed: asked (17 Nov, reference screenshot) for the Bangla hero callout with a lime-to-emerald bar on its left edge (.bn-callout); the other left border is the Markdown blockquote"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/index.css"
+        ],
+        "createdAt": "2026-11-17T09:52:23.896Z",
+        "reason": "user confirmed: asked (17 Nov, reference screenshot) for the landing motto 'never real.' in a lime-to-mint gradient (.hero-gradient)"
       }
     ]
   }
