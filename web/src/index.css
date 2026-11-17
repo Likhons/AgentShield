@@ -247,8 +247,9 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 
 .glass {
   position: relative; border-radius: 16px;
-  background: rgb(18 20 16 / 0.72);
-  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  /* no backdrop blur on cards: re-blurring every card each frame (over the moving aurora) was the main
+     scroll cost, and on these near-opaque surfaces it was barely visible. Bars and drawers use .glass-blur. */
+  background: rgb(18 20 16 / 0.86);
   border: 1px solid rgb(236 234 226 / 0.08);
   box-shadow: 0 24px 60px -32px rgb(0 0 0 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.04);
 }
@@ -306,7 +307,7 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 .run-progress {
   position: absolute; left: 0; right: 0; top: 0; height: 2px; z-index: 2; pointer-events: none; transform-origin: left center;
   background: linear-gradient(90deg, rgb(var(--accent-rgb) / 0.09), var(--color-mark));
-  transform: scaleX(0); animation: run-fill var(--run-ms, 5s) linear forwards; will-change: transform;
+  transform: scaleX(0); animation: run-fill var(--run-ms, 5s) linear forwards;
   transition: opacity 0.7s ease-out;
 }
 .run-progress.is-done { opacity: 0; }
@@ -316,7 +317,7 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 .spin-once { animation: spin 0.6s var(--ease-spring); }
 
 /* bars that fill with transform (scaleX), so the width never changes */
-.fill-bar { transform-origin: left center; transform: scaleX(0); transition: transform 1.2s var(--ease-spring); will-change: transform; }
+.fill-bar { transform-origin: left center; transform: scaleX(0); transition: transform 1.2s var(--ease-spring); }
 
 /* check pipeline: the active step */
 .pipe-step { transition: border-color 0.5s var(--ease-spring), background-color 0.5s var(--ease-spring), opacity 0.5s var(--ease-spring), transform 0.5s var(--ease-spring); }
@@ -407,9 +408,8 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 .tilt {
   transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--ty, 0px));
   transition: transform 0.6s var(--ease-spring), border-color 0.3s, box-shadow 0.5s var(--ease-spring);
-  will-change: transform;
 }
-.tilt.is-tilting { transition: transform 0.12s linear, border-color 0.3s, box-shadow 0.5s var(--ease-spring); }
+.tilt.is-tilting { will-change: transform; transition: transform 0.12s linear, border-color 0.3s, box-shadow 0.5s var(--ease-spring); }
 
 /* entrance: cards spring in one after another (--i is the index) */
 @keyframes spring-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
@@ -466,7 +466,7 @@ button:not(:disabled):active, a.inline-flex:active { transform: translateY(1px) 
 
 /* evaluation pipeline: cards ignite one after another, the verdict badge slams down */
 .ignite { transition: transform 0.6s var(--ease-spring), border-color 0.5s var(--ease-spring), background-color 0.5s var(--ease-spring), box-shadow 0.6s var(--ease-spring), opacity 0.5s; }
-.ignite.tilt.is-tilting { transition: transform 0.12s linear, border-color 0.5s, background-color 0.5s, box-shadow 0.6s, opacity 0.5s; }
+.ignite.tilt.is-tilting { will-change: transform; transition: transform 0.12s linear, border-color 0.5s, background-color 0.5s, box-shadow 0.6s, opacity 0.5s; }
 .ignite.is-lit { box-shadow: 0 0 0 1px var(--color-line2), 0 0 36px -12px var(--glow, rgb(var(--accent-rgb) / 0.42)); }
 @keyframes slam {
   0% { opacity: 0; transform: scale(2.2) rotate(-6deg); }
@@ -598,7 +598,7 @@ html[data-theme='light'] .icon-tile {
 html[data-theme='light'] .btn-primary { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 10px 26px -16px rgb(79 127 34 / 0.55); }
 html[data-theme='light'] .btn-primary:not(:disabled):hover { background: #b9e85c; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5), 0 12px 28px -14px rgb(79 127 34 / 0.6); }
 html[data-theme='light'] .glass {
-  background: rgb(251 250 245 / 0.8);
+  background: rgb(251 250 245 / 0.92);
   border-color: rgb(18 19 16 / 0.08);
   box-shadow: 0 1px 0 rgb(18 19 16 / 0.03), 0 18px 44px -28px rgb(18 19 16 / 0.28);
 }
@@ -668,6 +668,10 @@ a:hover .logo-mark .logo-dot, .logo-mark:hover .logo-dot { animation: pulse-dot 
 html[data-theme='light'] .nav-item:not(.nav-active):hover { background: rgb(18 19 16 / 0.05); }
 html[data-theme='light'] .nav-active { background: rgb(194 239 106 / 0.42); border-color: rgb(79 127 34 / 0.3); color: #1f4d12; box-shadow: none; }
 html[data-theme='light'] .nav-dot { background: #4f7f22; box-shadow: none; }
+
+/* frosted glass only where content scrolls underneath: the floating nav and the slide-over drawer */
+.glass-blur { -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); background: rgb(18 20 16 / 0.72); }
+html[data-theme='light'] .glass-blur { background: rgb(251 250 245 / 0.78); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }

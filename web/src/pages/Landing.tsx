@@ -216,7 +216,7 @@ function Results() {
           <ul className="flex flex-wrap gap-2.5">
             {PILLS.map((p) => (
               <li key={p.label} className="glass spotlight inline-flex min-h-10 items-center gap-2.5 rounded-full! px-4 py-1.5 text-sm">
-                <span className="relative font-mono font-bold tabular-nums text-soft">{p.value}</span>
+                <span className="relative shrink-0 font-mono font-bold whitespace-nowrap tabular-nums text-soft">{p.value}</span>
                 <span className="relative text-muted">{p.label}</span>
               </li>
             ))}
@@ -241,7 +241,7 @@ export default function Landing() {
         Skip to main content
       </a>
       <header data-scroll-header className="fixed inset-x-0 top-3 z-30 px-3 sm:px-6">
-        <nav aria-label="Main" className="glass mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl! px-3 sm:px-4">
+        <nav aria-label="Main" className="glass glass-blur mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-2xl! px-3 sm:px-4">
           <Link to="/" aria-label="AgentShield home" className="flex min-h-11 items-center">
             <Logo size={30} />
           </Link>

@@ -93,7 +93,7 @@ export default function About() {
           </ul>
           <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.84rem] text-muted">
             <span>A research prototype built for the International AI Builders Congress 2026. Demo data is fake; every number on this site comes from a saved run.</span>
-            <Link to="/benchmarks" className="inline-flex items-center gap-1 font-semibold text-soft hover:text-ink">
+            <Link to="/benchmarks" className="inline-flex min-h-11 items-center gap-1 font-semibold text-soft hover:text-ink">
               See the measurements <ArrowRight size={14} aria-hidden />
             </Link>
           </p>

@@ -34,7 +34,7 @@ export default function AuditDrawer({ record, thresholds, onClose }: { record: A
         aria-label="Audit details"
         tabIndex={-1}
         data-lenis-prevent
-        className="drawer-in glass h-full w-full max-w-[520px] overflow-y-auto rounded-none! border-y-0! border-r-0! px-4 py-4 outline-none sm:px-5"
+        className="drawer-in glass glass-blur h-full w-full max-w-[520px] overflow-y-auto rounded-none! border-y-0! border-r-0! px-4 py-4 outline-none sm:px-5"
       >
         <AuditDetail record={record} thresholds={thresholds} onClose={onClose} />
       </div>

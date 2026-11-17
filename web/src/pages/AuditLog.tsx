@@ -36,7 +36,7 @@ function useDebounced<T>(value: T, ms = 300): T {
 
 function Kpi({ icon: Icon, tint, label, value, note, wide = false }: { icon: LucideIcon; tint: string; label: string; value: string; note: string; wide?: boolean }) {
   return (
-    <div className={`card flex items-center gap-3.5 p-4 ${wide ? 'col-span-2 md:col-span-1' : ''}`}>
+    <div className={`card flex flex-col items-start gap-2.5 p-4 sm:flex-row sm:items-center sm:gap-3.5 ${wide ? 'col-span-2 flex-row! items-center! md:col-span-1' : ''}`}>
       <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${tint} 13%, transparent)`, border: `1px solid color-mix(in srgb, ${tint} 33%, transparent)` }}>
         <Icon size={20} color={tint} aria-hidden />
       </span>

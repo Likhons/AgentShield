@@ -65,7 +65,7 @@ export default function HeroArt() {
           {/* energy pulses flowing towards the shield */}
           {TRACES.map((d, i) => (
             <path key={`e-${d}`} className="energy" d={d} strokeWidth="2.4" strokeLinecap="round"
-              pathLength={220} style={{ stroke: 'var(--sa-energy)', animationDelay: `${i * -0.43}s`, filter: 'drop-shadow(0 0 4px var(--sa-energy-glow))' }} />
+              pathLength={220} style={{ stroke: 'var(--sa-energy)', animationDelay: `${i * -0.43}s` }} />
           ))}
           {[[232, 82], [222, 122], [240, 154], [348, 82], [358, 122], [340, 154]].map(([x, y]) => (
             <circle key={`${x}-${y}`} cx={x} cy={y} r="3" style={{ fill: 'var(--sa-node)' }} />
