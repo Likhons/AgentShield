@@ -52,7 +52,7 @@ function Checking() {
 function Chip({ name, score, flagged, on }: { name: string; score: string; flagged: boolean; on: boolean }) {
   const tone = !on ? 'border-fg/8 text-muted' : flagged ? 'border-bad/50 bg-bad/[0.12] text-bad-soft' : 'border-ok/45 bg-ok/[0.1] text-ok-ink'
   return (
-    <span className={`chip relative flex min-w-0 flex-col rounded-lg border px-2 py-1 ${tone} ${on ? 'is-in' : ''}`}>
+    <span className={`chip relative flex min-w-0 flex-col rounded-lg border px-1.5 py-1 sm:px-2 ${tone} ${on ? 'is-in' : ''}`}>
       <span className="truncate text-[0.66rem] leading-tight opacity-80">{name}</span>
       <span className="font-mono text-[0.78rem] leading-tight font-semibold tabular-nums">{on ? score : '··'}</span>
     </span>

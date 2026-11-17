@@ -11,6 +11,7 @@ import HeroSimulation from '../components/landing/HeroSimulation'
 import Pipeline from '../components/landing/Pipeline'
 import { CountUp, Reveal } from '../components/Motion'
 import { reducedMotion, useInView } from '../lib/motion'
+import { prefetchPages, wakeApi } from '../lib/pages'
 
 const SandboxModal = lazy(() => import('../components/landing/SandboxModal'))
 
@@ -24,10 +25,14 @@ function useScrollProgress<T extends HTMLElement>(ref: RefObject<T | null>) {
     const el = ref.current
     if (!el || reducedMotion()) return
     let frame = 0
+    let last = -1
     const update = () => {
       frame = 0
       const r = el.getBoundingClientRect()
-      el.style.setProperty('--p', String(Math.min(1, Math.max(0, -r.top / r.height))))
+      const p = Math.round(Math.min(1, Math.max(0, -r.top / r.height)) * 1000) / 1000
+      if (p === last) return // past the hero it stays 1: no style write, no restyle
+      last = p
+      el.style.setProperty('--p', String(p))
     }
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
     update()
@@ -235,6 +240,8 @@ function Results() {
 
 export default function Landing() {
   const [demoOpen, setDemoOpen] = useState(false)
+  // wake the API while the visitor reads, and have the Playground's code ready for the "Demo" click
+  useEffect(() => { wakeApi(); prefetchPages(['playground']) }, [])
 
   return (
     <div className="relative min-h-dvh overflow-x-clip">

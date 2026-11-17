@@ -358,7 +358,7 @@ function Node({ nref, state, tone, icon: Icon, tag, tagInk, title, sub, classNam
   return (
     <div ref={nref} className={`arch-node ${className}`} data-state={state} data-tone={tone}>
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate font-mono text-[0.58rem] tracking-[0.14em] uppercase sm:text-[0.6rem]" style={{ color: tagInk ?? 'var(--color-muted)' }}>{tag}</span>
+        <span className="truncate font-mono text-[0.58rem] tracking-[0.08em] uppercase sm:text-[0.6rem] sm:tracking-[0.14em]" style={{ color: tagInk ?? 'var(--color-muted)' }}>{tag}</span>
         <Icon size={14} strokeWidth={1.8} className="arch-icon hidden shrink-0 sm:block" aria-hidden />
       </div>
       <div className="mt-1.5 text-[0.8rem] leading-tight font-semibold sm:text-[0.92rem]">{title}</div>

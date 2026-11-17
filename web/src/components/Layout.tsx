@@ -1,13 +1,14 @@
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
 import { useTheme } from '../lib/theme'
-import { useQuery } from '@tanstack/react-query'
-import { ChartColumn, GitBranch, Languages, Menu, ScrollText, SquareTerminal, Waypoints, X, type LucideIcon } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { ChartColumn, GitBranch, Languages, Loader2, Menu, ScrollText, SquareTerminal, Waypoints, X, type LucideIcon } from 'lucide-react'
 import type { Overview } from '../lib/api'
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
 import { lockScroll, scrollToTop, unlockScroll } from '../lib/motion'
+import { prefetchPages, warmRoute } from '../lib/pages'
 
 interface NavItem {
   to: string
@@ -50,6 +51,7 @@ function Brand() {
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const { data } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
+  const qc = useQueryClient()
   return (
     <nav aria-label="Main" className="flex flex-col gap-6 lg:gap-5">
       {SECTIONS.map((section) => (
@@ -64,6 +66,9 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
                   <NavLink
                     to={to}
                     onClick={onNavigate}
+                    onMouseEnter={() => warmRoute(to, qc)}
+                    onFocus={() => warmRoute(to, qc)}
+                    onTouchStart={() => warmRoute(to, qc)}
                     className={({ isActive }) =>
                       `nav-item flex min-h-11 items-center gap-3 rounded-xl border px-3 text-[0.95rem] font-semibold lg:min-h-10 ${isActive ? 'nav-active' : 'border-transparent text-body'}`
                     }
@@ -207,6 +212,25 @@ function ThemeRow() {
   )
 }
 
+/** Free hosting puts the API to sleep when idle; the first answer can take about a minute. Say so instead of
+ *  leaving the visitor with spinners. */
+function WakeNotice() {
+  const { isPending, isError } = useQuery({ queryKey: ['overview'], queryFn: api.overview })
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    if (!isPending) return
+    const id = window.setTimeout(() => setSlow(true), 3500)
+    return () => clearTimeout(id)
+  }, [isPending])
+  if (!slow || !isPending || isError) return null
+  return (
+    <div role="status" className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-md items-center gap-3 rounded-xl border border-line2 bg-card2 px-4 py-3 text-[0.86rem] leading-snug text-body shadow-[0_18px_40px_-20px_rgb(0_0_0/0.8)] lg:left-[252px]">
+      <Loader2 size={17} className="shrink-0 animate-spin text-soft" aria-hidden />
+      Waking the demo server. Free hosting sleeps when idle, so the first load can take up to a minute.
+    </div>
+  )
+}
+
 export default function Layout() {
   const [open, setOpen] = useState(false)
   const location = useLocation()
@@ -215,6 +239,8 @@ export default function Layout() {
   const current = ALL_ITEMS.find((i) => location.pathname.startsWith(i.to))
 
   useEffect(() => scrollToTop(), [location.pathname])
+  // in the dashboard, the other pages are likely next: load their code while the browser is idle
+  useEffect(() => prefetchPages(), [])
 
   // nav links close the drawer themselves; Escape closes it; focus moves in and back out
   useEffect(() => {
@@ -277,7 +303,7 @@ export default function Layout() {
 
       {/* mobile drawer */}
       <div
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity lg:hidden ${open ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+        className={`fixed inset-0 z-40 bg-black/60 transition-opacity lg:hidden ${open ? 'opacity-100 backdrop-blur-sm' : 'pointer-events-none opacity-0'}`}
         onClick={() => setOpen(false)}
         aria-hidden
       />
@@ -317,6 +343,7 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+      <WakeNotice />
     </div>
   )
 }
