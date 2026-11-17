@@ -134,122 +134,112 @@
 .md th { @apply bg-card2 font-semibold text-ink; }
 .md hr { @apply my-5 border-line; }
 
-/* landing architecture: the system as a guided map (components/landing/Architecture.tsx). One step at a time: the
-   caption says what happens, the map lights only what that step is about, and a numbered marker shows where to look.
-   Colour carries meaning: untrusted input red and dashed, the tool call lime, the decision in its allow/ask/block
-   colour, the network flag blue and dotted. */
+/* landing architecture: the system as a live map. Nodes are laid out by the grid, measured, and joined by traces
+   (components/landing/Architecture.tsx). Colour carries meaning: untrusted input red and dashed, the tool call lime,
+   the decision in its allow/ask/block colour, the network flag blue and dotted. */
 :root { --warn-rgb: 242 181 68; --info-rgb: 124 192 224; }
 html[data-theme='light'] { --warn-rgb: 160 101 10; --info-rgb: 45 106 143; }
 
 .arch-grid {
   position: relative; display: grid; grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "src" "agent" "gate" "out" "bottom" "key";
-  row-gap: 2.75rem; padding-inline: 14px; /* on phones the gutters carry bank data, the log and the network flag */
+  grid-template-areas: "src" "agent" "gate" "out" "bottom" "reason";
+  row-gap: 2.75rem; padding-inline: 14px; /* the gutters carry the log and network-flag traces on phones */
 }
 .arch-src { grid-area: src; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
 .arch-agent { grid-area: agent; justify-self: center; width: min(100%, 15rem); }
 .arch-gate { grid-area: gate; position: relative; z-index: 1; }
 .arch-out { grid-area: out; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
 .arch-bottom { grid-area: bottom; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
-.arch-key { grid-area: key; position: relative; z-index: 1; }
+.arch-reason { grid-area: reason; }
 @media (min-width: 1024px) {
   .arch-grid {
     grid-template-columns: 10.5rem 8.5rem minmax(0, 1fr) 10.5rem;
-    grid-template-areas: "src agent gate out" "key key bottom bottom";
+    grid-template-areas: "src agent gate out" "reason reason bottom bottom";
     column-gap: 2.75rem; row-gap: 3rem; padding-inline: 0;
   }
   .arch-src, .arch-out { grid-template-columns: minmax(0, 1fr); align-content: center; gap: 1rem; }
   .arch-agent { width: 100%; align-self: center; }
   .arch-bottom { gap: 2.75rem; align-self: start; }
-  .arch-key { align-self: end; }
+  .arch-reason { align-self: start; }
 }
 @media (min-width: 1280px) {
   .arch-grid { grid-template-columns: 12rem 9.5rem minmax(0, 1fr) 12rem; column-gap: 3.5rem; }
 }
 
-/* nodes: the one in focus glows, visited ones stay clear, coming ones wait a little faded, unused ones fade far back */
 .arch-node {
   --tone: var(--accent-rgb);
   position: relative; z-index: 1; min-width: 0; border-radius: 14px; border: 1px solid var(--color-line2);
   background: var(--color-card); padding: 0.65rem 0.75rem;
-  transition: opacity 0.7s var(--ease-spring), border-color 0.7s var(--ease-spring), box-shadow 0.7s var(--ease-spring), background-color 0.7s var(--ease-spring);
+  transition: opacity 0.6s var(--ease-spring), border-color 0.6s var(--ease-spring), box-shadow 0.6s var(--ease-spring);
 }
 .arch-node[data-tone='trusted'], .arch-node[data-tone='allow'] { --tone: var(--ok-rgb); }
 .arch-node[data-tone='untrusted'], .arch-node[data-tone='block'] { --tone: var(--bad-rgb); }
 .arch-node[data-tone='ask'] { --tone: var(--warn-rgb); }
 .arch-node[data-tone='flag'] { --tone: var(--info-rgb); }
-.arch-node .arch-icon { color: var(--color-muted); transition: color 0.7s var(--ease-spring); }
-.arch-node[data-state='idle'] { opacity: 0.62; }
-.arch-node[data-state='dim'] { opacity: 0.28; }
+.arch-node .arch-icon { color: var(--color-muted); transition: color 0.6s var(--ease-spring); }
+.arch-node[data-state='dim'] { opacity: 0.36; }
 .arch-node[data-state='lit'] {
-  border-color: rgb(var(--tone) / 0.65);
-  box-shadow: 0 0 0 4px rgb(var(--tone) / 0.09), 0 18px 40px -22px rgb(var(--tone) / 0.65);
+  border-color: rgb(var(--tone) / 0.55);
+  box-shadow: 0 0 0 4px rgb(var(--tone) / 0.07), 0 18px 40px -24px rgb(var(--tone) / 0.6);
 }
-.arch-node[data-state='lit'] .arch-icon, .arch-node[data-state='chosen'] .arch-icon { color: rgb(var(--tone)); }
+.arch-node[data-state='lit'] .arch-icon { color: rgb(var(--tone)); }
 .arch-node[data-state='done'] { border-color: rgb(var(--tone) / 0.3); }
-.arch-node[data-state='chosen'] { border-color: rgb(var(--tone) / 0.55); background: color-mix(in oklab, var(--color-card) 92%, rgb(var(--tone))); }
 @media (min-width: 640px) { .arch-node { padding: 0.75rem 0.85rem; } }
 
 .arch-gate-card {
   position: relative; border-radius: 18px; border: 1px solid var(--color-line2); padding: 0.7rem;
   background: linear-gradient(180deg, var(--color-card2), var(--color-card));
-  transition: border-color 0.7s var(--ease-spring), box-shadow 0.7s var(--ease-spring), opacity 0.7s var(--ease-spring);
+  transition: border-color 0.6s var(--ease-spring), box-shadow 0.6s var(--ease-spring);
 }
-.arch-gate-card[data-state='idle'] { opacity: 0.75; }
 .arch-gate-card[data-state='lit'] {
   border-color: rgb(var(--accent-rgb) / 0.5);
   box-shadow: 0 0 0 5px rgb(var(--accent-rgb) / 0.06), 0 30px 60px -38px rgb(var(--accent-rgb) / 0.7);
 }
 @media (min-width: 640px) { .arch-gate-card { padding: 0.85rem; } }
 
-/* gateway rows: the check in focus is scanned once, then holds its result; earlier results stay, later checks wait */
 .arch-row {
   position: relative; overflow: hidden; border-radius: 11px; border: 1px solid var(--color-tile-line);
   background: var(--color-tile); padding: 0.5rem 0.65rem;
-  transition: opacity 0.6s var(--ease-spring), border-color 0.6s var(--ease-spring), background-color 0.6s var(--ease-spring), box-shadow 0.6s var(--ease-spring);
+  transition: opacity 0.45s var(--ease-spring), border-color 0.45s var(--ease-spring), background-color 0.45s var(--ease-spring);
 }
-.arch-row[data-state='idle'] { opacity: 0.5; }
+.arch-row[data-state='idle'] { opacity: 0.55; }
 .arch-row[data-level='bad'] { border-color: rgb(var(--bad-rgb) / 0.38); background: rgb(var(--bad-rgb) / 0.06); }
 .arch-row[data-level='warn'] { border-color: rgb(var(--warn-rgb) / 0.42); background: rgb(var(--warn-rgb) / 0.07); }
 .arch-row[data-level='clear'] { border-color: rgb(var(--ok-rgb) / 0.3); }
-.arch-row[data-state='focus'] { box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.14); }
-.arch-row[data-state='focus']::after {
+/* a soft light sweeps the row while the check runs */
+.arch-row[data-state='scan']::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; transform: translateX(-100%);
   background: linear-gradient(100deg, transparent 15%, rgb(var(--accent-rgb) / 0.16) 50%, transparent 85%);
-  animation: arch-scan 0.9s var(--ease-out-soft) forwards;
+  animation: arch-scan var(--scan, 560ms) var(--ease-out-soft) forwards;
 }
 @keyframes arch-scan { to { transform: translateX(100%); } }
-/* a result appears just after the scan passes */
-.arch-row[data-state='focus'] .arch-result { animation: arch-fade 0.5s var(--ease-out-soft) 0.55s both; }
-.arch-result { animation: arch-fade 0.5s var(--ease-out-soft) both; }
 
-.arch-decision { transition: border-color 0.6s var(--ease-spring), background-color 0.6s var(--ease-spring), box-shadow 0.6s var(--ease-spring); }
+.arch-decision { transition: border-color 0.5s var(--ease-spring), background-color 0.5s var(--ease-spring); }
 .arch-decision[data-decision='allow'] { border-color: rgb(var(--ok-rgb) / 0.4); background: rgb(var(--ok-rgb) / 0.05); }
 .arch-decision[data-decision='ask'] { border-color: rgb(var(--warn-rgb) / 0.45); background: rgb(var(--warn-rgb) / 0.06); }
 .arch-decision[data-decision='block'] { border-color: rgb(var(--bad-rgb) / 0.45); background: rgb(var(--bad-rgb) / 0.07); }
-.arch-decision[data-focus] { box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.14); }
 /* the decision lands like a stamp: a little large and soft, then crisp */
 .arch-stamp {
   display: inline-flex; align-items: center; border: 1.5px solid currentColor; border-radius: 7px;
   padding: 0.12rem 0.5rem; font: 700 0.74rem/1.2 var(--font-mono); letter-spacing: 0.1em;
-  opacity: 0.35; transform: rotate(-3deg);
+  opacity: 0.35; transform: rotate(-3deg); transition: opacity 0.3s, transform 0.55s var(--ease-spring), filter 0.3s;
 }
-.arch-stamp.is-on { opacity: 1; animation: arch-stamp 0.6s var(--ease-spring) 0.15s both; }
+.arch-stamp.is-on { opacity: 1; animation: arch-stamp 0.55s var(--ease-spring) both; }
 @keyframes arch-stamp { from { transform: scale(1.45) rotate(-3deg); filter: blur(2px); opacity: 0; } to { transform: rotate(-3deg); filter: none; opacity: 1; } }
 
 .arch-fade { animation: arch-fade 0.6s var(--ease-out-soft) both; }
 @keyframes arch-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.arch-record:first-child { animation: arch-fade 0.5s var(--ease-out-soft) both; }
 
 /* traces */
 .arch-edge { fill: none; stroke: var(--color-line2); stroke-width: 1.25; transition: opacity 0.6s var(--ease-spring); }
 .arch-edge.is-untrusted { stroke: rgb(var(--bad-rgb) / 0.5); stroke-dasharray: 4 5; }
 .arch-edge.is-proto { stroke: rgb(var(--info-rgb) / 0.65); stroke-dasharray: 1 5; stroke-linecap: round; stroke-width: 1.6; }
 .arch-edge.is-call { stroke: var(--color-mark); stroke-width: 2; }
-.arch-edge.is-dim { opacity: 0.25; }
-.arch-trail { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; }
-.arch-trail.is-run { animation: arch-draw var(--dur, 1400ms) cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-.arch-trail.is-now { stroke-dashoffset: 0; }
-.arch-trail.is-done { stroke-dashoffset: 0; stroke-width: 1.75; opacity: 0.5; }
+.arch-edge.is-dim { opacity: 0.3; }
+.arch-trail { fill: none; stroke-width: 2.25; stroke-linecap: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+.arch-trail.is-run { animation: arch-draw var(--dur, 900ms) cubic-bezier(0.45, 0.05, 0.25, 1) forwards; }
+.arch-trail.is-done { stroke-dashoffset: 0; opacity: 0.45; transition: opacity 0.8s var(--ease-spring); }
 @keyframes arch-draw { to { stroke-dashoffset: 0; } }
 .arch-port { fill: var(--color-card); stroke: var(--color-line2); stroke-width: 1.25; transition: fill 0.4s, stroke 0.4s; }
 
@@ -259,65 +249,26 @@ html[data-theme='light'] { --warn-rgb: 160 101 10; --info-rgb: 45 106 143; }
   offset-rotate: 0deg; offset-anchor: 50% 50%;
   display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;
   border-radius: 999px; border: 1px solid var(--color-line2); background: var(--color-card2);
-  padding: 0.26rem 0.65rem 0.26rem 0.5rem; font: 600 0.68rem/1.2 var(--font-mono); color: var(--color-ink);
-  box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.7), 0 0 0 3px rgb(var(--accent-rgb) / 0.06);
+  padding: 0.22rem 0.6rem 0.22rem 0.45rem; font: 600 0.64rem/1.2 var(--font-mono); color: var(--color-ink);
+  box-shadow: 0 10px 24px -12px rgb(0 0 0 / 0.7), 0 0 0 3px rgb(var(--accent-rgb) / 0.05);
 }
 .arch-packet-dot { width: 7px; height: 7px; flex: none; border-radius: 999px; }
-html[data-theme='light'] .arch-packet { box-shadow: 0 10px 22px -14px rgb(18 19 16 / 0.35), 0 0 0 3px rgb(var(--accent-rgb) / 0.1); }
-@media (min-width: 640px) { .arch-packet { font-size: 0.72rem; } }
+html[data-theme='light'] .arch-packet { box-shadow: 0 10px 22px -14px rgb(18 19 16 / 0.35), 0 0 0 3px rgb(var(--accent-rgb) / 0.08); }
+@media (min-width: 640px) { .arch-packet { font-size: 0.68rem; } }
 
-/* "you are here": the step number moves to the part of the map the caption talks about */
-.arch-marker {
-  position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none;
-  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px;
-  background: var(--color-accent); color: var(--color-accent-ink); font: 700 0.68rem/1 var(--font-mono);
-  box-shadow: 0 0 0 4px rgb(var(--accent-rgb) / 0.16), 0 6px 16px -6px rgb(0 0 0 / 0.6);
-  transition: transform 0.75s var(--ease-spring);
-}
-.arch-marker::after {
-  content: ""; position: absolute; inset: -4px; border-radius: inherit; border: 1.5px solid rgb(var(--accent-rgb) / 0.5);
-  animation: arch-ping 2.2s var(--ease-out-soft) infinite;
-}
-@keyframes arch-ping { 0% { transform: scale(0.85); opacity: 0.9; } 70%, 100% { transform: scale(1.7); opacity: 0; } }
-
-/* the caption: stays in view while the map scrolls past (the board uses overflow: clip, so sticky still works) */
-.arch-caption {
-  position: sticky; border-radius: 16px; border: 1px solid var(--color-line2); padding: 0.85rem 0.9rem 0.8rem;
-  background: rgb(14 16 13 / 0.9); -webkit-backdrop-filter: blur(12px) saturate(1.15); backdrop-filter: blur(12px) saturate(1.15);
-  box-shadow: 0 18px 44px -24px rgb(0 0 0 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.04); overflow: hidden;
-}
-html[data-theme='light'] .arch-caption { background: rgb(251 250 245 / 0.92); box-shadow: 0 18px 40px -26px rgb(18 19 16 / 0.35); }
-@media (min-width: 640px) { .arch-caption { padding: 1rem 1.15rem 0.9rem; } }
-.arch-stepnum {
-  display: grid; flex: none; place-items: center; width: 26px; height: 26px; margin-top: 1px; border-radius: 999px;
-  background: var(--color-accent); color: var(--color-accent-ink); font: 700 0.74rem/1 var(--font-mono);
-}
-.arch-dot-hit { display: inline-grid; place-items: center; width: 14px; height: 28px; }
-@media (min-width: 640px) { .arch-dot-hit { width: 18px; } }
-.arch-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--color-line2); transition: background-color 0.3s, width 0.4s var(--ease-spring); }
-.arch-dot-hit[data-state='past'] .arch-dot { background: rgb(var(--accent-rgb) / 0.55); }
-.arch-dot-hit[data-state='now'] .arch-dot { width: 14px; background: var(--color-accent); }
-@media (hover: hover) { .arch-dot-hit:hover .arch-dot { background: var(--color-muted); } .arch-dot-hit[data-state='now']:hover .arch-dot { background: var(--color-accent); } }
-.arch-ctl {
-  display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--color-line2);
-  color: var(--color-muted); transition: color 0.2s, background-color 0.2s, opacity 0.2s;
-}
-.arch-ctl:not(:disabled):hover { color: var(--color-ink); background: rgb(var(--accent-rgb) / 0.06); }
-.arch-ctl:disabled { opacity: 0.35; }
-
-/* while playing: a thin line along the caption's foot fills over the step's reading time */
+/* autoplay: a thin line under the active flow fills over the flow's length */
 .arch-progress {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
-  background: var(--color-accent); opacity: 0.7; transform-origin: left; transform: scaleX(0);
-  animation: arch-progress var(--total, 4s) linear forwards;
+  position: absolute; left: 0.75rem; right: 0.75rem; bottom: 5px; height: 2px; border-radius: 2px;
+  background: currentColor; opacity: 0.6; transform-origin: left; transform: scaleX(0);
+  animation: arch-progress var(--total, 9s) linear forwards;
 }
 @keyframes arch-progress { to { transform: scaleX(1); } }
 
 @media (prefers-reduced-motion: reduce) {
   .arch-trail.is-run { animation: none; stroke-dashoffset: 0; }
-  .arch-row[data-state='focus']::after, .arch-marker::after { display: none; }
-  .arch-stamp.is-on, .arch-fade, .arch-result, .arch-row[data-state='focus'] .arch-result { animation: none; }
-  .arch-node, .arch-row, .arch-gate-card, .arch-decision, .arch-marker { transition: none; }
+  .arch-row[data-state='scan']::after { display: none; }
+  .arch-stamp.is-on, .arch-fade, .arch-record:first-child { animation: none; }
+  .arch-node, .arch-row, .arch-gate-card, .arch-decision { transition: none; }
 }
 
 /* network page: payment dots appear in time order once seen, money bars grow from the left */
