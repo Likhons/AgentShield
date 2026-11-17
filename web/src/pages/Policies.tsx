@@ -51,7 +51,7 @@ function Precedence() {
       <span className="mr-1 hidden font-mono text-[0.7rem] tracking-[0.16em] text-muted uppercase sm:inline">Precedence</span>
       {order.map((d, i) => (
         <Fragment key={d}>
-          {i > 0 && <span className="font-mono text-sm text-soft" aria-hidden>&gt;</span>}
+          {i > 0 && <span className="prec-arrow font-mono text-sm text-soft" style={{ ['--d' as string]: `${(i - 1) * 0.35}s` }} aria-hidden>&gt;</span>}
           <Tag decision={d} dot />
         </Fragment>
       ))}
