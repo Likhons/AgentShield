@@ -289,13 +289,17 @@ export default function Landing() {
       <footer className="footer-dots relative border-t border-fg/6">
         {/* a few dots of the grid light up and fade, each set on its own rhythm */}
         <div className="footer-twinkle" aria-hidden><span /><span /><span /><span /></div>
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-4 px-4 py-14 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>Built for the International AI Builders Congress 2026. Demo data is fake: numbers start with 010, domains end in .example.</p>
-          <div className="flex gap-5">
-            <Link to="/playground" className="inline-flex min-h-11 min-w-11 items-center transition-colors hover:text-soft">Demo</Link>
-            <Link to="/benchmarks" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">Benchmarks</Link>
-            <Link to="/policies" className="inline-flex min-h-11 items-center transition-colors hover:text-soft">Policies</Link>
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-6 px-4 py-12 sm:flex-row sm:items-end sm:justify-between sm:px-6">
+          <div className="flex min-w-0 flex-col gap-3">
+            <Logo size={26} />
+            <p className="max-w-[46ch] text-[0.9rem] leading-relaxed text-body">Built for the International AI Builders Congress 2026.</p>
+            <p className="font-mono text-[0.72rem] text-muted">demo data is fake · numbers start with 010 · domains end in .example</p>
           </div>
+          <nav aria-label="Footer" className="-ml-3 flex gap-1 sm:-mr-3 sm:ml-0">
+            {[['/playground', 'Demo'], ['/benchmarks', 'Benchmarks'], ['/policies', 'Policies']].map(([to, label]) => (
+              <Link key={to} to={to} className="inline-flex min-h-11 items-center rounded-lg px-3 text-[0.9rem] text-muted transition-colors hover:text-ink">{label}</Link>
+            ))}
+          </nav>
         </div>
       </footer>
 
