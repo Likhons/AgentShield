@@ -82,12 +82,6 @@
     transition: background-color 0.2s, box-shadow 0.2s, transform 0.2s;
   }
   .btn-primary:not(:disabled):hover { background: #e0ff66; box-shadow: 0 0 0 1px rgb(224 255 102 / 0.8), 0 12px 36px -10px rgb(212 255 42 / 0.75); }
-  .grad-text {
-    background-image: linear-gradient(90deg, #e4ff8a, #9be600);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
 }
 
 /* Markdown documents (results.md, datasets/README.md) */

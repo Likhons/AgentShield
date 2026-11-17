@@ -24,7 +24,7 @@ function Hero() {
         </span>
         <h1 className="mt-4 text-[clamp(1.62rem,6.2vw,2.05rem)] leading-[1.15] font-bold tracking-tight lg:text-[2.6rem]">
           <span className="block">Stop AI Agents from Acting&nbsp;on</span>
-          <span className="grad-text">Hidden Instructions</span>
+          <span className="text-accent">Hidden Instructions</span>
         </h1>
         <p className="mt-4 max-w-[560px] text-[0.94rem] leading-relaxed text-[#BCC8C0] lg:text-base">
           AgentShield checks every tool call before it runs, so an AI agent cannot be tricked into sending money by text
