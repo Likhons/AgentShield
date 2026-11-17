@@ -673,6 +673,24 @@ html[data-theme='light'] .nav-dot { background: #4f7f22; box-shadow: none; }
 .glass-blur { -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); background: rgb(18 20 16 / 0.72); }
 html[data-theme='light'] .glass-blur { background: rgb(251 250 245 / 0.78); }
 
+/* landing ticker: one row drawn twice, the track slides by exactly one row (-50%) for a seamless loop.
+   Linear because the motion is constant; slow (about 35 px/s) so it reads as calm, not busy. */
+@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.marquee-track { display: flex; width: max-content; animation: marquee 90s linear infinite; }
+.marquee-row { display: flex; flex-shrink: 0; align-items: center; }
+.marquee-item {
+  padding: 0 1.4rem; white-space: nowrap; color: var(--color-muted);
+  font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.marquee-item:lang(bn) { font-family: var(--font-bangla); font-size: 0.92rem; letter-spacing: 0; text-transform: none; line-height: 1.4; }
+.marquee-sep { color: var(--color-mark); opacity: 0.55; font-size: 0.5rem; }
+@media (hover: hover) and (pointer: fine) { .marquee:hover .marquee-track { animation-play-state: paused; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }
@@ -680,6 +698,11 @@ html[data-theme='light'] .glass-blur { background: rgb(251 250 245 / 0.78); }
   .sim-item, .stamp { opacity: 1; transform: none; }
   .stamp { transform: rotate(-8deg); }
   .row-scan, .run-progress { display: none; }
+  /* the ticker stands still: one row, wrapped and centred, no fade */
+  .marquee { -webkit-mask-image: none; mask-image: none; }
+  .marquee-track { width: auto; }
+  .marquee-row { flex-wrap: wrap; justify-content: center; row-gap: 0.5rem; }
+  .marquee-row[aria-hidden] { display: none; }
   .laser, .packet, .flow-bar.is-busy::before { display: none; }
   .tilt { transform: none !important; }
   .chip { opacity: 1; transform: none; }

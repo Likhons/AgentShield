@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useRef, useState, type RefObject } from 'rea
 import { Link } from 'react-router-dom'
 import About from '../components/landing/About'
 import DevTerminal from '../components/landing/DevTerminal'
+import Marquee from '../components/landing/Marquee'
 import Logo from '../components/Logo'
 import ThemeToggle from '../components/ThemeToggle'
 import HeroSimulation from '../components/landing/HeroSimulation'
@@ -262,6 +263,7 @@ export default function Landing() {
 
       <main id="main" className="relative">
         <Hero onRunAttack={() => setDemoOpen(true)} />
+        <Marquee />
         <HowItWorks />
         <Results />
         <section id="builders" className="relative scroll-mt-20 border-t border-fg/6">
