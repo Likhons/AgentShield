@@ -31,14 +31,31 @@ def test_rate_cell_parses_numbers_and_keeps_text():
     assert rate_cell("n/a")["hits"] is None
 
 
-@pytest.mark.parametrize("name,without,with_", [
-    ("attack_email_bn", 5000, 0), ("attack_email_bn", 0, 0), ("benign_send", 0, 0), ("attack_x", 3000, 3000)])
-def test_banner_wording_matches_streamlit(name, without, with_):
-    api = summary_banner(name, without, with_)
-    st = ui.summary_banner(name, without, with_)
+@pytest.mark.parametrize("name,without,with_,held", [
+    ("attack_email_bn", 5000, 0, 0), ("attack_email_bn", 0, 0, 0), ("benign_send", 0, 0, 0), ("attack_x", 3000, 3000, 0),
+    ("benign_send_large", 0, 0, 15000), ("attack_email_bn", 5000, 0, 15000)])
+def test_banner_wording_matches_streamlit(name, without, with_, held):
+    api = summary_banner(name, without, with_, held)
+    st = ui.summary_banner(name, without, with_, held)
     assert (api is None) == (st is None)
     if api:
         assert api["text"] == st[1]
+
+
+def test_recorded_large_transfer_is_held_not_let_through(client):
+    # the real run of 13 Nov: 15,000 to the landlord, typed by the user -> ASK, not approved, nothing moved
+    body = run(client, "benign_send_large", mode="recorded")
+    assert body["with"]["stolen"] == 0
+    asked = [s for s in body["with"]["steps"] if s["verdict"] and s["verdict"]["decision"] == "ask_human"]
+    assert asked and asked[0]["stopped_by_shield"]
+    assert body["banner"]["tone"] == "held"
+    assert "Held for your approval" in body["banner"]["text"] and "৳ 15,000" in body["banner"]["text"]
+
+
+@pytest.mark.parametrize("approve,tone,words", [(False, "held", "Held for your approval"), (True, "saved", "Normal task")])
+def test_large_transfer_banner_follows_the_approval(client, approve, tone, words):
+    body = run(client, "benign_send_large", mode="mock", approve=approve)
+    assert body["banner"]["tone"] == tone and words in body["banner"]["text"]
 
 
 def test_overview_counts_come_from_the_real_sources(client):

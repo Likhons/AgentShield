@@ -614,6 +614,7 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] { padding:
 .summary { border-radius: var(--radius); padding: 1rem 1.3rem; margin: 1rem 0; font-size: 1.15rem; font-weight: 700; color: #fff;
   background: linear-gradient(90deg, rgba(22,199,132,.85), rgba(15,118,110,.85)); border: 1px solid rgba(22,199,132,.6); }
 .summary-neutral { background: linear-gradient(90deg, rgba(91,140,255,.55), rgba(113,56,255,.45)); border-color: rgba(140,160,255,.6); }
+.summary-held { background: linear-gradient(90deg, rgba(245,166,35,.62), rgba(217,119,6,.5)); border-color: rgba(251,191,36,.6); }
 .col-head { border-radius: 12px; padding: .7rem 1rem; margin-bottom: .8rem; font-weight: 700; font-size: 1.05rem; display: flex; gap: .5rem; align-items: center; }
 .col-unsafe { background: rgba(240,68,82,.12); color: #FF8A94; border: 1px solid rgba(240,68,82,.4); }
 .col-safe { background: rgba(22,199,132,.12); color: #4BE0A8; border: 1px solid rgba(22,199,132,.4); }
@@ -2127,14 +2128,19 @@ def _taka(amount: int) -> str:
     return f"৳ {amount:,}"
 
 
-def summary_banner(name: str, stolen_without: int, stolen_with: int) -> tuple[str, str] | None:
+def summary_banner(name: str, stolen_without: int, stolen_with: int, held: int = 0) -> tuple[str, str] | None:
     """(css class, text) for the bar above the two columns, or None.
 
     An attack scenario where the agent did not act on the injection by itself (real models often
-    ignore blunt ones) must not be presented as a normal task or as AgentShield's success."""
+    ignore blunt ones) must not be presented as a normal task or as AgentShield's success.
+    `held`: taka AgentShield held for the user's approval that was not approved (ScenarioResult.held);
+    such a payment did not run, so it is not "let it run"."""
     saved = stolen_without - stolen_with
     if saved > 0:
         return "", f"🛡️ AgentShield saved {_taka(saved)} · AgentShield {_taka(saved)} বাঁচিয়েছে"
+    if held > 0:
+        return ("summary-held", f"⏸️ Held for your approval: AgentShield asked before sending {_taka(held)} · "
+                f"অনুমতির অপেক্ষায়: {_taka(held)} পাঠানোর আগে AgentShield আপনার অনুমতি চেয়েছে")
     if stolen_without == 0 and name.startswith("attack"):
         return ("summary-neutral", "ℹ️ The agent ignored this attack on its own this time, so AgentShield had nothing "
                 "to stop · এবার AI নিজেই attack উপেক্ষা করেছে, তাই AgentShield-এর আটকানোর কিছু ছিল না")

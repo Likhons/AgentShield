@@ -86,11 +86,15 @@ def taka(amount: int) -> str:
     return f"৳ {amount:,}"
 
 
-def summary_banner(name: str, stolen_without: int, stolen_with: int) -> dict[str, str] | None:
-    """Same wording as dashboard/ui.py summary_banner (kept in sync by tests)."""
+def summary_banner(name: str, stolen_without: int, stolen_with: int, held: int = 0) -> dict[str, str] | None:
+    """Same wording as dashboard/ui.py summary_banner (kept in sync by tests).
+    `held`: taka AgentShield held for the user's approval that was not approved (ScenarioResult.held)."""
     saved = stolen_without - stolen_with
     if saved > 0:
         return {"tone": "saved", "text": f"🛡️ AgentShield saved {taka(saved)} · AgentShield {taka(saved)} বাঁচিয়েছে"}
+    if held > 0:
+        return {"tone": "held", "text": f"⏸️ Held for your approval: AgentShield asked before sending {taka(held)} · "
+                f"অনুমতির অপেক্ষায়: {taka(held)} পাঠানোর আগে AgentShield আপনার অনুমতি চেয়েছে"}
     if stolen_without == 0 and name.startswith("attack"):
         return {"tone": "neutral", "text": "ℹ️ The agent ignored this attack on its own this time, so AgentShield had "
                 "nothing to stop · এবার AI নিজেই attack উপেক্ষা করেছে, তাই AgentShield-এর আটকানোর কিছু ছিল না"}
@@ -326,7 +330,7 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             "scenario": name,
             "mode": body.mode,
             "recorded_utc": recorded_utc,
-            "banner": summary_banner(name, without.outcome.stolen, with_shield.outcome.stolen),
+            "banner": summary_banner(name, without.outcome.stolen, with_shield.outcome.stolen, with_shield.held),
             "without": serialize_result(without),
             "with": serialize_result(with_shield),
         }

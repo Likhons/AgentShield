@@ -94,7 +94,7 @@ export interface RunResult {
   scenario: string
   mode: RunMode
   recorded_utc: string | null
-  banner: { tone: 'saved' | 'neutral'; text: string } | null
+  banner: { tone: 'saved' | 'neutral' | 'held'; text: string } | null
   without: RunSide
   with: RunSide
 }

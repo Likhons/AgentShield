@@ -20,7 +20,7 @@ from agentshield.checks.policy import PolicyEngine
 from agentshield.checks.taint import TaintChecker
 from agentshield.config import get_settings
 from agentshield.core.engine import Engine
-from agentshield.core.models import ToolCall, Verdict
+from agentshield.core.models import Decision, ToolCall, Verdict
 from agentshield.llm import get_provider
 from agentshield.sdk.session import ShieldSession
 from demo_agent.agent import AgentRun, BankingAgent, Step
@@ -43,6 +43,23 @@ class ScenarioResult:
     shielded: bool
     history: list[tuple[ToolCall, Verdict]] = field(default_factory=list)
     step_verdicts: list[Verdict | None] = field(default_factory=list)  # one per step, None if unchecked
+
+    @property
+    def held(self) -> int:
+        """Taka that AgentShield held for the user's approval (ASK_HUMAN) and that was not approved, so it never moved.
+        A held or blocked call returns an "[AgentShield] ..." message to the agent instead of running."""
+        return sum(
+            _amount((step.args or {}).get("amount"))
+            for step, verdict in zip(self.run.steps, self.step_verdicts)
+            if verdict is not None and verdict.decision == Decision.ASK_HUMAN and step.result.startswith("[AgentShield]")
+        )
+
+
+def _amount(value: object) -> int:
+    try:
+        return int(float(str(value).replace(",", "")))
+    except (TypeError, ValueError):
+        return 0
 
 
 def match_verdicts(steps: list[Step], history: list[tuple[ToolCall, Verdict]]) -> list[Verdict | None]:

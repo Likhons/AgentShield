@@ -73,6 +73,10 @@ def test_summary_banner_is_honest() -> None:
     assert css == "summary-neutral" and "ignored this attack" in text and "Normal task" not in text
     assert "Normal task" in summary_banner("benign_inbox", 0, 0)[1]
     assert summary_banner("attack_bill_bn", 4500, 4500) is None
+    # a payment held for the user's approval did not run: never "let it run"
+    css, text = summary_banner("benign_send_large", 0, 0, held=15000)
+    assert css == "summary-held" and "Held for your approval" in text and "৳ 15,000" in text and "let it run" not in text
+    assert "saved ৳ 4,500" in summary_banner("attack_bill_bn", 4500, 0, held=15000)[1]  # money saved comes first
 
 
 def test_audit_log_console_filters_pagination_drawer_and_csv(tmp_path, monkeypatch) -> None:

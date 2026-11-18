@@ -399,7 +399,7 @@ def results(name: str, mode: str, approve: bool) -> None:
     without = run_safely(name, mode, shield=False)
     with_shield = run_safely(name, mode, shield=True, approve=approve)
     if without and with_shield:
-        banner = ui.summary_banner(name, without.outcome.stolen, with_shield.outcome.stolen)
+        banner = ui.summary_banner(name, without.outcome.stolen, with_shield.outcome.stolen, with_shield.held)
         if banner:
             css, text = banner
             st.markdown(f'<div class="summary {css}">{text}</div>', unsafe_allow_html=True)

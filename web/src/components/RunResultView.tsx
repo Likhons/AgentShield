@@ -1,4 +1,4 @@
-import { ChevronRight, CircleAlert, CircleCheck, Lock, RotateCcw, ShieldCheck, ShieldOff, TrendingDown, Wallet } from 'lucide-react'
+import { ChevronRight, CircleAlert, CircleCheck, Hand, Lock, RotateCcw, ShieldCheck, ShieldOff, TrendingDown, Wallet } from 'lucide-react'
 import type { Decision, RunResult, RunSide, Step, Verdict } from '../lib/api'
 import { taka } from '../lib/format'
 import { stagger } from '../lib/motion'
@@ -186,10 +186,18 @@ function Side({ side, shielded }: { side: RunSide; shielded: boolean }) {
   )
 }
 
+// banner look per tone: money saved (ok), held for the user's approval (warn, the ASK colour), anything else (info)
+const BANNER = {
+  saved: { card: 'border-ok/35!', tile: 'border-ok/40 bg-ok/10 text-ok-ink', en: 'text-soft', bn: 'text-ok-ink', Icon: ShieldCheck },
+  held: { card: 'border-warn/40!', tile: 'border-warn/40 bg-warn/10 text-warn-ink', en: 'text-warn-ink', bn: 'text-ink', Icon: Hand },
+  neutral: { card: 'border-info/35!', tile: 'border-info/40 bg-info/10 text-info-ink', en: 'text-info-ink', bn: 'text-ok-ink', Icon: ShieldCheck },
+} as const
+
 export default function RunResultView({ result, onRerun, rerunning = false }: { result: RunResult; onRerun?: () => void; rerunning?: boolean }) {
-  const saved = result.banner?.tone === 'saved'
+  const look = BANNER[result.banner?.tone ?? 'neutral'] ?? BANNER.neutral
   // the banner text from the API starts with an emoji; the icon tile already says it
-  const [en, bn] = (result.banner?.text ?? '').replace(/^[\p{Extended_Pictographic}️\s]+/u, '').split(' · ')
+  // and "৳ 15,000" must not break between the sign and the number
+  const [en, bn] = (result.banner?.text ?? '').replace(/^[\p{Extended_Pictographic}️\s]+/u, '').replace(/৳ /g, '৳ ').split(' · ')
   const modeNote = result.mode === 'mock'
     ? 'Offline mode: a simulated naive agent. Not a real-model result.'
     : result.recorded_utc
@@ -199,16 +207,16 @@ export default function RunResultView({ result, onRerun, rerunning = false }: { 
 
   return (
     <div className="flex flex-col gap-4">
-      <div className={`glass flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 animate-rise ${saved ? 'border-ok/35!' : 'border-info/35!'}`}>
+      <div className={`glass flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 animate-rise ${look.card}`}>
         <div className="flex items-start gap-3.5">
-          <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${saved ? 'border-ok/40 bg-ok/10 text-ok-ink' : 'border-info/40 bg-info/10 text-info-ink'}`}>
-            <ShieldCheck size={22} aria-hidden />
+          <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${look.tile}`}>
+            <look.Icon size={22} aria-hidden />
           </span>
           <div className="min-w-0">
             {result.banner ? (
               <p className="text-[1.1rem] leading-snug font-bold sm:text-[1.2rem]">
-                <span className={saved ? 'text-soft' : 'text-info-ink'}>{en}</span>
-                {bn && <><span className="mx-2 text-muted">·</span><span lang="bn" className="text-ok-ink">{bn}</span></>}
+                <span className={look.en}>{en}</span>
+                {bn && <><span className="mx-2 text-muted">·</span><span lang="bn" className={look.bn}>{bn}</span></>}
               </p>
             ) : (
               <p className="text-[1.1rem] font-bold">Run finished</p>
