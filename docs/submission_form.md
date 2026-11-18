@@ -130,6 +130,34 @@ AgentShield itself does not use or expose MCP: it calls LLMs over plain HTTPS an
 5. Attack drafts (ChatGPT, 24 items later edited by the team): [Team: paste the prompt you used, if you still have it; otherwise write "prompt not saved".]
 6. Benign payment requests (`datasets/benign_payreq.jsonl`, written by Claude on 11 Nov): prompt not saved; `datasets/README.md` records who wrote the file and why (the benign twin of a subtle fake bill).
 
+### AI Detail Usage (portal section with an auto-scored "AI Depth Score"; 18 Nov)
+Tick only what is true; leave Retrieval & RAG empty (we use none; the judge deliberately sees no retrieved text).
+
+Prompt Usage:
+```
+Two prompts run in the product, both kept verbatim in the repository and changed only through git, each change checked against a small test set.
+1) Intent judge (gpt-oss-120b): a role prompt ("a security judge for an AI banking assistant"), explicit rules, and trust-labelled blocks: the user's request inside delimiters marked trusted, one context line computed by AgentShield (is the recipient a saved contact), and the tool call's arguments marked as untrusted data, not instructions. The judge never sees email, web or file text, so injected instructions cannot reach it. It must reply with a fixed JSON object (consistent true/false, a one-sentence reason in English and one in Bangla), at temperature 0. If the judge call fails, it returns a medium risk (0.5) instead of "safe".
+2) Demo agent (qwen3.8-27b): a role prompt with the tool list and a one-JSON-object reply format.
+Iteration: the first judge version called legitimate bill payments "inconsistent". Adding the saved-contact line alone did not fix it; a rule that a general request ("pay my pending bills") covers payments to saved contacts did. On 11 hand-made cases repeated 3 times, correct answers rose from 28/33 to 33/33. No few-shot examples or chain-of-thought: the judge answers in one short JSON object.
+```
+
+Token Optimization:
+```
+Most tool calls never reach an LLM. Taint tracking, the injection classifier and the policy rules run locally; the LLM judge is called only for money-moving tools and only when a cheaper check already sees risk. In our recorded real run, the fake-bill call took 0.31 ms for taint tracking, 0.36 ms for the classifier and 0.16 ms for the policy; only the judge took real time (797.5 ms). For the 15,000-taka transfer the judge was skipped and the whole decision took 0.74 ms. The judge prompt holds only the user's request (cut at 1,000 characters), one context line and the tool call (each argument cut at 200 characters), never the inbox or page text, and the reply is one short JSON object. The judge runs on its own model so it does not share the agent's free-tier rate limit (worst-case judge latency fell from 15.6 s to 1.0 s). Benchmark detector scores are cached on disk, and real-model demo runs are recorded once and replayed without new calls.
+```
+
+Token Optimization Tools & Methods: tick only "Structured outputs / JSON mode" (prompt-enforced fixed JSON). Add:
+`Check cascade: LLM judge only when a local check sees risk` · `Minimal-context judge prompt (inputs capped at 1,000 / 200 characters)` · `On-disk score cache and record/replay of real-model runs`
+
+LLMs / Models Used: tick Claude, ChatGPT, Llama, Qwen. Add: `gpt-oss-120b (OpenAI open-weight, via Groq)` · `XLM-RoBERTa-base (fine-tuned, experimental)`. Not Gemini (the provider exists, the free tier returned 403, never used).
+
+How & why did you use these LLMs?:
+```
+In the product: qwen3.8-27b (Qwen, via Groq) is the demo banking agent that AgentShield protects, a real open model, so we could show it paying a fake Bangla bill. gpt-oss-120b (via Groq) is the intent judge, on a separate model so it has its own rate-limit budget; it sees only the request and the tool call. Llama Prompt Guard 2 (86M and 22M) are our baselines: they flagged 0 of our 24 Bangla/Banglish attacks. XLM-RoBERTa-base, fine-tuned by us on Kaggle, is an experimental classifier we did not ship, because it held legitimate rent payments (reported in our results). To build it: Claude (Claude Code) as AI pair programmer for code, reviews, benchmarks, the dashboard and the demo video; ChatGPT for first drafts of the Bangla/Banglish attack texts, which the team edited and reviewed; Microsoft neural text-to-speech for the video narration.
+```
+
+Retrieval & RAG and RAG architecture details: leave empty.
+
 ### YouTube video
 Link: **https://youtu.be/QlSZ6nz16Q8** (v4, uploaded 18 Nov 2026; checked the same day: viewable with the link,
 length 174 s on YouTube (limit 181 s), title, chapters and custom thumbnail set). This is the link for the portal.
