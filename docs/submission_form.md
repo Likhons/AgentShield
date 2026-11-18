@@ -115,7 +115,8 @@ AgentShield itself does not use or expose MCP: it calls LLMs over plain HTTPS an
 6. Benign payment requests (`datasets/benign_payreq.jsonl`, written by Claude on 11 Nov): prompt not saved; `datasets/README.md` records who wrote the file and why (the benign twin of a subtle fake bill).
 
 ### YouTube video
-Link: **TBD** (upload as Unlisted). File: `video/film2/renders/agentshield_film2_v3.mp4` (2:26, 1080p; git-ignored, rebuild
+Link: https://youtu.be/HNCWn-S3yt8 (uploaded 18 Nov 2026; checked the same day: viewable with the link, title and custom
+thumbnail set). File: `video/film2/renders/agentshield_film2_v3.mp4` (2:26, 1080p; git-ignored, rebuild
 with `npx hyperframes render` in `video/film2`). Thumbnail: `video/thumbnail/agentshield_thumbnail.png` (1280x720).
 
 Title:
