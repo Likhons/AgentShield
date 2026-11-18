@@ -1,6 +1,7 @@
 # Preliminary submission: form text (copy into the CloudCamp portal)
 
-> Draft, 12 Nov 2026, updated 17 Nov. Deadline: 20 Nov 2026, 11:59 PM GMT+6 (per other teams' notes; **confirm in the portal**). Our target: 19 Nov.
+> Draft, 12 Nov 2026, updated 18 Nov. Deadline: 20 Nov 2026, 11:59 PM GMT+6 (extended; confirmed by the team on 18 Nov). Our target: 19 Nov.
+> Domain and challenge: **FinSphere AI → FraudShield** (chosen by the team on 18 Nov; the challenge locks after the preliminary deadline).
 > Field list taken from other teams' public notes about the portal, not from the official page: check every field name against the live form.
 > Numbers: only from `docs/results.md` (real-LLM run `agent_20261112-111137`).
 > Fill only what is true. The portal auto-scores listed technologies; do not list anything we do not use (RAG, vector DBs, local LLM runtimes are **not** used). MCP is not part of the product but was used during development: say so in *MCP usage disclosure*, not in the technology list.
@@ -13,14 +14,17 @@
 ### Project name
 AgentShield
 
+### Domain and challenge
+FinSphere AI → FraudShield (real-time fraud and anomaly detection across transactions)
+
 ### Elevator pitch (one sentence)
-AgentShield checks every action an AI agent is about to take, such as sending money, and blocks the ones the user never asked for, even when the trick is hidden in Bangla or Banglish inside an email, web page or file.
+AgentShield is real-time fraud defense for AI agents that move money: it checks every payment an agent is about to make and blocks the ones the user never asked for, even when the trick is hidden in Bangla or Banglish inside an email, web page or file.
 
 ### Public summary
-AI agents are starting to pay bills and move money for people. They read emails, web pages and files, and they cannot reliably tell the user's instruction from text an attacker planted there (indirect prompt injection). In Bangladesh that text is often Bangla or Banglish, where existing guardrails are weakest: in our tests Meta's Prompt Guard 2 flagged 0 of 24 Bangla/Banglish attacks. AgentShield is a runtime security gateway that sits between the agent and its tools. Before any tool runs it checks where each argument came from, whether untrusted text tries to instruct the AI, whether the action follows from what the user asked, and fixed policy rules, then answers ALLOW, ASK (the user decides) or BLOCK, with a reason in Bangla and English and an audit record. With a real model (20 Bangla/Banglish attacks, 20 normal bill payments), attacks moved money 4 times without AgentShield and 0 times with it, while legitimate rent payments went through just as often as without protection (16/20). A second, network-level check looks across all users of a wallet for numbers that collect money from many strangers and pass it on; on a simulated wallet week it cut the money reaching scammers from 334,300 to 96,000 BDT without flagging any real account.
+Fraud has a new channel: instead of fooling a person, the attacker fools the person's AI agent. AI agents are starting to pay bills and move money for people. They read emails, web pages and files, and they cannot reliably tell the user's instruction from text an attacker planted there (indirect prompt injection). In Bangladesh that text is often Bangla or Banglish, where existing guardrails are weakest: in our tests Meta's Prompt Guard 2 flagged 0 of 24 Bangla/Banglish attacks. AgentShield is a runtime security gateway that sits between the agent and its tools. Before any tool runs it checks where each argument came from, whether untrusted text tries to instruct the AI, whether the action follows from what the user asked, and fixed policy rules, then answers ALLOW, ASK (the user decides) or BLOCK, with a reason in Bangla and English and an audit record. With a real model (20 Bangla/Banglish attacks, 20 normal bill payments), attacks moved money 4 times without AgentShield and 0 times with it, while legitimate rent payments went through just as often as without protection (16/20). A second, network-level check looks across all users of a wallet for numbers that collect money from many strangers and pass it on; on a simulated wallet week it cut the money reaching scammers from 334,300 to 96,000 BDT without flagging any real account.
 
 ### Problem statement
-Banks, wallets and fintech apps are giving AI agents tools that move money. An agent treats everything it reads as possible instructions, so an attacker does not need to hack the bank: a fake bill in an inbox, a line on a web page or a note in a file can make the agent pay the attacker. This is indirect prompt injection, listed by OWASP as the top risk for LLM applications. Defences today are mostly text classifiers trained on English. On our Bangla and Banglish attacks, Meta's Prompt Guard 2 flagged 0 of 24, and it caught only 1 of 40 subtle English agent attacks from a public NVIDIA dataset. The most dangerous attacks do not even address the AI: a realistic fake bill looks exactly like a real one. A real open model (qwen3.8-27b) paid such a Bangla fake bill in our tests. Bangladesh runs on mobile financial services and has a fast-growing fintech sector, so this gap will matter as soon as agents handle payments. [Optional: add the current number of MFS accounts from Bangladesh Bank, with the source, before submitting.]
+Banks, wallets and fintech apps are giving AI agents tools that move money. An agent treats everything it reads as possible instructions, so an attacker does not need to hack the bank: a fake bill in an inbox, a line on a web page or a note in a file can make the agent pay the attacker. This is indirect prompt injection, listed by OWASP as the top risk for LLM applications. Defences today are mostly text classifiers trained on English. On our Bangla and Banglish attacks, Meta's Prompt Guard 2 flagged 0 of 24, and it caught only 1 of 40 subtle English agent attacks from a public NVIDIA dataset. The most dangerous attacks do not even address the AI: a realistic fake bill looks exactly like a real one. A real open model (qwen3.8-27b) paid such a Bangla fake bill in our tests. The old scams continue too: in a phone scam the victim is talked into typing the scammer's number, so each payment looks like a normal request and only the pattern across many users shows the fraud. Bangladesh runs on mobile financial services and has a fast-growing fintech sector, so this gap will matter as soon as agents handle payments. [Optional: add the current number of MFS accounts from Bangladesh Bank, with the source, before submitting.]
 
 ### Solution description
 AgentShield is a gateway that every tool call passes through before it runs (Python SDK `ShieldSession.wrap()` or an HTTP API). Four checks run on each call:
@@ -33,6 +37,15 @@ The scores are combined and the stricter of the score and the policy decides: AL
 Across users (prototype, tested on simulated data): one person's agent sees one payment, but a wallet running AgentShield for everyone sees the same stranger's number in many people's payments. A network check replays payments in time order and scores each receiving number over 24 hours: how many unrelated people pay it, how much of the money it sends straight on, how much came from untrusted sources, and whether the graph links it to a known cash-out account or to a source where a flagged number appeared. This catches phone scams in which the victim types the number in themselves, which no single check can tell apart from a real request. Flagged numbers are blocked for everyone; borderline ones only add a confirmation.
 
 A web dashboard shows the same scenario side by side without and with AgentShield, plus the audit log, benchmarks, policies, datasets and the network view.
+
+### Fit with FraudShield
+[Use where the portal asks why the project fits the challenge; otherwise add it to the Solution description.]
+FraudShield asks for real-time fraud and anomaly detection across transactions, with few false positives. AgentShield covers a new fraud channel, payments made by AI agents, and an old one, scam numbers that many people pay:
+- Real time, before the money moves: every payment is checked before it runs. Local checks take under a millisecond; the LLM judge, used only when needed, took 0.8 s in our recorded run.
+- Fraud caught, few false alarms: with a real model, attacks moved money 4/20 times without and 0/20 with AgentShield, while the real rent was paid 16/20 times either way. In the simulated wallet week, 0 of 1,109 legitimate accounts were flagged.
+- Anomalies across transactions: the network check (prototype, simulated data) scores each receiving number over 24 hours (strangers paying in, money passed straight on, links to a cash-out account) and flagged a phone-scam ring's numbers after 12, then 4, then 1 victim.
+- Human-readable reasons: every decision comes with a reason in Bangla and English; uncertain cases go to the user (ASK) instead of being blocked.
+- Not built yet: a streaming ML model on the live transaction stream. Planned before the final: an online model that updates as payments arrive, evaluated in time order on a public mobile-money dataset, feeding its score into the same decision.
 
 ### Data & AI provenance
 - Attack data: 64 Bangla/Banglish prompt-injection texts written for this project (24 drafted with ChatGPT and then edited and reviewed by the team, 40 hand-written by the team), plus 40 English agentic indirect-injection items sampled from NVIDIA's Nemotron-RL-Agentic-Indirect-Prompt-Injection-v1 (CC-BY-4.0).
@@ -219,7 +232,7 @@ Each decision is stored with time, user request, tool, arguments, per-check scor
 Phased plan (vulnerable demo agent → core checks → datasets and benchmark → classifier training → dashboard → submission). Every step ends with tests and a commit; 283 tests run in GitHub Actions on Python 3.13 and 3.14. Numbers are only reported from saved runs, and failures we found in our own system (judge over-refusal, classifier scope, trained-model over-refusal) are documented with the fix or the decision.
 
 ### Build level
-Working prototype: core gateway, SDK, HTTP API, demo agent, dashboards and benchmarks run end to end; live demos online. The network check is a prototype tested on simulated data.
+Working prototype: core gateway, SDK, HTTP API, demo agent, dashboards and benchmarks run end to end; live demos online. The network check is a prototype tested on simulated data. Not built yet: a streaming ML model on the live transaction stream (planned before the final).
 
 ### Publicly hosted environment
 Vercel (web dashboard): https://agent-shield-demo.vercel.app, with the dashboard API on Render (free tier, Singapore). Streamlit Community Cloud (first version): https://agentshield-demo.streamlit.app
