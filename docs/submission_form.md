@@ -190,6 +190,10 @@ Built with Python, FastAPI, React and the Groq API (qwen3.8-27b agent, gpt-oss-1
 - Live demo, Streamlit (first version): https://agentshield-demo.streamlit.app (offline simulated agent and recorded real-model runs; no Network page)
 - **Live-link field: https://agent-shield-demo.vercel.app** (chosen by the team on 18 Nov; it has the Network page, and the video's end card shows it).
   Access note (optional field): `Public, no login. Start at Playground → Run scenario → Recorded run. The API runs on a free server: if the first run is slow, wait about a minute.`
+  "Test credentials for judges" (required, at least one row, stored in plain text): the demo has no login, so one
+  honest row: role `Guest (public demo)`, username `No login needed`, password `No login needed`, note
+  `Public demo, no account. Open https://agent-shield-demo.vercel.app, then Playground → Run scenario → Recorded run.`
+  Never put a real password or an API key (e.g. the Groq key) here.
 - Portal (18 Nov): "Links & Demo" has YouTube Video (max 181 s, public or unlisted; ours: https://youtu.be/HNCWn-S3yt8, 2:26, unlisted, no access note needed), Demo / Live Links, and Other Links.
 - Other links (pages of the live site, they open without repo access): https://agent-shield-demo.vercel.app/benchmarks (measured results, with the full results write-up), https://agent-shield-demo.vercel.app/network (network check, simulated); the GitHub link once decided. Streamlit (first version) only if there is room.
 - GitHub repository: **TBD**: a new public repo, or the private repo with a judge access note (our 16 Nov reading of the portal FAQ: private links are accepted and marked "Restricted"; confirm). Decide what to do with `datasets/attacks.jsonl` first, see `docs/ethics_impact.md` §9.
