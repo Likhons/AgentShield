@@ -262,6 +262,18 @@ Retrieval & RAG and RAG architecture details: leave empty.
 Rest of the section (seen 18 Nov):
 
 MCP (Model Context Protocol) Usage: tick "We built and/or used MCP servers / clients in this build" (we used one, built none). If it opens inventory fields: Playwright MCP (Microsoft, `@playwright/mcp`), used not built, client Claude Code, transport stdio (started locally with npx by the Claude Code plugin), 14 distinct browser tools called (~1,060 calls), reused across all UI checks of this project only. Details: see "MCP usage disclosure" below.
+Portal inventory (seen 18 Nov):
+- MCP Servers we BUILT: leave empty.
+- MCP Servers we USED → Add server we used: name `Playwright MCP`; source `https://github.com/microsoft/playwright-mcp` (npm `@playwright/mcp`); purpose `Let Claude Code open our dashboard in a browser: check layouts at phone and desktop widths, screenshots, console errors, verify deploys`; transport stdio; 14 tools used.
+- MCP Clients / Hosts: `Claude Code (VS Code)`. Transports used: tick stdio only.
+- Reuse, architecture & integration notes:
+```
+One third-party server, Playwright MCP (@playwright/mcp), started locally with npx over stdio by the Claude Code plugin; Claude Code was the only client. We used it as the AI's eyes on our own UI: open the local dev servers and the live demo after each deploy, resize to phone and desktop widths (360–1920 px), take screenshots, read console errors, switch the day/night theme, click through the demo flows. 14 distinct tools, about 1,060 calls in our saved session logs. Reused across the whole build: the Streamlit dashboard, the React dashboard and the landing page. Local only, no auth needed; no logins, cookies, API keys or real user data went through it; every call is recorded in the Claude Code session log.
+```
+- Anything else about MCP in this build:
+```
+AgentShield itself does not use or expose MCP: it calls LLMs over plain HTTPS and offers its own HTTP API (POST /v1/check), so any agent framework can use it without MCP. We built no MCP server.
+```
 
 Open Source Tools & Libraries:
 ```
