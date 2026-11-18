@@ -94,7 +94,18 @@ Portal fields (seen 18 Nov, team only):
 Earlier draft (one text):
 VS Code on Windows 11; Claude Code (Anthropic) as AI pair programmer for implementation, reviews, benchmarking and UI work; ChatGPT for first drafts of attack texts (team-edited); Python 3.14; Pydantic, FastAPI, Streamlit, httpx, PyYAML; React 19, TypeScript, Vite, Tailwind CSS 4, TanStack Query and Recharts for the web dashboard; pytest (290 tests) with GitHub Actions CI on Python 3.13 and 3.14; Groq API (free tier) for LLMs; Kaggle notebooks (T4 GPU) with Hugging Face Transformers for fine-tuning; SQLite for the audit log; Playwright for UI checks (scripts, and the Playwright MCP server inside Claude Code); HyperFrames (HTML to video) and edge-tts for the demo video; Vercel (web), Render (API) and Streamlit Community Cloud for the live demos.
 
+**Context / Memory Files** (portal field inside Tooling & IDE)
+- CLAUDE.md (in the repo): project context for Claude Code, read at the start of every session: goal, architecture, current status, commands, and working rules (e.g. "never invent results; numbers only from saved runs", "the AI does not write attack texts", "commit after each step").
+- Claude Code auto-memory (MEMORY.md index + small notes, on the developer's machine, not in the repo): language and working preferences, team agreements (ask before every push), design preferences, hackathon facts.
+- PROGRESS.md (phase log), docs/react_frontend_plan.md (web plan and breakpoints), video/film2/SPEC.md (demo video spec).
+
 ### MCP usage disclosure
+Portal fields (seen 18 Nov, team only). Tool names and call counts are from our Claude Code session logs (checked 18 Nov): only the Playwright MCP server was actually called.
+- Mcp Servers (one line): `Playwright MCP (Microsoft, as a Claude Code plugin): open our dashboard in a browser, check layouts at phone and desktop widths, take screenshots, verify deploys. Development only; AgentShield itself does not use MCP.`
+- Tools Exposed: AgentShield exposes no MCP tools (it has its own HTTP API: POST /v1/check, GET /v1/audit, GET /v1/stats). In development, the Playwright MCP server gave Claude Code browser tools. Tools we actually called (~1,060 calls in our saved session logs): browser_navigate, browser_resize, browser_take_screenshot, browser_evaluate, browser_run_code_unsafe, browser_wait_for, browser_click, browser_console_messages, browser_emulate_media (day/night theme), browser_hover, browser_type, browser_select_option, browser_press_key, browser_snapshot.
+- Permissions (one line): `Local only (developer's laptop, run by Claude Code under its permission settings); browser control only: open pages, resize, screenshot, click/type, run page scripts; no logins, cookies, API keys or real user data; sites: localhost dev servers, our own live demo sites, the hackathon page, one public design reference`
+
+Earlier draft (one text):
 AgentShield itself does not use or expose MCP: it calls LLMs over plain HTTPS and offers its own HTTP API. During development we used one MCP server inside Claude Code, the Playwright MCP server, to open our dashboard in a browser, take screenshots, and check layouts at phone and desktop widths, also on the live site after a deploy. It ran on the developer's laptop against fake demo data; no user data, API keys or private files went through it. [Team: add any other MCP server you used, or delete this note.]
 
 ### Prompt library
