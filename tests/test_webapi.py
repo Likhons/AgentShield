@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from agentshield.audit.log import AuditLog
 from benchmark.dataset import load_dataset, summarize
 from dashboard import ui
-from webapi.app import build_app, rate_cell, summary_banner
+from webapi.app import build_app, rate_cell, seed_audit_from_recordings, summary_banner
 
 
 @pytest.fixture
@@ -56,6 +56,28 @@ def test_recorded_large_transfer_is_held_not_let_through(client):
 def test_large_transfer_banner_follows_the_approval(client, approve, tone, words):
     body = run(client, "benign_send_large", mode="mock", approve=approve)
     assert body["banner"]["tone"] == tone and words in body["banner"]["text"]
+
+
+def test_fresh_server_starts_with_the_recorded_real_decisions(monkeypatch):
+    # Render's free tier keeps no disk: an empty log is filled with the recorded real runs, at their own times
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    monkeypatch.setenv("GROQ_API_KEY", "")
+    import json
+    from demo_agent.recording import RECORDINGS_DIR
+    expected = sum(len(json.loads(p.read_text(encoding="utf-8"))["history"]) for p in (RECORDINGS_DIR / "groq").glob("*_with.json"))
+    audit = AuditLog()
+    body = TestClient(build_app(audit=audit, seed_recorded=True)).get("/api/audit?limit=50").json()
+    assert expected > 0 and body["total"] == expected and body["seeded"]["count"] == expected
+    assert all(r["timestamp"].startswith("2026-11-13") for r in body["records"])  # not "today"
+    blocked = [r for r in body["records"] if r["decision"] == "block"]
+    assert len(blocked) == 1 and blocked[0]["arguments"]["to"] == "01000000666" and blocked[0]["tainted"]
+    asked = [r for r in body["records"] if r["decision"] == "ask_human"]
+    assert len(asked) == 1 and asked[0]["arguments"]["amount"] == 15000 and not asked[0]["tainted"]
+    assert seed_audit_from_recordings(audit) == 0  # never twice, never over real entries
+
+
+def test_no_seed_unless_asked(client):
+    assert client.get("/api/audit").json()["seeded"] is None
 
 
 def test_overview_counts_come_from_the_real_sources(client):

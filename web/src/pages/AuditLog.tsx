@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Download, Filter, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Filter, Info, Search } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useSearchParams } from 'react-router-dom'
@@ -226,6 +226,16 @@ export default function AuditLog() {
   return (
     <>
       <PageHeader title="Audit Log" sub="Every AgentShield decision, newest first (SQLite, path from AUDIT_DB_PATH)." right={headerRight} />
+
+      {data?.seeded && (
+        <p className="-mt-2 mb-5 flex items-start gap-2 text-[0.85rem] leading-relaxed text-muted">
+          <Info size={15} className="mt-[3px] shrink-0 text-info-ink" aria-hidden />
+          <span>
+            This free server keeps no log between deploys, so it starts with the {data.seeded.count} decisions of our{' '}
+            {data.seeded.source}, at their original times. Offline and live runs are added on top.
+          </span>
+        </p>
+      )}
 
       {error && <ErrorNote error={error} />}
       {isPending && <PageSkeleton cards={5} />}

@@ -133,6 +133,8 @@ export interface AuditPage {
   tools: string[]
   thresholds: Thresholds
   newest: string | null
+  // rows loaded at startup from the recorded real runs (a fresh free server has an empty log); older servers omit it
+  seeded?: { count: number; source: string } | null
 }
 
 export interface AuditFilters {

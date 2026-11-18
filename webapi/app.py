@@ -37,13 +37,13 @@ from agentshield.audit.log import AuditLog
 from agentshield.checks.policy import DEFAULT_POLICY_PATH, PolicyRule
 from agentshield.config import get_settings
 from agentshield.core.models import (AuditRecord, CheckName, ContextItem, DecisionThresholds, GuardRequest,
-                                     SourceType, ToolCall)
+                                     SourceType, ToolCall, Verdict)
 from agentshield.llm import LLMError
 from agentshield.llm.mock import find_money_order, normalize
 from benchmark.dataset import load_dataset, summarize
 from benchmark.network import cached_report as network_report
 from benchmark.report import agent_rows, detection_rows, latest_where, outcome_rows
-from demo_agent.recording import load_result, recording_path
+from demo_agent.recording import RECORDINGS_DIR, load_result, recording_path
 from demo_agent.run import ScenarioResult, build_engine, run_scenario
 from demo_agent.scenarios import load_json, load_scenarios
 
@@ -101,6 +101,43 @@ def summary_banner(name: str, stolen_without: int, stolen_with: int, held: int =
     if stolen_without == 0:
         return {"tone": "saved", "text": "✅ Normal task: AgentShield let it run · সাধারণ কাজ, AgentShield বাধা দেয়নি"}
     return None
+
+
+SEED_SOURCE = "recorded real runs, 13 Nov 2026 (qwen3.8-27b agent, gpt-oss-120b judge)"
+
+
+def seed_audit_from_recordings(audit: AuditLog, folder: Path = RECORDINGS_DIR / "groq") -> int:
+    """A fresh server (Render's free tier keeps no disk between deploys) starts with an empty audit log.
+    Fill an empty log with the decisions AgentShield made in the recorded real-model runs, at their original
+    times, so the Audit Log page has real entries; nothing is made up and nothing counts as "today".
+    `tainted` is not stored in a recording: an argument that did not come from the user marks the call tainted
+    (the taint check's own per-argument trace), which is what the engine logged for these runs."""
+    if audit.stats()["total"] > 0:
+        return 0
+    written = 0
+    for path in sorted(folder.glob("*_with.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for call, raw in data.get("history", []):
+            verdict = Verdict.model_validate(raw)
+            taint = next((c for c in verdict.checks if c.check == CheckName.TAINT), None)
+            traced = ((taint.details or {}).get("arguments") or {}) if taint else {}
+            audit.write(AuditRecord(
+                timestamp=verdict.created_at,
+                session_id=f"recorded-{data.get('provider', 'groq')}-{data['name']}",
+                request_id=verdict.request_id,
+                user_request=data["task"],
+                tool_name=call["tool_name"],
+                arguments=call["arguments"],
+                tainted=any(a.get("status") != "user" for a in traced.values()),
+                decision=verdict.decision,
+                risk_score=verdict.risk_score,
+                reason_en=verdict.reason_en,
+                reason_bn=verdict.reason_bn,
+                checks=verdict.checks,
+                total_latency_ms=verdict.total_latency_ms,
+            ))
+            written += 1
+    return written
 
 
 def heuristic_run(data: dict) -> bool:
@@ -222,10 +259,13 @@ def scenario_context(scenario: dict) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # app
 # ---------------------------------------------------------------------------
-def build_app(audit: AuditLog | None = None) -> FastAPI:
+def build_app(audit: AuditLog | None = None, seed_recorded: bool | None = None) -> FastAPI:
     settings = get_settings()
     if audit is None:
         audit = AuditLog(settings.audit_db_path)
+        if seed_recorded is None:  # a real server: on unless AUDIT_SEED_RECORDED=0
+            seed_recorded = os.getenv("AUDIT_SEED_RECORDED", "1").strip().lower() not in {"0", "false", "no"}
+    seeded = seed_audit_from_recordings(audit) if seed_recorded else 0
     app = create_app(audit=audit)  # the gateway: /v1/check, /v1/audit, /v1/stats, /health
     app.title = "AgentShield dashboard API"
 
@@ -359,6 +399,8 @@ def build_app(audit: AuditLog | None = None) -> FastAPI:
             "thresholds": DecisionThresholds().model_dump(),
             # date ranges count back from the newest event (as in Streamlit), so older demo data stays reachable
             "newest": newest[0].timestamp.isoformat() if newest else None,
+            # rows loaded at startup from the recorded real runs (this free server keeps no log between deploys)
+            "seeded": {"count": seeded, "source": SEED_SOURCE} if seeded else None,
         }
 
     @app.get("/api/audit.csv", tags=["audit"])
