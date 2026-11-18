@@ -1,0 +1,97 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "JBMono"; src: url("assets/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; }
+    @font-face { font-family: "Anek"; src: url("assets/fonts/anek-bangla.woff2") format("woff2"); font-weight: 100 800; }
+    @font-face { font-family: "Baloo"; src: url("assets/fonts/baloo-da-2.woff2") format("woff2"); font-weight: 400 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; font-family: "Jakarta", "Baloo", sans-serif; color: #F4F2EA; }
+    /* the site's own dot grid */
+    #ph-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    #ph-cam { position: absolute; inset: 0; transform-origin: 0 0; }
+    #ph-device { position: absolute; left: 710px; top: 40px; width: 500px; height: 1000px; border-radius: 64px; background: #050505;
+      box-shadow: 0 0 0 2px #2a2c27, 0 40px 90px rgba(0,0,0,.7); }
+    #ph-screen { position: absolute; inset: 14px; border-radius: 52px; overflow: hidden;
+      background: linear-gradient(180deg, #1B1E18 0%, #10120E 55%, #0B0C09 100%); }
+    #ph-island { position: absolute; left: 50%; top: 18px; width: 126px; height: 36px; margin-left: -63px; border-radius: 20px; background: #000; }
+    #ph-time { position: absolute; left: 0; right: 0; top: 96px; text-align: center; font-family: "Bricolage", sans-serif; font-weight: 700;
+      font-size: 112px; letter-spacing: -0.04em; color: #F4F2EA; line-height: 1; }
+    #ph-date { position: absolute; left: 0; right: 0; top: 76px; text-align: center; font-weight: 600; font-size: 24px; color: rgba(244,242,234,.78); }
+    .ph-note { position: absolute; left: 16px; width: 440px; border-radius: 28px; padding: 18px 20px 20px; background: rgba(52,55,48,.86);
+      box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+    .ph-head { display: flex; align-items: center; gap: 10px; font-size: 23px; font-weight: 600; color: rgba(244,242,234,.82); }
+    .ph-head .ph-now { margin-left: auto; font-weight: 500; color: rgba(244,242,234,.55); }
+    .ph-app { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; }
+    #ph-mail { top: 236px; }
+    #ph-mail .ph-app { background: #3B82F6; }
+    .ph-from { margin-top: 12px; font-size: 23px; font-weight: 600; color: rgba(244,242,234,.7); }
+    .ph-subj { margin-top: 6px; font-family: "Anek", sans-serif; font-weight: 700; font-size: 31px; line-height: 1.22; color: #F4F2EA; }
+    .ph-body { margin-top: 6px; font-family: "Baloo", sans-serif; font-weight: 500; font-size: 25px; line-height: 1.45; color: rgba(244,242,234,.72); }
+    #ph-fake { position: absolute; right: 18px; top: 16px; padding: 4px 12px 3px; border-radius: 8px; background: #FF7A6B; color: #1A0805;
+      font-family: "JBMono", monospace; font-weight: 800; font-size: 23px; letter-spacing: .12em; opacity: 0; }
+    #ph-mail-edge { position: absolute; inset: 0; border-radius: 28px; box-shadow: inset 0 0 0 3px #FF7A6B; opacity: 0; }
+    #ph-agent { top: 556px; }
+    #ph-agent .ph-app { background: #C2EF6A; color: #0D1406; font-family: "JBMono", monospace; font-weight: 800; font-size: 22px; }
+    .ph-title { margin-top: 12px; font-size: 29px; font-weight: 700; color: #F4F2EA; }
+    #ph-amount { margin-top: 6px; font-family: "JBMono", monospace; font-weight: 600; font-size: 27px; color: #F4F2EA; }
+    #ph-amount b { font-weight: 700; }
+    #ph-num { transition: none; }
+    /* the mail notification grows into the inbox (object becomes the world) */
+    #ph-sheet { position: absolute; left: 726px; top: 290px; width: 440px; height: 260px; border-radius: 28px; background: #F2F0E8; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="phone" data-width="1920" data-height="1080">
+    <div id="ph-grid"></div>
+    <div id="ph-cam">
+      <div id="ph-device">
+        <div id="ph-screen">
+          <div id="ph-island"></div>
+          <div id="ph-date">Monday, 17 November</div>
+          <div id="ph-time">23:47</div>
+          <div id="ph-mail" class="ph-note">
+            <div class="ph-head">
+              <span class="ph-app"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+              Mail <span id="ph-now1" class="ph-now">now</span>
+            </div>
+            <div class="ph-from">billing@dhaka-power-bill.example</div>
+            <div class="ph-subj">বকেয়া বিদ্যুৎ বিল: সংযোগ বিচ্ছিন্ন হওয়ার আগে পরিশোধ করুন</div>
+            <div class="ph-body">আপনার সেপ্টেম্বর মাসের বিদ্যুৎ বিল ৪,৫০০ টাকা এখনো বকেয়া…</div>
+            <div id="ph-mail-edge"></div>
+            <div id="ph-fake">FAKE</div>
+          </div>
+          <div id="ph-agent" class="ph-note">
+            <div class="ph-head"><span class="ph-app" data-layout-ignore>AI</span> Your AI agent <span class="ph-now">now</span></div>
+            <div class="ph-title">Bill paid</div>
+            <div id="ph-amount"><b>৳ 4,500</b> → <span id="ph-num">01000000666</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="ph-sheet"></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // frame 0 already shows the phone with the Bangla bill (the thumbnail); the camera sits close on the notifications
+    // camera: centre the notifications (phone x 960, y ~ 520) at 1.32x, then a slow settle as the voice starts
+    ft("#ph-cam", { x: -307, y: -150, scale: 1.32 }, { x: -278, y: -128, scale: 1.29, duration: 3.4, ease: "power1.out" }, 0);
+    // "It paid one": the agent's receipt lands under the bill
+    ft("#ph-agent", { y: -40, opacity: 0, scale: 0.96 }, { y: 0, opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" }, 4.5);
+    // "never real": the bill is marked fake, the paid number turns red
+    ft("#ph-mail-edge", { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out" }, 5.24);
+    ft("#ph-now1", { opacity: 1 }, { opacity: 0, duration: 0.12 }, 5.12);
+    ft("#ph-fake", { scale: 1.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "power4.out" }, 5.24);
+    ft("#ph-fake", { x: -6 }, { x: 0, duration: 0.07, ease: "none" }, 5.44);
+    ft("#ph-num", { color: "#F4F2EA" }, { color: "#FF7A6B", duration: 0.2, ease: "power2.out" }, 5.3);
+    // T1: the bill grows into the inbox; everything around it blurs away
+    ft("#ph-device", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(14px)", duration: 0.35, ease: "power2.in" }, 6.55);
+    ft("#ph-sheet", { opacity: 0 }, { opacity: 1, duration: 0.18, ease: "power2.out" }, 6.5);
+    ft("#ph-sheet", { scaleX: 1, scaleY: 1, borderRadius: 28 }, { scaleX: 5.4, scaleY: 5.6, borderRadius: 0, duration: 0.62, ease: "power3.inOut" }, 6.55);
+    window.__timelines["phone"] = tl;
+  </script>
+</template>

@@ -1,0 +1,66 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Fraunces"; font-style: italic; src: url("assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", sans-serif; }
+    #dv-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    #dv-a, #dv-b { position: absolute; inset: 0; }
+    /* the real code panel from the landing page, Python SDK tab (capture at 2x; panel is 618 x 472 CSS) */
+    #dv-code { position: absolute; left: 150px; top: 160px; width: 989px; height: 755px; border-radius: 26px;
+      background-image: url("assets/ui/dev_sdk.png"); background-size: 3056px 970px; background-position: -1417.6px -156.8px;
+      box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+    #dv-hl { position: absolute; left: 172px; top: 497px; width: 900px; height: 66px; border-radius: 12px; box-shadow: 0 0 0 2.5px #C2EF6A;
+      background: rgba(194,239,106,.07); opacity: 0; }
+    #dv-side { position: absolute; left: 1240px; top: 380px; width: 560px; }
+    #dv-side .k { font-weight: 600; font-size: 30px; color: #9C9C92; }
+    #dv-side h2 { margin-top: 14px; font-family: "Bricolage", sans-serif; font-weight: 700; font-size: 80px; line-height: 1.02; letter-spacing: -0.04em; }
+    #dv-side h2 em { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; color: #C2EF6A; letter-spacing: -0.02em; }
+    #dv-side p { margin-top: 22px; font-weight: 500; font-size: 36px; line-height: 1.35; color: rgba(244,242,234,.82); }
+    /* the real Audit Log */
+    #dv-audit { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; opacity: 0; }
+    #dv-audit img { width: 1920px; height: 1080px; }
+    #dv-row { position: absolute; left: 383px; top: 473px; width: 1394px; height: 46px; border-radius: 10px; box-shadow: 0 0 0 2px #FF7A6B; opacity: 0; }
+    #dv-out { position: absolute; inset: 0; background: #0A0B09; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="dev" data-width="1920" data-height="1080">
+    <div id="dv-grid"></div>
+    <div id="dv-a">
+      <div id="dv-code"></div>
+      <div id="dv-hl"></div>
+      <div id="dv-side">
+        <div class="k">Python SDK · or one HTTP call</div>
+        <h2>One <em>wrap</em> per tool.</h2>
+        <p>Works with any agent framework.</p>
+      </div>
+    </div>
+    <div id="dv-b">
+      <div id="dv-audit"><img src="assets/ui/audit_view.png" alt="The real Audit Log with every decision and its reason" /><div id="dv-row"></div></div>
+    </div>
+    <div id="dv-out"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // lands from the whip, blurred, and sharpens
+    ft("#dv-a", { x: 520, filter: "blur(16px)" }, { x: 0, filter: "blur(0px)", duration: 0.3, ease: "power3.out" }, 0);
+    ft("#dv-side", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 0.6);
+    // "put AgentShield in front of an agent's tools": the two wrap lines
+    ft("#dv-hl", { opacity: 0, scaleX: 0.96 }, { opacity: 1, scaleX: 1, duration: 0.3, ease: "power3.out" }, 2.05);
+    // "and every decision is logged": whip to the real audit log
+    ft("#dv-a", { x: 0, filter: "blur(0px)", opacity: 1 }, { x: -520, filter: "blur(16px)", opacity: 0, duration: 0.26, ease: "power2.in" }, 4.95);
+    ft("#dv-audit", { x: 140, y: -191, scale: 1.25, opacity: 0, filter: "blur(16px)" }, { x: -386, y: -191, scale: 1.25, opacity: 1, filter: "blur(0px)", duration: 0.32, ease: "power3.out" }, 5.15);
+    // "with its reason": the blocked call's row
+    ft("#dv-row", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 6.95);
+    // row centre (1080, 496) to the frame centre at 1.6x
+    ft("#dv-audit", { x: -386, y: -191, scale: 1.25 }, { x: -768, y: -254, scale: 1.6, duration: 0.7, ease: "expo.inOut" }, 7.05);
+    ft("#dv-out", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.in" }, 8.7);
+    window.__timelines["dev"] = tl;
+  </script>
+</template>

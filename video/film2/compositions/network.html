@@ -1,0 +1,109 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "JBMono"; src: url("assets/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", sans-serif; }
+    #nw-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    #nw-a, #nw-b { position: absolute; inset: 0; }
+    /* act one of the twist: a user, talked into it on a call, types the number in themselves */
+    #nw-phone { position: absolute; left: 230px; top: 40px; width: 500px; height: 1000px; border-radius: 64px; background: #050505;
+      box-shadow: 0 0 0 2px #2a2c27, 0 40px 90px rgba(0,0,0,.7); }
+    #nw-screen { position: absolute; inset: 14px; border-radius: 52px; overflow: hidden; background: linear-gradient(180deg, #171A15, #0D0F0B); }
+    #nw-island { position: absolute; left: 50%; top: 18px; width: 126px; height: 36px; margin-left: -63px; border-radius: 20px; background: #000; }
+    #nw-head { position: absolute; left: 0; right: 0; top: 80px; padding: 0 30px 22px; border-bottom: 1px solid rgba(236,234,226,.1);
+      font-weight: 700; font-size: 30px; }
+    #nw-head span { display: block; margin-top: 4px; font-weight: 500; font-size: 28px; color: #9C9C92; }
+    #nw-call { position: absolute; left: 30px; right: 30px; top: 420px; display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+      border-radius: 18px; background: rgba(236,234,226,.06); font-weight: 600; font-size: 28px; color: #D8D6CE; }
+    #nw-call svg { flex: none; }
+    #nw-bubble { position: absolute; right: 26px; top: 540px; max-width: 400px; padding: 20px 24px; border-radius: 26px 26px 8px 26px;
+      background: #2B2F27; font-weight: 600; font-size: 31px; line-height: 1.35; color: #F4F2EA; }
+    #nw-type { display: inline-block; white-space: nowrap; clip-path: inset(0 100% 0 0); }
+    #nw-type b { font-family: "JBMono", monospace; font-weight: 700; color: #F4F2EA; }
+    #nw-caret { display: inline-block; width: 3px; height: 34px; margin-left: 3px; vertical-align: -5px; background: #C2EF6A; }
+    /* "One call looks fine": the real gateway on that call (phone-scam flow), all four checks clear, ALLOW */
+    #nw-gate { position: absolute; left: 950px; top: 90px; width: 585px; height: 840px; border-radius: 30px; opacity: 0;
+      background-image: url("assets/ui/arch4_allow.png"); background-size: 1933.75px 1592.5px; background-position: -855.4px -204.4px;
+      box-shadow: 0 0 0 2px rgba(194,239,106,.55), 0 40px 90px rgba(0,0,0,.6); }
+    #nw-gk { position: absolute; left: 950px; top: 40px; font-weight: 600; font-size: 30px; color: #9C9C92; opacity: 0; }
+    /* act two: across all users (the network check, simulated) */
+    #nw-ring { position: absolute; left: 110px; top: 50px; width: 732px; height: 987px; border-radius: 22px; opacity: 0;
+      background-image: url("assets/ui/net_ring2.png"); background-size: 732px 987px; box-shadow: 0 40px 90px rgba(0,0,0,.6); }
+    #nw-sim { position: absolute; left: 950px; top: 120px; padding: 10px 18px; border-radius: 12px; background: rgba(143,211,240,.12);
+      box-shadow: inset 0 0 0 1.5px rgba(143,211,240,.55); font-weight: 700; font-size: 32px; color: #8FD3F0; opacity: 0; }
+    #nw-line { position: absolute; left: 950px; top: 230px; width: 860px; font-family: "Bricolage", sans-serif; font-weight: 700; font-size: 66px;
+      line-height: 1.05; letter-spacing: -0.035em; opacity: 0; }
+    #nw-nums { position: absolute; left: 950px; top: 470px; display: flex; align-items: flex-end; gap: 38px; }
+    .nw-n { font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 230px; letter-spacing: -0.05em; line-height: .85; color: #F4F2EA;
+      opacity: 0; transform-origin: 50% 85%; }
+    #nw-n3 { color: #C2EF6A; }
+    .nw-arrow { font-family: "JBMono", monospace; font-weight: 700; font-size: 72px; color: rgba(244,242,234,.4); margin-bottom: 40px; opacity: 0; }
+    #nw-cap { position: absolute; left: 950px; top: 720px; width: 860px; font-weight: 500; font-size: 36px; line-height: 1.35; color: rgba(244,242,234,.82); opacity: 0; }
+    #nw-cap b { color: #F4F2EA; font-weight: 700; }
+  </style>
+  <div id="root" data-composition-id="network" data-width="1920" data-height="1080">
+    <div id="nw-grid"></div>
+    <div id="nw-a">
+      <div id="nw-phone"><div id="nw-screen">
+        <div id="nw-island"></div>
+        <div id="nw-head">Your AI agent<span>MockPay assistant</span></div>
+        <div id="nw-call"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF7A6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Call ended · unknown caller</div>
+        <div id="nw-bubble"><span id="nw-type">Send 6000 taka to<br /><b>01031537768</b></span><span id="nw-caret"></span></div>
+      </div></div>
+      <div id="nw-gk">One call, alone</div>
+      <div id="nw-gate"></div>
+    </div>
+    <div id="nw-b">
+      <div id="nw-ring"></div>
+      <div id="nw-sim">Simulated wallet week · 600 users</div>
+      <div id="nw-line">One number, paid by many strangers.</div>
+      <div id="nw-nums">
+        <div id="nw-n1" class="nw-n">12</div><div id="nw-a1" class="nw-arrow">→</div>
+        <div id="nw-n2" class="nw-n">4</div><div id="nw-a2" class="nw-arrow">→</div>
+        <div id="nw-n3" class="nw-n">1</div>
+      </div>
+      <div id="nw-cap">people paid each of the ring's numbers before the <b>network check</b> flagged it</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    const pop = (id, at) => {
+      ft(id, { scale: 1.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: "power4.out" }, at);
+      ft(id, { x: -7 }, { x: 0, duration: 0.07, ease: "none" }, at + 0.22);
+    };
+    // "But some scams skip the email": no inbox this time, a phone call
+    ft("#nw-phone", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+    ft("#nw-call", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 0.8);
+    // "The victim types the number": typed in, letter by letter
+    ft("#nw-type", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 1.6, ease: "steps(30)" }, 1.75);
+    ft("#nw-caret", { opacity: 1 }, { opacity: 0, duration: 0.01 }, 3.5);
+    // "One call looks fine": every check clear, ALLOW
+    ft("#nw-gate", { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 4.05);
+    ft("#nw-gk", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 4.0);
+    // "Across all users, it doesn't": out to the network
+    ft("#nw-a", { x: 0, opacity: 1, filter: "blur(0px)" }, { x: -300, opacity: 0, filter: "blur(12px)", duration: 0.4, ease: "power2.in" }, 5.45);
+    ft("#nw-ring", { x: 120, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 5.55);
+    ft("#nw-line", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 6.0);
+    // "In our simulated wallet week"
+    ft("#nw-sim", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 8.1);
+    // "flagged the scam number after twelve people, and the next ones after four, then one"
+    ft("#nw-line", { opacity: 1 }, { opacity: 0, duration: 0.3 }, 10.3);
+    ft("#nw-cap", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 10.6);
+    pop("#nw-n1", 12.33);
+    ft("#nw-a1", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 13.45);
+    pop("#nw-n2", 14.29);
+    ft("#nw-a2", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 14.85);
+    pop("#nw-n3", 15.16);
+    // T4 whip to the developer's view
+    ft("#nw-b", { x: 0, filter: "blur(0px)", opacity: 1 }, { x: -520, filter: "blur(16px)", opacity: 0, duration: 0.26, ease: "power2.in" }, 17.1);
+    window.__timelines["network"] = tl;
+  </script>
+</template>

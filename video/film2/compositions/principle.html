@@ -1,0 +1,54 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Fraunces"; font-style: italic; src: url("assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", sans-serif; }
+    #pr-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    #pr-all { position: absolute; inset: 0; }
+    .pr-line { position: absolute; left: 140px; font-family: "Bricolage", sans-serif; font-weight: 700; font-size: 100px; line-height: 1.02;
+      letter-spacing: -0.04em; clip-path: inset(0 100% 0 0); }
+    .pr-line em { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; letter-spacing: -0.02em; color: #C2EF6A; }
+    #pr-l1 { top: 140px; } #pr-l2 { top: 600px; }
+    .pr-k { position: absolute; left: 1150px; font-weight: 600; font-size: 30px; color: #9C9C92; opacity: 0; }
+    #pr-k1 { top: 168px; } #pr-k2 { top: 628px; }
+    /* the real rows from the map, at 2x */
+    .pr-row { position: absolute; left: 1150px; width: 611px; height: 144px; border-radius: 22px; opacity: 0;
+      background-size: 2210px 1820px; box-shadow: 0 24px 50px rgba(0,0,0,.55); }
+    #pr-r1 { top: 216px; background-image: url("assets/ui/arch_c2.png"); background-position: -1006.4px -624.4px; }
+    #pr-r2 { top: 676px; background-image: url("assets/ui/arch_decide.png"); background-position: -1006.4px -780.2px; }
+    #pr-rule { position: absolute; left: 140px; right: 140px; top: 539px; height: 1px; background: rgba(236,234,226,.12); transform-origin: 0 50%; }
+  </style>
+  <div id="root" data-composition-id="principle" data-width="1920" data-height="1080">
+    <div id="pr-grid"></div>
+    <div id="pr-all">
+      <div id="pr-l1" class="pr-line">AI where <em>judgment</em><br />is needed.</div>
+      <div id="pr-k1" class="pr-k">the LLM judge</div>
+      <div id="pr-r1" class="pr-row"></div>
+      <div id="pr-rule"></div>
+      <div id="pr-l2" class="pr-line">Rules where <em>certainty</em><br />is needed.</div>
+      <div id="pr-k2" class="pr-k">a fixed rule</div>
+      <div id="pr-r2" class="pr-row"></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    ft("#pr-l1", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.5, ease: "power2.out" }, 0.42);
+    ft("#pr-r1", { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.6);
+    ft("#pr-k1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 0.75);
+    ft("#pr-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, 1.6);
+    ft("#pr-l2", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.5, ease: "power2.out" }, 2.55);
+    ft("#pr-r2", { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 2.72);
+    ft("#pr-k2", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 2.87);
+    // T4 whip out to the side-by-side result
+    ft("#pr-all", { x: 0, filter: "blur(0px)", opacity: 1 }, { x: -520, filter: "blur(16px)", opacity: 0, duration: 0.26, ease: "power2.in" }, 5.92);
+    window.__timelines["principle"] = tl;
+  </script>
+</template>

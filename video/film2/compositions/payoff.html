@@ -1,0 +1,72 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Fraunces"; font-style: italic; src: url("assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Anek"; src: url("assets/fonts/anek-bangla.woff2") format("woff2"); font-weight: 100 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", sans-serif; }
+    /* the real Playground after the recorded run (viewport capture at 2x) */
+    #po-view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    #po-view img { width: 1920px; height: 1080px; }
+    #po-dim { position: absolute; inset: 0; background: #0A0B09; opacity: 0; }
+    .po-card { position: absolute; left: 0; top: 0; transform-origin: 0 0; border-radius: 16px; opacity: 0; box-shadow: 0 40px 90px rgba(0,0,0,.65); }
+    #po-block { width: 646px; height: 572px; }
+    #po-rent { width: 646px; height: 317px; }
+    .po-card img { width: 100%; height: 100%; border-radius: 16px; }
+    .po-ring { position: absolute; inset: -2px; border-radius: 18px; }
+    #po-block .po-ring { box-shadow: 0 0 0 2px #FF7A6B; }
+    #po-rent .po-ring { box-shadow: 0 0 0 2px #C2EF6A; }
+    /* payoff: the money stays; the lime is the product's own "act here" colour, used once for this */
+    #po-flood { position: absolute; inset: 0; background: #C2EF6A; clip-path: circle(0% at 1320px 540px); }
+    #po-pay { position: absolute; left: 150px; top: 250px; color: #0D1406; opacity: 0; }
+    #po-amt { display: flex; align-items: baseline; gap: 34px; }
+    #po-num { font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 300px; letter-spacing: -0.05em; line-height: .86; }
+    #po-saved { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; font-size: 170px; letter-spacing: -0.03em; line-height: .86; }
+    #po-bn { margin-top: 56px; font-family: "Anek", sans-serif; font-weight: 700; font-size: 66px; color: rgba(13,20,6,.82); }
+    #po-src { margin-top: 30px; font-weight: 600; font-size: 32px; color: rgba(13,20,6,.62); }
+  </style>
+  <div id="root" data-composition-id="payoff" data-width="1920" data-height="1080">
+    <div id="po-view"><img src="assets/ui/pg_results_view.png" alt="Playground: the same recorded run without and with AgentShield" /></div>
+    <div id="po-dim"></div>
+    <div id="po-rent" class="po-card"><img src="assets/ui/pg_step_rent.png" alt="Step 4: rent of 8,000 taka, ALLOW" /><div class="po-ring"></div></div>
+    <div id="po-block" class="po-card"><img src="assets/ui/pg_step_block.png" alt="Step 5: 4,500 taka to 01000000666, BLOCK, with the reason in Bangla and English" /><div class="po-ring"></div></div>
+    <div id="po-flood"></div>
+    <div id="po-pay">
+      <div id="po-amt"><span id="po-num">৳ 4,500</span><span id="po-saved">saved</span></div>
+      <div id="po-bn">AgentShield ৳ 4,500 বাঁচিয়েছে</div>
+      <div id="po-src">Recorded run, 13 Nov 2026</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // T4 whip in: the side-by-side lands blurred and sharpens
+    ft("#po-view", { x: 520, y: 0, scale: 1, filter: "blur(16px)" }, { x: 0, y: 0, scale: 1, filter: "blur(0px)", duration: 0.3, ease: "power3.out" }, 0);
+    // "Same model, same inbox": both columns, without and with
+    ft("#po-view", { x: 0, y: 0, scale: 1 }, { x: -355, y: -40, scale: 1.22, duration: 0.7, ease: "expo.inOut" }, 0.55);
+    // "The fake bill never runs": its BLOCK step comes forward
+    ft("#po-dim", { opacity: 0 }, { opacity: 0.6, duration: 0.35, ease: "power2.out" }, 2.7);
+    ft("#po-block", { x: 1180, y: 200, scale: 0.9, opacity: 0 }, { x: 1000, y: 168, scale: 1.3, opacity: 1, duration: 0.55, ease: "power3.out" }, 2.75);
+    // "The real rent still goes through": the rent's ALLOW step beside it
+    ft("#po-rent", { x: -120, y: 334, scale: 1.3, opacity: 0 }, { x: 80, y: 334, scale: 1.3, opacity: 1, duration: 0.55, ease: "power3.out" }, 4.92);
+    // "And the user reads why, in Bangla": into the Bangla reason
+    ft("#po-rent", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.in" }, 7.0);
+    ft("#po-block", { x: 1000, y: 168, scale: 1.3 }, { x: 120, y: -396, scale: 2.6, duration: 0.75, ease: "expo.inOut" }, 7.05);
+    ft("#po-dim", { opacity: 0.6 }, { opacity: 0.92, duration: 0.4 }, 7.05);
+    // payoff: the money stays. lime opens from the reason card; the amount lands like a stamp
+    ft("#po-flood", { clipPath: "circle(0% at 1320px 540px)" }, { clipPath: "circle(160% at 1320px 540px)", duration: 0.55, ease: "power3.inOut" }, 9.55);
+    ft("#po-pay", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 10.0);
+    ft("#po-num", { scale: 1.35, opacity: 0, transformOrigin: "0% 80%" }, { scale: 1, opacity: 1, duration: 0.22, ease: "power4.out" }, 10.02);
+    ft("#po-num", { x: -8 }, { x: 0, duration: 0.07, ease: "none" }, 10.24);
+    ft("#po-saved", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 10.3);
+    ft("#po-bn", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" }, 10.75);
+    ft("#po-src", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" }, 11.0);
+    window.__timelines["payoff"] = tl;
+  </script>
+</template>

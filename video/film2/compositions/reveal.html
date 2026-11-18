@@ -1,0 +1,60 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Fraunces"; font-style: italic; src: url("assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; }
+    #rv-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    #rv-cam { position: absolute; inset: 0; transform-origin: 0 0; }
+    /* the AgentShield mark: two halves of a shield form a gate; the lime dot is the agent's action held for checking */
+    #rv-mark { position: absolute; left: 150px; top: 380px; width: 320px; height: 320px; }
+    #rv-mark svg { position: absolute; inset: 0; width: 320px; height: 320px; overflow: visible; }
+    #rv-lines { position: absolute; left: 540px; top: 392px; }
+    .rv-line { font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 118px; line-height: 1.02; letter-spacing: -0.045em; white-space: nowrap;
+      clip-path: inset(0 100% 0 0); }
+    .rv-line + .rv-line { margin-top: 10px; }
+    .rv-line em { font-family: "Fraunces", serif; font-style: italic; font-weight: 500; letter-spacing: -0.02em; color: #C2EF6A; }
+  </style>
+  <div id="root" data-composition-id="reveal" data-width="1920" data-height="1080">
+    <div id="rv-grid"></div>
+    <div id="rv-cam">
+      <div id="rv-mark">
+        <svg viewBox="0 0 32 32">
+          <defs>
+            <mask id="rv-m"><rect x="-40" y="-10" width="112" height="52" fill="#fff" /><circle cx="16" cy="15.2" r="4.9" fill="#000" /></mask>
+          </defs>
+          <g mask="url(#rv-m)">
+            <path id="rv-left" d="M14.7 2.6 L4.6 6.4 V14.6 C4.6 21.6 8.9 26.6 14.7 29.3 Z" fill="#F4F2EA" />
+            <path id="rv-right" d="M17.3 2.6 L27.4 6.4 V14.6 C27.4 21.6 23.1 26.6 17.3 29.3 Z" fill="#F4F2EA" />
+          </g>
+          <circle id="rv-dot" cx="16" cy="15.2" r="3.3" fill="#C2EF6A" />
+        </svg>
+      </div>
+      <div id="rv-lines">
+        <div id="rv-l1" class="rv-line">The agent proposes.</div>
+        <div id="rv-l2" class="rv-line">AgentShield <em>decides.</em></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // "So we built a gate": the two halves close in and leave a gate between them
+    ft("#rv-left", { x: -14, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 0.62);
+    ft("#rv-right", { x: 14, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, 0.66);
+    // "between the agent and its tools": the agent's action arrives and is held in the gate
+    ft("#rv-dot", { x: -26, opacity: 0, scale: 0.6, transformOrigin: "50% 50%" }, { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 2.45);
+    // "The agent proposes." / "AgentShield decides."
+    ft("#rv-l1", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.45, ease: "power2.out" }, 4.05);
+    ft("#rv-l2", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.5, ease: "power2.out" }, 5.62);
+    // T3: zoom through the lime dot into the gateway (dot centre on screen: 310, 532)
+    // (the dot's radius is 33 px; at 56x it covers the farthest corner, so the frame ends fully lime)
+    ft("#rv-cam", { x: 0, y: 0, scale: 1 }, { x: 310 - 310 * 56, y: 532 - 532 * 56, scale: 56, duration: 0.75, ease: "expo.in" }, 7.45);
+    window.__timelines["reveal"] = tl;
+  </script>
+</template>

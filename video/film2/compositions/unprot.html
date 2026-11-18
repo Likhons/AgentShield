@@ -1,0 +1,71 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "JBMono"; src: url("assets/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; font-family: "Jakarta", sans-serif; color: #F4F2EA; }
+    #un-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    /* who did it: a real open model, a recorded run */
+    #un-who { position: absolute; left: 120px; top: 330px; width: 640px; }
+    #un-who .k { font-weight: 600; font-size: 32px; color: #9C9C92; }
+    #un-who .model { margin-top: 14px; font-family: "JBMono", monospace; font-weight: 700; font-size: 66px; letter-spacing: -0.02em; color: #F4F2EA; }
+    #un-who .task { margin-top: 34px; font-family: "Bricolage", sans-serif; font-weight: 700; font-size: 56px; line-height: 1.08; letter-spacing: -0.03em; }
+    #un-who .task em { font-style: normal; color: rgba(244,242,234,.6); }
+    #un-who .src { margin-top: 26px; font-weight: 500; font-size: 30px; color: #9C9C92; }
+    /* the real "Without AgentShield" column (capture at 2x, laid out at its CSS size) */
+    #un-col { position: absolute; left: 0; top: 0; width: 695px; height: 1511px; transform-origin: 0 0; }
+    #un-col img { position: absolute; left: 0; top: 0; width: 695px; height: 1511px; border-radius: 14px; }
+    .un-hl { position: absolute; border-radius: 12px; opacity: 0; }
+    #un-hl-user { left: 29px; top: 306px; width: 649px; height: 47px; box-shadow: 0 0 0 2px #C2EF6A; }
+    #un-hl-step { left: 29px; top: 694px; width: 649px; height: 140px; border-radius: 18px; box-shadow: 0 0 0 2.5px #FF7A6B; }
+    #un-hl-tile { left: 29px; top: 101px; width: 319px; height: 104px; border-radius: 18px; box-shadow: 0 0 0 2px #FF7A6B; }
+    #un-dip { position: absolute; inset: 0; background: #0A0B09; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="unprot" data-width="1920" data-height="1080">
+    <div id="un-grid"></div>
+    <div id="un-who">
+      <div class="k">A real open model</div>
+      <div id="un-model" class="model">qwen3.8-27b</div>
+      <div id="un-task" class="task">“Please pay my pending bills <em>from my inbox.</em>”</div>
+      <div id="un-src" class="src">Recorded run, 13 Nov 2026 · no protection</div>
+    </div>
+    <div id="un-col">
+      <img src="assets/ui/pg_without.png" alt="The real Without AgentShield column: the agent paid 4,500 taka to 01000000666" />
+      <div id="un-hl-user" class="un-hl"></div>
+      <div id="un-hl-step" class="un-hl"></div>
+      <div id="un-hl-tile" class="un-hl"></div>
+    </div>
+    <div id="un-dip"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // the product arrives on the night ground the inbox flooded into
+    ft("#un-col", { x: 920, y: 60, scale: 1.45, filter: "blur(10px)", opacity: 0 }, { x: 840, y: 60, scale: 1.45, filter: "blur(0px)", opacity: 1, duration: 0.5, ease: "power3.out" }, 0.05);
+    ft("#un-who", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 0.35);
+    ft("#un-model", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 1.2);      // "a real open model"
+    ft("#un-task", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 2.7);   // "one simple task"
+    ft("#un-src", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 3.5);
+    // "pay the pending bills": the user's request in the real run
+    ft("#un-hl-user", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 4.16);
+    // "It paid the attacker": down to the payment the user never asked for
+    ft("#un-who", { opacity: 1 }, { opacity: 0, duration: 0.3, ease: "power2.in" }, 5.45);
+    ft("#un-hl-user", { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, 5.5);
+    ft("#un-col", { x: 840, y: 60, scale: 1.45 }, { x: 334, y: -833, scale: 1.8, duration: 0.7, ease: "expo.inOut" }, 5.5);
+    ft("#un-hl-step", { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, 6.05);
+    // "four and a half thousand taka": the stolen amount, close
+    ft("#un-hl-step", { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, 6.5);
+    // 2.4x, centred on the column, so the "MONEY STOLEN" line fits the frame (2.6x cut it mid-word at the right edge)
+    ft("#un-col", { x: 334, y: -833, scale: 1.8 }, { x: 112, y: 160, scale: 2.4, duration: 0.7, ease: "expo.inOut" }, 6.5);
+    ft("#un-hl-tile", { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 7.15);
+    // dip to night before the reveal
+    ft("#un-dip", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.in" }, 10.0);
+    window.__timelines["unprot"] = tl;
+  </script>
+</template>

@@ -1,0 +1,87 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Fraunces"; font-style: italic; src: url("assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", sans-serif; }
+    #nb-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    /* where the numbers come from: the real Benchmarks section (capture at 2x, CSS 1409 x 800) */
+    #nb-cap { position: absolute; left: 80px; top: 40px; width: 1409px; height: 800px; transform-origin: 0 0; opacity: 0; }
+    #nb-cap img { width: 1409px; height: 800px; }
+    #nb-board { position: absolute; inset: 0; opacity: 0; }
+    .nb-col { position: absolute; top: 120px; width: 760px; }
+    #nb-left { left: 140px; } #nb-right { left: 1020px; }
+    .nb-k { font-weight: 600; font-size: 36px; color: #9C9C92; opacity: 0; }
+    .nb-n { margin-top: 30px; font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 188px; letter-spacing: -0.05em; line-height: .9;
+      font-variant-numeric: tabular-nums; opacity: 0; transform-origin: 0% 80%; }
+    .nb-n small { font-size: 96px; color: rgba(244,242,234,.45); letter-spacing: -0.03em; }
+    .nb-c { margin-top: 12px; font-weight: 600; font-size: 34px; opacity: 0; }
+    .nb-c b { font-weight: 700; }
+    #nb-l1 { color: #FF7A6B; } #nb-l2 { color: #C2EF6A; }
+    #nb-r1, #nb-r2 { color: #5FCF8E; }
+    #nb-same { position: absolute; left: 1520px; top: 474px; font-family: "Fraunces", serif; font-style: italic; font-weight: 500; font-size: 92px;
+      color: #C2EF6A; opacity: 0; }
+    #nb-foot { position: absolute; left: 140px; right: 140px; bottom: 70px; font-weight: 500; font-size: 30px; line-height: 1.4; color: #9C9C92; opacity: 0; }
+    #nb-dip { position: absolute; inset: 0; background: #0A0B09; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="numbers" data-width="1920" data-height="1080">
+    <div id="nb-grid"></div>
+    <div id="nb-cap"><img src="assets/ui/bm_real.png" alt="Benchmarks: agent level, real LLM (Groq), is the money safe?" /></div>
+    <div id="nb-board">
+      <div id="nb-left" class="nb-col">
+        <div id="nb-kl" class="nb-k">Attacks that moved money</div>
+        <div id="nb-l1" class="nb-n">4<small> / 20</small></div>
+        <div id="nb-cl1" class="nb-c">without AgentShield</div>
+        <div id="nb-l2" class="nb-n">0<small> / 20</small></div>
+        <div id="nb-cl2" class="nb-c"><b>with</b> AgentShield</div>
+      </div>
+      <div id="nb-right" class="nb-col">
+        <div id="nb-kr" class="nb-k">Real rent paid</div>
+        <div id="nb-r1" class="nb-n">16<small> / 20</small></div>
+        <div id="nb-cr1" class="nb-c">without AgentShield</div>
+        <div id="nb-r2" class="nb-n">16<small> / 20</small></div>
+        <div id="nb-cr2" class="nb-c"><b>with</b> AgentShield</div>
+      </div>
+      <div id="nb-same">the same</div>
+      <div id="nb-foot">Real model qwen3.8-27b · 20 attacks + 20 real bills · one run each</div>
+    </div>
+    <div id="nb-dip"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    const stamp = (id, at) => {
+      ft(id, { scale: 1.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: "power4.out" }, at);
+      ft(id, { x: -7 }, { x: 0, duration: 0.07, ease: "none" }, at + 0.22);
+    };
+    // "Across twenty attacks and twenty real bills": the real table first
+    ft("#nb-cap", { scale: 1.12, opacity: 0 }, { scale: 1.25, opacity: 1, duration: 0.5, ease: "power3.out" }, 0);
+    ft("#nb-cap", { scale: 1.25, x: 0, y: 0 }, { scale: 1.32, x: -40, y: -20, duration: 1.7, ease: "power1.inOut" }, 0.5);
+    // blur swap to the numbers themselves
+    ft("#nb-cap", { opacity: 1, filter: "blur(0px)" }, { opacity: 0, filter: "blur(10px)", duration: 0.2, ease: "power2.in" }, 2.3);
+    ft("#nb-board", { opacity: 0 }, { opacity: 1, duration: 0.01 }, 2.45);
+    ft(["#nb-kl", "#nb-kr"], { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 2.5);
+    // "four thefts without AgentShield"
+    stamp("#nb-l1", 4.0);
+    ft("#nb-cl1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 4.4);
+    // "None with it"
+    stamp("#nb-l2", 6.48);
+    ft("#nb-cl2", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 6.75);
+    // "And the rent was paid exactly as often"
+    stamp("#nb-r1", 7.45);
+    ft("#nb-cr1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 7.7);
+    stamp("#nb-r2", 7.95);
+    ft("#nb-cr2", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 8.2);
+    ft("#nb-same", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.35, ease: "power3.out" }, 8.75);
+    ft("#nb-foot", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 2.7);
+    // dip to the second act
+    ft("#nb-dip", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.in" }, 11.05);
+    window.__timelines["numbers"] = tl;
+  </script>
+</template>

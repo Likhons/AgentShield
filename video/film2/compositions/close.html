@@ -1,0 +1,60 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Fraunces"; font-style: italic; src: url("assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "JBMono"; src: url("assets/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; }
+    #cl-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    #cl-mark { position: absolute; left: 445px; top: 250px; width: 260px; height: 260px; }
+    #cl-mark svg { width: 260px; height: 260px; overflow: visible; }
+    #cl-word { position: absolute; left: 755px; top: 296px; font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 156px;
+      letter-spacing: -0.05em; line-height: 1; clip-path: inset(0 100% 0 0); }
+    #cl-word span { color: #C2EF6A; }
+    .cl-line { position: absolute; left: 0; right: 0; text-align: center; font-family: "Bricolage", sans-serif; font-weight: 700; font-size: 78px; letter-spacing: -0.035em;
+      line-height: 1.1; clip-path: inset(0 100% 0 0); }
+    #cl-l1 { top: 600px; }
+    #cl-l2 { top: 690px; font-family: "Fraunces", serif; font-style: italic; font-weight: 500; letter-spacing: -0.02em; color: #C2EF6A; }
+    #cl-url { position: absolute; left: 0; right: 0; text-align: center; top: 870px; font-family: "JBMono", monospace; font-weight: 600; font-size: 48px; color: #F4F2EA; opacity: 0; }
+    #cl-ul { position: absolute; left: 542px; top: 938px; width: 836px; height: 4px; border-radius: 2px; background: #C2EF6A; transform-origin: 0 50%; transform: scaleX(0); }
+  </style>
+  <div id="root" data-composition-id="close" data-width="1920" data-height="1080">
+    <div id="cl-grid"></div>
+    <div id="cl-mark">
+      <svg viewBox="0 0 32 32">
+        <defs><mask id="cl-m"><rect x="-40" y="-10" width="112" height="52" fill="#fff" /><circle cx="16" cy="15.2" r="4.9" fill="#000" /></mask></defs>
+        <g mask="url(#cl-m)">
+          <path id="cl-left" d="M14.7 2.6 L4.6 6.4 V14.6 C4.6 21.6 8.9 26.6 14.7 29.3 Z" fill="#F4F2EA" />
+          <path id="cl-right" d="M17.3 2.6 L27.4 6.4 V14.6 C27.4 21.6 23.1 26.6 17.3 29.3 Z" fill="#F4F2EA" />
+        </g>
+        <circle id="cl-dot" cx="16" cy="15.2" r="3.3" fill="#C2EF6A" />
+      </svg>
+    </div>
+    <div id="cl-word">Agent<span>Shield</span></div>
+    <div id="cl-l1" class="cl-line">The agent may be fooled.</div>
+    <div id="cl-l2" class="cl-line">The money is not.</div>
+    <div id="cl-url">agent-shield-demo.vercel.app</div>
+    <div id="cl-ul"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // the agent's action (the lime dot) is carried in and held: it becomes the mark
+    ft("#cl-dot", { x: -60, opacity: 0, scale: 0.7, transformOrigin: "50% 50%" }, { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, 0.05);
+    ft("#cl-left", { x: -12, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 0.35);
+    ft("#cl-right", { x: 12, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 0.39);
+    ft("#cl-word", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.45, ease: "power2.out" }, 0.5);
+    // "The agent may be fooled." / "The money is not."
+    ft("#cl-l1", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.45, ease: "power2.out" }, 0.78);
+    ft("#cl-l2", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.45, ease: "power2.out" }, 2.55);
+    // the call to action
+    ft("#cl-url", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.5);
+    ft("#cl-ul", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, 3.7);
+    window.__timelines["close"] = tl;
+  </script>
+</template>
