@@ -5,8 +5,10 @@
 Same instruments as make_score.py; the sections follow film2's scenes (seconds = film time): a dark pulse under
 the phone, minor tension through the inbox and the stolen money, a held breath for the reveal, a driving
 arpeggio through the four checks, silence for the BLOCK hit, a lift into the principle and the payoff,
-confident numbers, a short return to tension for the second act, and the resolved chord on the mark.
+confident numbers, a held question while a big transfer waits for the user's yes, a short return to tension
+for the second act, and the resolved chord on the mark.
 The music ducks under the narration (clip times read from film2/index.html).
+The ask scene (18 Nov) was inserted at 99.6 s: everything written for 99.6 s or later plays ASK_LEN later.
 """
 import json
 import re
@@ -17,7 +19,8 @@ from pathlib import Path
 import numpy as np
 
 SR = 44100
-DUR = 134.5
+ASK0, ASK_LEN = 99.6, 12.0   # the ask scene: sections written for t >= ASK0 are placed ASK_LEN later
+DUR = 134.5 + ASK_LEN
 N = int(SR * DUR)
 BEAT = 60 / 90          # 90 BPM
 BAR = 4 * BEAT
@@ -34,8 +37,11 @@ def hz(m):
     return 440.0 * 2 ** ((m - 69) / 12)
 
 
-def place(sig, t0, gain=1.0, pan=0.0, rev=0.3):
-    """Mix a mono signal at film time t0; pan -1..1 (equal power)."""
+def place(sig, t0, gain=1.0, pan=0.0, rev=0.3, shift=True):
+    """Mix a mono signal at film time t0; pan -1..1 (equal power). Times from ASK0 on move ASK_LEN later
+    (the sections below keep their pre-insert times); the ask section itself passes shift=False."""
+    if shift and t0 >= ASK0 - 1e-9:
+        t0 += ASK_LEN
     i = int(t0 * SR)
     if i >= N:
         return
@@ -265,6 +271,19 @@ place(final, 126.45, 0.7, 0, rev=0.7)
 place(sub(29, 7.8), 126.45, 0.6, 0, rev=0.0)
 for j, m in enumerate([53, 57, 60, 67, 72]):
     place(piano(m + 12, 6.0), 126.45 + j * 0.035, 0.3, -0.4 + j * 0.2, rev=0.7)
+
+# 8b ASK 99.6-111.6 (real film time): the transfer the user typed waits for their yes. An open, suspended chord
+# (a question; it resolves into the D minor of the second act), a slow clock, a soft piano on "asks you first".
+# Own random generator, so every other section (and the reverb) sounds exactly as before the insert.
+_rng_main, rng = rng, np.random.default_rng(8)
+A0 = ASK0
+place(pad(ASUS, ASK_LEN - 0.6, 1.0), A0, 0.48, 0, rev=0.6, shift=False)
+place(sub(33, ASK_LEN - 0.4), A0, 0.34, 0, rev=0.0, shift=False)
+for k, t in enumerate(grid(A0 + 0.33, A0 + ASK_LEN - 0.5, BEAT)):
+    place(tick(), t, 0.14 if k % 2 else 0.08, 0.3 if k % 2 else -0.3, rev=0.15, shift=False)
+for j, m in enumerate([57, 62, 64]):
+    place(piano(m + 12, 3.5), A0 + 9.82 + j * 0.06, 0.24, -0.3 + j * 0.3, rev=0.6, shift=False)
+rng = _rng_main
 
 
 # ---------- reverb: stereo decaying noise IR, convolved by FFT ----------

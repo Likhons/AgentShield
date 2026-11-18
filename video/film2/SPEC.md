@@ -8,12 +8,13 @@ GOAL:    A judge who has never heard of AgentShield ends the film knowing: an AI
 
 OUTPUT:  HyperFrames, 1920 x 1080, 30 fps, H.264 MP4 for YouTube (unlisted).
 
-TIME:    134.5 s = 4035 frames. Narrated, the voice is the clock (en-US-AndrewMultilingualNeural, video/make_vo2.py).
+TIME:    146.5 s = 4395 frames. Narrated, the voice is the clock (en-US-AndrewMultilingualNeural, video/make_vo2.py).
          Scenes (start s / voice start s / voice length s):
          phone 0.0 / 0.8 / 5.21 | mail 7.2 / 7.6 / 15.91 | unprot 25.0 / 25.4 / 8.59 | reveal 35.4 / 36.0 / 6.89
          | how 43.6 / 44.2 / 23.06 | principle 68.6 / 69.0 / 4.90 | payoff 74.8 / 75.3 / 9.48
-         | numbers 88.2 / 88.6 / 9.60 | network 99.6 / 100.0 / 15.50 | dev 117.0 / 117.4 / 7.61
-         | close 126.0 / 126.6 / 3.34, end card holds to 134.5.
+         | numbers 88.2 / 88.6 / 9.60 | ask 99.6 / 100.05 / 10.68 | network 111.6 / 112.0 / 15.50
+         | dev 129.0 / 129.4 / 7.61 | close 138.0 / 138.6 / 3.34, end card holds to 146.5.
+         (ask was inserted on 18 Nov; everything after it moved 12.0 s, the score too: make_score2.py ASK0/ASK_LEN.)
 
 LOOK:    Two worlds from the product itself, plus the phone.
          NIGHT (the product): ground #0A0B09 with the site's own 24 px dot grid at 4.5% ink; card #121410;
@@ -48,6 +49,11 @@ OBJECTS: the fake Bangla electricity bill (billing@dhaka-power-bill.example, ৳
          action held for checking; SVG from web/src/components/Logo.tsx); the decision clock with the real
          per-check times of the recorded call (taint 0.31 ms, classifier 0.36 ms, judge 797.5 ms, policy
          0.16 ms, total 799.4 ms).
+         ASK (recorded run 13 Nov, benign_send_large): the user's own request "Send 15000 taka to my landlord at
+         01000000102." typed on the agent phone; the real map in its "Large transfer you typed" flow
+         (assets/ui/arch4_ask.png, live site, reduced motion = final state): taint 0.00, classifier 0.00, judge
+         skipped (no LLM call), policy 0.60 "transfers above 10,000 BDT need your approval", decision ASK,
+         outcome "You decide. Nothing moves without your yes." Amber #F5C66B marks it.
 
 MOTION:  enter power3.out 18 f; move power2.inOut 16 f; exit power2.in 9 f; camera expo.inOut 21 f;
          stamps scale 1.4 -> 1 in 6 f power4.out + a 2-frame 6 px shake; text lands, then holds still.
@@ -65,5 +71,7 @@ BANNED:  a dark void with small floating things (every shot's hero fills >= 40% 
 
 QA:      frame 0 shows the phone with the Bangla bill (never black); 0/24 readable >= 1 s; every check row
          readable when named; BLOCK stamp lands on "blocked"; clock shows 799.4 ms then 0.80 s;
-         payoff banner holds >= 2.5 s; "Simulated" is visible during every network number; end card URL holds >= 3 s.
+         payoff banner holds >= 2.5 s; ask: each check ring lands on its words ("typed by you", "No attack",
+         "over the limit"), the ASK rings on "asks", "You decide" readable >= 1.5 s; "Simulated" is visible during
+         every network number; end card URL holds >= 3 s.
 ```

@@ -1,45 +1,56 @@
 # REVIEW: AgentShield film v2 (18 Nov 2026)
 
-Render: `renders/agentshield_film2_v2.mp4` (134.5 s, 1920x1080, 30 fps, `-q delivery`, 30.9 MB, about 6 min to
-render). v1 (`agentshield_film2_v1.mp4`) had the two P1 issues below. Not in git: renders, 12 unused captures in
-`assets/ui/` (arch_final, bm_text, dev_terminal, net_ring1, net_s1-3, pg_banner, pg_runcard, pg_step_stolen, pg_top,
-pg_with), the voice auditions in `video/samples/`.
+Render: `renders/agentshield_film2_v3.mp4` (146.5 s = 2:26, 1920x1080, 30 fps, `-q delivery`, about 6 min to render).
+History: v1 had the two P1 issues fixed in v2 (below); v2 (134.5 s) was watched by the user, who asked to add the
+ASK case; v3 adds the `ask` scene. Not in git: renders, 12 unused captures in `assets/ui/` (arch_final, bm_text,
+dev_terminal, net_ring1, net_s1-3, pg_banner, pg_runcard, pg_step_stolen, pg_top, pg_with), the voice auditions in
+`video/samples/`.
 
 ## Creative calls
 - Built storyline A, "The bill that was never real", with B's 0.8 s decision clock folded into the "how" scene.
   Not built: B "0.8 seconds" as a whole film, C "Night and day" (`video/STORYLINES_v2.md`).
 - Voice: en-US-AndrewMultilingualNeural (edge-tts, `video/make_vo2.py`); score synthesized by `video/make_score2.py`.
+- ASK (v3) sits after the numbers and before the network act, not inside the payoff: it keeps the payoff's climax
+  intact, and it bridges into the second act (a big transfer you type yourself is asked; a small one a scammer
+  talks you into looks fine alone, so the network check is needed). Narration: "Some payments are real, just big.
+  Fifteen thousand taka to your landlord, typed by you. No attack, but over the limit. So AgentShield asks you
+  first." Every claim is from the recorded run (benign_send_large, 13 Nov). Picture: the same phone as the network
+  act, then the real map's "Large transfer you typed" flow (live site, reduced motion = its final state), first
+  the four checks beside the phone, then the window opens onto the decision and the three outcomes. Music: a held
+  A-sus chord and a slow clock (waiting for the user's yes), resolving into the second act's D minor.
 
-## Measured (on the rendered v1 file, then on the fixed inputs)
-- `hyperframes check`: 0 errors. 16 lint warnings `gsap_repeated_fromto_without_baseline` kept: every scene uses the
-  `ft()` helper, which sets `immediateRender: false` on repeat tweens at runtime; the linter cannot see that. The
-  rendered frames show no element in a wrong rest state.
-- Blank frames: only 0.1-0.6 s dips at cuts (24.5, 35.4, 68.6 s: dip to night before the next line). No stretch over
-  3 s without change except the end card (4.3 s hold, on purpose).
-- Audio (v1): -16.7 LUFS integrated, true peak -1 dB, no clipping. Voice was only 3.5-7 dB over the music during
-  speech (close line 1.4 dB). Fixed: duck under narration 0.5 -> 0.22, static loudness gain instead of the dynamic
-  single-pass loudnorm, music `data-volume` 0.5 -> 0.4. Now 10.6-14.7 dB (close line 8.7 dB); music between lines
-  stays at the v1 level. Measured, not heard.
-- QA from SPEC: frame 0 is the phone with the Bangla bill; 0/24 on screen 19.9-24.2 s; BLOCK hit at 64.5 s with
-  "blocked" at 64.65 s; clock 799.4 ms then 0.80 s; payoff lime banner 84.7-88.2 s; "Simulated" chip on every
-  network number; URL on the end card about 4 s.
-
-- v2 render checked: frames differ from v1 only at 31.7-35.4 s (the reframed shot); -16.6 LUFS, true peak -1.1 dB.
+## Measured
+- `hyperframes check`: 0 errors. 18 lint warnings `gsap_repeated_fromto_without_baseline` kept: every scene uses
+  the `ft()` helper, which sets `immediateRender: false` on repeat tweens at runtime; the linter cannot see that.
+- Blank frames (v2): only 0.1-0.6 s dips at cuts (24.5, 35.4, 68.6 s: dip to night before the next line). No
+  stretch over 3 s without change except the end card (4.3 s hold, on purpose).
+- Audio: v1 had the voice only 3.5-7 dB over the music (close line 1.4 dB). Fixed in v2: duck under narration
+  0.5 -> 0.22, static loudness gain instead of the dynamic single-pass loudnorm, music `data-volume` 0.5 -> 0.4.
+  Voice over music now 10.6-15 dB (ask line 15.0 dB, close line 8.5 dB); in the 300-4000 Hz speech band 13-27 dB
+  over music + sfx. Measured, not heard.
+- Score after the insert: before 99.6 s and (moved 12 s) after it, identical to the v2 score (difference -58 dB);
+  the ask section uses its own random generator so nothing else changed.
 - Sound effects: `impact.mp3` is 99.8% energy below 80 Hz (a sub boom). Full-band it outweighs the voice where it
-  lands on a line (32.1 "thousand taka", 64.5 "blocked", 94.6 numbers, 126.5 close line), but in the 300-4000 Hz
-  speech band the voice sits 13-27 dB over music + sfx on average (worst 10% of frames: 5.7 dB, the close line).
-  Listen on headphones and on a laptop speaker before upload; lower the impacts if the booms feel too heavy.
+  lands on a line (32.1 "thousand taka", 64.5 "blocked", 94.6 numbers, 138.5 close line); in the speech band the
+  voice stays on top. Listen on headphones and on a laptop speaker before upload; lower the impacts if heavy.
+- QA from SPEC: frame 0 is the phone with the Bangla bill; 0/24 on screen 19.9-24.2 s; BLOCK hit at 64.5 s with
+  "blocked" at 64.65 s; clock 799.4 ms then 0.80 s; payoff lime banner 84.7-88.2 s; ask rings on "typed by you"
+  (104.95), "No attack" (106.17), "over the limit" (107.02), ASK rings on "asks" (109.42); "Simulated" chip on
+  every network number; URL on the end card about 4 s.
 
 ## Looked at only
-- Contact sheets every 2 s and 24 key frames at full size. Not checked: the 360 px phone sheet.
+- Contact sheets every 2 s, 24 key frames at full size, the ask scene at 16 moments. Not checked: the 360 px
+  phone sheet.
 
-## Fixed in v2
-- P1 t=31.7-35.0 s: the push-in on the stolen tile (2.6x) cut "which the user ne|ver asked" at the right edge ->
-  2.4x, centred on the column; the whole "MONEY STOLEN" line and the user's request now sit inside the frame.
-- P1 narration buried under the music (above).
+## Fixed
+- v2, P1 t=31.7-35.0 s: the push-in on the stolen tile (2.6x) cut "which the user ne|ver asked" at the right
+  edge -> 2.4x, centred on the column.
+- v2, P1 narration buried under the music (above).
+- v3: an empty chat bubble sat on the phone for 0.8 s before the typing -> the bubble arrives with the typing.
 
 ## Open (P2)
 - t=11.9-12.2 s: the inbox and the opened email crossfade with both texts readable for a moment.
-- t=106-107 s: "One number, paid by many strangers." shows before the "Simulated wallet week" chip arrives
+- t=118-119 s: "One number, paid by many strangers." shows before the "Simulated wallet week" chip arrives
   (the capture itself is labelled simulated).
-- Weakest shot: the architecture map at 62-67 s is small on a phone; the big clock carries the read there.
+- Weakest shot: the architecture map at 62-67 s is small on a phone; the big clock carries the read there. The ask
+  scene's map text (1.75x) is also small on a phone, fine on a laptop.

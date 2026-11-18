@@ -1,0 +1,104 @@
+<template>
+  <style>
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "JBMono"; src: url("assets/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", sans-serif; }
+    #ak-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    /* the user's own request, typed to the agent (recorded run 13 Nov, benign_send_large); same device as the network scene */
+    #ak-phone { position: absolute; left: 230px; top: 40px; width: 500px; height: 1000px; border-radius: 64px; background: #050505;
+      box-shadow: 0 0 0 2px #2a2c27, 0 40px 90px rgba(0,0,0,.7); }
+    #ak-screen { position: absolute; inset: 14px; border-radius: 52px; overflow: hidden; background: linear-gradient(180deg, #171A15, #0D0F0B); }
+    #ak-island { position: absolute; left: 50%; top: 18px; width: 126px; height: 36px; margin-left: -63px; border-radius: 20px; background: #000; }
+    #ak-head { position: absolute; left: 0; right: 0; top: 80px; padding: 0 30px 22px; border-bottom: 1px solid rgba(236,234,226,.1);
+      font-weight: 700; font-size: 30px; }
+    #ak-head span { display: block; margin-top: 4px; font-weight: 500; font-size: 28px; color: #9C9C92; }
+    #ak-bubble { position: absolute; right: 26px; top: 420px; padding: 20px 24px; border-radius: 26px 26px 8px 26px; background: #2B2F27;
+      font-weight: 600; font-size: 31px; line-height: 1.35; color: #F4F2EA; }
+    .ak-line { display: block; white-space: nowrap; clip-path: inset(0 100% 0 0); }
+    .ak-line b { font-family: "JBMono", monospace; font-weight: 700; }
+    #ak-amt { position: relative; display: inline-block; }
+    #ak-ul { position: absolute; left: 0; right: 0; bottom: 3px; height: 4px; border-radius: 2px; background: #F5C66B; transform-origin: 0 50%; }
+    #ak-gk { position: absolute; left: 950px; top: 34px; display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 30px;
+      color: #9C9C92; opacity: 0; }
+    #ak-gk i { width: 14px; height: 14px; border-radius: 99px; background: #F5C66B; }
+    /* the real architecture map, "Large transfer you typed" flow, final state (capture at 2x, CSS 1104 x 913).
+       The board's transform is the camera; the clip is the window onto it (first the gateway's four checks, then the decision and where it goes). */
+    #ak-clip { position: absolute; inset: 0; clip-path: inset(88.25px 383.75px 377.5px 948.25px round 25px); opacity: 0; }
+    #ak-board { position: absolute; left: 0; top: 0; width: 1104px; height: 913px; transform-origin: 0 0; }
+    #ak-board img { position: absolute; left: 0; top: 0; width: 1104px; }
+    .ak-ring { position: absolute; border-radius: 12px; opacity: 0; }
+    #ak-dip { position: absolute; inset: 0; background: #0A0B09; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="ask" data-width="1920" data-height="1080">
+    <div id="ak-grid"></div>
+    <div id="ak-phone"><div id="ak-screen">
+      <div id="ak-island"></div>
+      <div id="ak-head">Your AI agent<span>MockPay assistant</span></div>
+      <div id="ak-bubble">
+        <span id="ak-t1" class="ak-line">Send <span id="ak-amt">15000<i id="ak-ul"></i></span> taka to my</span>
+        <span id="ak-t2" class="ak-line">landlord at</span>
+        <span id="ak-t3" class="ak-line"><b>01000000102</b>.</span>
+      </div>
+    </div></div>
+    <div id="ak-gk"><i></i>Large transfer you typed</div>
+    <div id="ak-clip" data-layout-allow-overflow>
+      <div id="ak-board">
+        <img src="assets/ui/arch4_ask.png" alt="Architecture map, large transfer you typed: taint 0.00, classifier 0.00, judge skipped, policy 0.60, decision ASK, You decide" />
+        <div id="ak-r1" class="ak-ring" style="left:500.1px;top:153.4px;width:311.8px;height:79.2px;box-shadow:0 0 0 2px #C2EF6A"></div>
+        <div id="ak-r2" class="ak-ring" style="left:500.1px;top:231.7px;width:311.8px;height:79.2px;box-shadow:0 0 0 2px #C2EF6A"></div>
+        <div id="ak-r4" class="ak-ring" style="left:500.1px;top:388.1px;width:311.8px;height:79.2px;box-shadow:0 0 0 2px #F5C66B"></div>
+        <div id="ak-rd" class="ak-ring" style="left:500.1px;top:468.4px;width:311.8px;height:120.5px;box-shadow:0 0 0 2px #F5C66B"></div>
+        <div id="ak-ra" class="ak-ring" style="left:875.5px;top:295.5px;width:199px;height:109.2px;border-radius:14px;box-shadow:0 0 0 2px #F5C66B"></div>
+      </div>
+    </div>
+    <div id="ak-dip"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    // camera on the board (s = 1.75, the network scene's gateway scale). B: gateway at (950, 90) beside the phone; C: centred, with its outcomes
+    const CAM_B = { x: 94.25, y: -114.75, scale: 1.75 };
+    const CAM_C = { x: -405.75, y: -84.75, scale: 1.75 };
+    const CLIP_B = "inset(88.25px 383.75px 377.5px 948.25px round 25px)";   // board CSS x 488-824, y 116-467: the four checks
+    const CLIP_C = "inset(100.75px 432.25px 100.75px 430.75px round 30px)"; // board CSS x 478-1082, y 106-608: checks, decision, outcomes
+    const ring = (id, on, off) => {
+      ft(id, { opacity: 0, scale: 1.06, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.22, ease: "power4.out" }, on);
+      if (off != null) ft(id, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, off);
+    };
+    // "Some payments are real, just big": the user's own request, typed to the agent
+    ft("#ak-phone", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.1);
+    ft("#ak-bubble", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.2, ease: "power3.out" }, 0.8);   // no empty bubble before the typing
+    ft("#ak-t1", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.8, ease: "steps(21)" }, 0.95);
+    ft("#ak-t2", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.35, ease: "steps(11)" }, 1.8);
+    ft("#ak-t3", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.4, ease: "steps(12)" }, 2.2);
+    // "Fifteen thousand taka": the amount, above the 10,000 limit
+    ft("#ak-ul", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power3.out" }, 2.6);
+    // "to your landlord": the call reaches the real gateway
+    ft("#ak-gk", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 4.15);
+    ft("#ak-board", CAM_B, { ...CAM_B, duration: 0.01 }, 0);
+    ft("#ak-clip", { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 4.2);
+    // "typed by you": taint 0.00, every value came from the request
+    ring("#ak-r1", 5.35, 6.5);
+    // "No attack": classifier 0.00, no untrusted text to scan
+    ring("#ak-r2", 6.57, 7.38);
+    // "but over the limit": the policy rule, 0.60
+    ring("#ak-r4", 7.42, 9.75);
+    // "So AgentShield asks you first": the window opens onto the decision and where the call goes
+    ft("#ak-gk", { opacity: 1 }, { opacity: 0, duration: 0.25, ease: "power2.in" }, 8.5);
+    ft("#ak-phone", { x: 0, filter: "blur(0px)", opacity: 1 }, { x: -140, filter: "blur(10px)", opacity: 0, duration: 0.4, ease: "power2.in" }, 8.5);
+    ft("#ak-clip", { clipPath: CLIP_B }, { clipPath: CLIP_C, duration: 0.7, ease: "expo.inOut" }, 8.55);
+    ft("#ak-board", CAM_B, { ...CAM_C, duration: 0.7, ease: "expo.inOut" }, 8.55);
+    // "asks": decision ASK, and the outcome "You decide. Nothing moves without your yes."
+    ring("#ak-rd", 9.82);
+    ring("#ak-ra", 9.9);
+    // dip to night before the second act
+    ft("#ak-dip", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.in" }, 11.6);
+    window.__timelines["ask"] = tl;
+  </script>
+</template>
