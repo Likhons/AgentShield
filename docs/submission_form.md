@@ -254,10 +254,65 @@ LLMs / Models Used: tick Claude, ChatGPT, Llama, Qwen. Add: `gpt-oss-120b (OpenA
 
 How & why did you use these LLMs?:
 ```
-In the product: qwen3.8-27b (Qwen, via Groq) is the demo banking agent that AgentShield protects, a real open model, so we could show it paying a fake Bangla bill. gpt-oss-120b (via Groq) is the intent judge, on a separate model so it has its own rate-limit budget; it sees only the request and the tool call. Llama Prompt Guard 2 (86M and 22M) are our baselines: they flagged 0 of our 24 Bangla/Banglish attacks. XLM-RoBERTa-base, fine-tuned by us on Kaggle, is an experimental classifier we did not ship, because it held legitimate rent payments (reported in our results). To build it: Claude (Claude Code) as AI pair programmer for code, reviews, benchmarks, the dashboard and the demo video; ChatGPT for first drafts of the Bangla/Banglish attack texts, which the team edited and reviewed; Microsoft neural text-to-speech for the video narration.
+In the product: qwen3.8-27b (Qwen, via Groq) is the demo banking agent that AgentShield protects, a real open model, so we could show it paying a fake Bangla bill. gpt-oss-120b (via Groq) is the intent judge, on a separate model so it has its own rate-limit budget; it sees only the request and the tool call. Llama Prompt Guard 2 (86M and 22M) are our baselines: they flagged 0 of the 24 Bangla/Banglish attacks we tested them on. XLM-RoBERTa-base, fine-tuned by us on Kaggle, is an experimental classifier we did not ship, because it held legitimate rent payments (reported in our results). To build it: Claude (Claude Code) as AI pair programmer for code, reviews, benchmarks, the dashboard and the demo video; ChatGPT for first drafts of the Bangla/Banglish attack texts, which the team edited and reviewed; Microsoft neural text-to-speech for the video narration.
 ```
 
 Retrieval & RAG and RAG architecture details: leave empty.
+
+Rest of the section (seen 18 Nov):
+
+MCP (Model Context Protocol) Usage: tick "We built and/or used MCP servers / clients in this build" (we used one, built none). If it opens inventory fields: Playwright MCP (Microsoft, `@playwright/mcp`), used not built, client Claude Code, transport stdio (started locally with npx by the Claude Code plugin), 14 distinct browser tools called (~1,060 calls), reused across all UI checks of this project only. Details: see "MCP usage disclosure" below.
+
+Open Source Tools & Libraries:
+```
+FastAPI + Uvicorn: the gateway (POST /v1/check) and the dashboard API. Pydantic: typed models for every request, verdict and audit row; FastAPI validates with them. httpx: our own small client for the Groq API (retries on rate limits). PyYAML: policy rules in a readable file. SQLite: the audit log. PyTorch + Hugging Face Transformers: fine-tuning XLM-RoBERTa-base on Kaggle. gpt-oss-120b (open-weight): the intent judge. Llama Prompt Guard 2 (open weights): baseline detector we measured against. Streamlit + Altair + pandas: first dashboard. React, TypeScript, Vite, Tailwind CSS, TanStack Query, Recharts: the web dashboard. pytest: 290 tests. Playwright: UI checks and screenshots.
+```
+
+Agent Frameworks & Orchestration:
+```
+No agent framework: a small custom loop we wrote, so we control exactly where the check sits. One banking agent with six tools (read inbox, read email, web search, read file, get balance, send money), each labelled with its data source. The agent replies with one JSON action per step (call a tool, or finish). Every tool is wrapped by ShieldSession.wrap(), which runs four checks before the tool executes: taint tracking, injection classifier, LLM intent judge (only if needed) and policy. The judge is a second, independent model that checks the agent's tool calls without seeing the untrusted text. The same checks are a plain HTTP gateway, so LangGraph, CrewAI or any other framework could call it.
+```
+
+Fine-tuning / Adaptation:
+```
+Full fine-tune of xlm-roberta-base as a Bangla/Banglish/English injection classifier on Kaggle (T4 GPU, 6 epochs, class weights, 334 items, split 70/15/15 by language and label). Held-out test: 16/16 attacks and 3/35 benign texts flagged. In the agent-level benchmark it held every legitimate rent payment (0/175 paid), because it reacts to email header formatting it never saw in training. So the rule-based classifier stays at runtime and we report the finding; retraining on texts in the runtime format is the next step. Prompt adaptation: the intent judge's rules were tuned on 11 hand-made cases (28/33 → 33/33 correct over 3 runs).
+```
+
+Evaluation & Quality Measurement:
+```
+Custom benchmarks, every run saved with 95% Wilson confidence intervals. (1) Text level: do detectors flag attack texts and leave benign ones alone, per language (Bangla, Banglish, English), against Llama Prompt Guard 2 as baseline. (2) Agent level: does money reach a recipient the user never asked for, and is the user's real rent still paid, without vs with AgentShield. Real LLM (qwen3.8-27b, 20 attacks + 20 bill payments): attacks moved money 4/20 without and 0/20 with; rent paid 16/20 in both. Simulated agent, full dataset: attacks 22/60 → 0/60, rent 175/175 in both. (3) Judge regression set: 11 hand-made cases × 3 runs after each prompt change. (4) 290 automated tests in CI on every push. Failures we found in our own AI (judge over-refusal, trained-model over-refusal) are published with the numbers.
+```
+
+Guardrails, Safety & Privacy:
+```
+AgentShield is itself a guardrail against prompt injection and jailbreaks that turn into actions: it checks every tool call before it runs. Separation of data and instructions: the LLM judge never sees email, web or file text; tool arguments reach it labelled "untrusted data, not instructions". Hard rules the LLM cannot override: a tainted transfer to a stranger is blocked, unknown recipients and amounts over 10,000 BDT need the user's approval. Output validation: the judge must return a fixed JSON object; if it is missing or malformed, or the call fails, the result is medium risk and the user is asked (never a silent allow). Uncertain cases go to the user (ASK) instead of being blocked. Every decision is explained in Bangla and English and logged. Privacy: fake data only, API keys only in platform secrets, never in the repo.
+```
+
+Frontend AI / Visual App Builders: none of the listed tools. Add: `Claude Code (Anthropic)`. Text:
+```
+The React web dashboard was written with Claude Code (no visual builder): almost all UI code is AI-written. The team set the direction (calm palette, Bangla-friendly fonts, what each page must show, honest labels such as SIM for simulated data), reviewed every page at phone and desktop widths, and rejected versions that did not work (a neon palette, a slow step-by-step architecture tour). Claude Code checked layouts in a real browser through the Playwright MCP server and used the Impeccable design skill for design reviews.
+```
+
+Workflow Automation: tick nothing. Text (optional): `None. Only CI: GitHub Actions runs 290 tests on every push; Vercel and Render redeploy on every push.`
+
+Local / On-device LLMs: tick nothing. Text:
+```
+No local LLMs: the laptop has 8 GB RAM and no GPU, so all LLMs run on Groq's free tier. Only our small fine-tuned XLM-RoBERTa-base classifier (not an LLM) can run locally on CPU with Hugging Face Transformers (about 66 ms per text); it is optional and off by default.
+```
+
+Agentic Frameworks Used: tick nothing (custom loop, see Agent Frameworks & Orchestration).
+
+AI Development Lifecycle (AI-DLC): tick "Claude Skills" (Impeccable for design reviews, HyperFrames for the demo video). Add: `CLAUDE.md project memory + Claude Code auto-memory`. Process notes:
+```
+Phased plan with a gate after each phase: vulnerable demo agent → core checks → datasets and benchmark → classifier training → dashboard → submission. CLAUDE.md holds the plan, status and rules and is read at the start of every Claude Code session. Clear split of work: the team writes the core security checks and all attack texts; the AI writes tooling, dashboard, benchmarks and docs, explains before it builds, and never writes attack texts. Every step ends with tests and a commit; nothing is pushed without the team's OK. Numbers are reported only from saved runs; when our own AI failed (judge over-refusal, trained-model over-refusal), we measured it, documented it and changed the plan.
+```
+
+Build a Live /docs Module: do not tick for now (it is a promise to build a page). Read "Show instructions & copy prompt" first.
+
+Anything else about your AI usage?:
+```
+Principle: AI where judgment is needed, deterministic rules where certainty is needed. The LLM judges whether an action matches what the user asked; money rules are hard rules it cannot override. The judge never sees untrusted text, so the same injection that fools the agent cannot reach it. We tested real open models: in one recorded run, a realistic Bangla fake bill fooled qwen3.8-27b into paying an attacker, and AgentShield blocked that payment while the landlord's rent still went through (over 20 runs: attacks 4/20 without, 0/20 with). Meta's Prompt Guard 2 flagged 0 of the 24 Bangla/Banglish attacks we tested it on, which is why a Bangla-aware, action-level check matters.
+```
 
 ### YouTube video
 Link: **https://youtu.be/QlSZ6nz16Q8** (v4, uploaded 18 Nov 2026; checked the same day: viewable with the link,
