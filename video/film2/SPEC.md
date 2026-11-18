@@ -8,13 +8,18 @@ GOAL:    A judge who has never heard of AgentShield ends the film knowing: an AI
 
 OUTPUT:  HyperFrames, 1920 x 1080, 30 fps, H.264 MP4 for YouTube (unlisted).
 
-TIME:    146.5 s = 4395 frames. Narrated, the voice is the clock (en-US-AndrewMultilingualNeural, video/make_vo2.py).
-         Scenes (start s / voice start s / voice length s):
+TIME:    173.5 s = 5205 frames (portal limit 181 s). Narrated, the voice is the clock (en-US-AndrewMultilingualNeural,
+         video/make_vo2.py). Scenes (start s / voice start s / voice length s):
          phone 0.0 / 0.8 / 5.21 | mail 7.2 / 7.6 / 15.91 | unprot 25.0 / 25.4 / 8.59 | reveal 35.4 / 36.0 / 6.89
          | how 43.6 / 44.2 / 23.06 | principle 68.6 / 69.0 / 4.90 | payoff 74.8 / 75.3 / 9.48
          | numbers 88.2 / 88.6 / 9.60 | ask 99.6 / 100.05 / 10.68 | network 111.6 / 112.0 / 15.50
-         | dev 129.0 / 129.4 / 7.61 | close 138.0 / 138.6 / 3.34, end card holds to 146.5.
-         (ask was inserted on 18 Nov; everything after it moved 12.0 s, the score too: make_score2.py ASK0/ASK_LEN.)
+         | dev 129.0 / 129.4 / 7.61 | reach 138.0 / 138.45 / 25.18 | close 165.0 / 165.6 / 3.34, end card to 173.5.
+         (Inserted on 18 Nov: ask, 12 s; reach, 27 s, after the portal's video guidance asked for "AI approach" and
+         "Impact & next step". Later scenes moved; the score too: make_score2.py INSERTS.)
+         reach says only what is built (user, 18 Nov: no plans): who it is for (wallets, banks, fintech apps that let
+         AI agents move money), cost at scale (median check 0.6 ms and "the LLM judge ran on 107 of 469" from the
+         audit log capture), any agent framework (Python SDK, HTTP API), language-neutral taint tracking and rules,
+         Bangla and Banglish built in, "for Bangladeshis at home and abroad".
 
 LOOK:    Two worlds from the product itself, plus the phone.
          NIGHT (the product): ground #0A0B09 with the site's own 24 px dot grid at 4.5% ink; card #121410;

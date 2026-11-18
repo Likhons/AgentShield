@@ -1,0 +1,151 @@
+<template>
+  <style>
+    @font-face { font-family: "Bricolage"; src: url("assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "Fraunces"; font-style: italic; src: url("assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+    @font-face { font-family: "Jakarta"; src: url("assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+    @font-face { font-family: "JBMono"; src: url("assets/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; }
+    @font-face { font-family: "Anek"; src: url("assets/fonts/anek-bangla.woff2") format("woff2"); font-weight: 100 800; }
+    @font-face { font-family: "Baloo"; src: url("assets/fonts/baloo-da-2.woff2") format("woff2"); font-weight: 400 800; }
+    #root { position: absolute; inset: 0; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", sans-serif; }
+    #rc-grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 24px 24px; }
+    .rc-act { position: absolute; inset: 0; }
+    /* 1. who it is for: the words, and the agent inside a wallet app (the film's own phone, the real user request) */
+    #rc-q { position: absolute; left: 150px; top: 206px; font-weight: 600; font-size: 36px; color: #9C9C92; opacity: 0; }
+    .rc-w { position: absolute; left: 146px; font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 150px; letter-spacing: -0.045em;
+      line-height: 1; opacity: 0; }
+    #rc-w1 { top: 266px; } #rc-w2 { top: 416px; } #rc-w3 { top: 566px; }
+    #rc-sub { position: absolute; left: 152px; top: 772px; font-weight: 500; font-size: 46px; color: rgba(244,242,234,.86); opacity: 0; }
+    #rc-sub b { color: #C2EF6A; font-weight: 600; }
+    #rc-phone { position: absolute; left: 1262px; top: 40px; width: 500px; height: 1000px; border-radius: 64px; background: #050505;
+      box-shadow: 0 0 0 2px #2a2c27, 0 40px 90px rgba(0,0,0,.7); opacity: 0; }
+    #rc-screen { position: absolute; inset: 14px; border-radius: 52px; overflow: hidden; background: linear-gradient(180deg, #171A15, #0D0F0B); }
+    #rc-island { position: absolute; left: 50%; top: 18px; width: 126px; height: 36px; margin-left: -63px; border-radius: 20px; background: #000; }
+    #rc-head { position: absolute; left: 0; right: 0; top: 80px; padding: 0 30px 22px; border-bottom: 1px solid rgba(236,234,226,.1);
+      font-weight: 700; font-size: 30px; }
+    #rc-head span { display: block; margin-top: 4px; font-weight: 500; font-size: 28px; color: #9C9C92; }
+    #rc-bubble { position: absolute; right: 26px; top: 420px; max-width: 400px; padding: 20px 24px; border-radius: 26px 26px 8px 26px;
+      background: #2B2F27; font-weight: 600; font-size: 31px; line-height: 1.35; opacity: 0; }
+    /* 2. cheap as they grow: the real audit log's median check time (capture at 2x, card at CSS 729-1081 x 169-294) */
+    #rc-h2 { position: absolute; left: 150px; top: 168px; font-family: "Bricolage", sans-serif; font-weight: 700; font-size: 88px;
+      letter-spacing: -0.035em; line-height: 1.05; opacity: 0; }
+    #rc-ms { position: absolute; left: 140px; top: 300px; font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 280px;
+      letter-spacing: -0.05em; line-height: .9; color: #C2EF6A; opacity: 0; transform-origin: 0% 80%; }
+    #rc-msl { position: absolute; left: 156px; top: 612px; font-weight: 600; font-size: 40px; color: rgba(244,242,234,.86); opacity: 0; }
+    #rc-card { position: absolute; left: 990px; top: 360px; width: 809.6px; height: 287.5px; border-radius: 26px; opacity: 0;
+      background-image: url("assets/ui/audit_view.png"); background-size: 4416px 2484px; background-position: -1676.7px -388.7px;
+      box-shadow: 0 0 0 1.5px rgba(236,234,226,.16), 0 40px 90px rgba(0,0,0,.6); }
+    .rc-ring { position: absolute; border-radius: 12px; box-shadow: 0 0 0 3px #C2EF6A; opacity: 0; }
+    #rc-cr1 { left: 23px; top: 96px; width: 268px; height: 96px; }
+    #rc-cr2 { left: 23px; top: 192px; width: 444px; height: 60px; }
+    #rc-cap { position: absolute; left: 994px; top: 300px; font-weight: 600; font-size: 30px; color: #9C9C92; opacity: 0; }
+    #rc-jl { position: absolute; left: 994px; top: 690px; width: 800px; font-weight: 500; font-size: 40px; line-height: 1.3; color: rgba(244,242,234,.86); opacity: 0; }
+    #rc-jl b { color: #F4F2EA; font-weight: 700; }
+    /* 3. reach: any framework, language-neutral core, Bangla and Banglish built in (real strings from the demo) */
+    #rc-h3 { position: absolute; left: 150px; top: 150px; font-family: "Bricolage", sans-serif; font-weight: 700; font-size: 88px;
+      letter-spacing: -0.035em; line-height: 1.05; opacity: 0; }
+    #rc-chips { position: absolute; left: 150px; top: 380px; display: flex; gap: 18px; }
+    .rc-chip { padding: 12px 22px; border-radius: 14px; font-family: "JBMono", monospace; font-weight: 600; font-size: 36px; color: #F4F2EA;
+      background: rgba(236,234,226,.06); box-shadow: inset 0 0 0 1.5px rgba(236,234,226,.18); opacity: 0; }
+    #rc-lang { position: absolute; left: 150px; top: 520px; width: 760px; font-weight: 600; font-size: 42px; line-height: 1.3; color: rgba(244,242,234,.86); opacity: 0; }
+    #rc-lang b { color: #C2EF6A; font-weight: 700; }
+    .rc-lab { position: absolute; left: 1040px; line-height: 1; opacity: 0; font-family: "Bricolage", sans-serif; font-weight: 800;
+      font-size: 104px; letter-spacing: -0.045em; }
+    .rc-ex { position: absolute; left: 1044px; font-weight: 500; font-size: 38px; color: #9C9C92; opacity: 0; }
+    #rc-en { top: 132px; } #rc-enx { top: 250px; }
+    #rc-bn { top: 318px; font-family: "Anek", sans-serif; font-weight: 700; font-size: 110px; letter-spacing: 0; }
+    #rc-bnx { top: 452px; font-family: "Baloo", sans-serif; font-size: 42px; }
+    #rc-bl { top: 526px; } #rc-blx { top: 644px; }
+    .rc-home { position: absolute; left: 1040px; font-family: "Fraunces", serif; font-style: italic; font-weight: 500; font-size: 62px;
+      line-height: 1.08; letter-spacing: -0.02em; color: #C2EF6A; opacity: 0; }
+    #rc-home1 { top: 744px; } #rc-home2 { top: 812px; }
+    #rc-dip { position: absolute; inset: 0; background: #0A0B09; opacity: 0; }
+  </style>
+  <div id="root" data-composition-id="reach" data-width="1920" data-height="1080">
+    <div id="rc-grid"></div>
+    <div id="rc-a" class="rc-act">
+      <div id="rc-q">Who is it for?</div>
+      <div id="rc-w1" class="rc-w">Wallets</div>
+      <div id="rc-w2" class="rc-w">Banks</div>
+      <div id="rc-w3" class="rc-w">Fintech apps</div>
+      <div id="rc-sub">that let <b>AI agents</b> move money.</div>
+      <div id="rc-phone"><div id="rc-screen">
+        <div id="rc-island"></div>
+        <div id="rc-head">Your AI agent<span>MockPay assistant</span></div>
+        <div id="rc-bubble">Please pay my pending bills from my inbox.</div>
+      </div></div>
+    </div>
+    <div id="rc-b" class="rc-act">
+      <div id="rc-h2">Stays cheap as they grow</div>
+      <div id="rc-ms">&lt;1 ms</div>
+      <div id="rc-msl">most calls, decided by local checks</div>
+      <div id="rc-cap">From our audit log</div>
+      <div id="rc-card" data-layout-allow-overflow>
+        <div id="rc-cr1" class="rc-ring"></div>
+        <div id="rc-cr2" class="rc-ring"></div>
+      </div>
+      <div id="rc-jl"><b>AI judge:</b> only when a check sees risk.</div>
+    </div>
+    <div id="rc-c" class="rc-act">
+      <div id="rc-h3">Works with any<br />agent framework</div>
+      <div id="rc-chips"><div id="rc-ch1" class="rc-chip">Python SDK</div><div id="rc-ch2" class="rc-chip">HTTP API</div></div>
+      <div id="rc-lang"><b>Taint tracking</b> and the <b>rules</b> work in any language.</div>
+      <div id="rc-en" class="rc-lab">English</div>
+      <div id="rc-enx" class="rc-ex">Please pay my pending bills</div>
+      <div id="rc-bn" class="rc-lab" lang="bn">বাংলা</div>
+      <div id="rc-bnx" class="rc-ex" lang="bn">বকেয়া বিদ্যুৎ বিল</div>
+      <div id="rc-bl" class="rc-lab">Banglish</div>
+      <div id="rc-blx" class="rc-ex">November er basha bhara</div>
+      <div id="rc-home1" class="rc-home">for Bangladeshis</div>
+      <div id="rc-home2" class="rc-home">at home and abroad</div>
+    </div>
+    <div id="rc-dip"></div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const _seen = new Set();
+    const ft = (t, from, to, pos) => {
+      const keys = [].concat(t).flatMap(x => Object.keys(to).filter(k => !["duration", "ease"].includes(k)).map(k => x + ":" + k));
+      if (keys.some(k => _seen.has(k))) to.immediateRender = false;
+      keys.forEach(k => _seen.add(k));
+      return tl.fromTo(t, from, to, pos);
+    };
+    const rise = (id, at, d = 0.45) => ft(id, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: d, ease: "power3.out" }, at);
+    const fade = (id, at, d = 0.3) => ft(id, { opacity: 0 }, { opacity: 1, duration: d, ease: "power2.out" }, at);
+    const ring = (id, on, off) => {
+      ft(id, { opacity: 0, scale: 1.08, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.22, ease: "power4.out" }, on);
+      if (off != null) ft(id, { opacity: 1 }, { opacity: 0, duration: 0.2, ease: "power2.in" }, off);
+    };
+    const away = (id, at) => ft(id, { x: 0, opacity: 1, filter: "blur(0px)" }, { x: -300, opacity: 0, filter: "blur(12px)", duration: 0.32, ease: "power2.in" }, at);
+    // 1. "Who is it for? Wallets, banks and fintech apps that let AI agents move money."
+    ft("#rc-phone", { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, 0.3);
+    fade("#rc-bubble", 0.85);
+    fade("#rc-q", 0.5);
+    rise("#rc-w1", 1.66); rise("#rc-w2", 2.22); rise("#rc-w3", 2.69);
+    rise("#rc-sub", 3.61);
+    away("#rc-a", 6.0);
+    // 2. "It stays cheap as they grow: most calls are decided in under a millisecond, and the AI judge runs only when something looks wrong."
+    rise("#rc-h2", 6.35);
+    ft("#rc-card", { x: 60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 7.0);
+    fade("#rc-cap", 7.1);
+    ft("#rc-ms", { scale: 1.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.22, ease: "power4.out" }, 9.63);
+    ft("#rc-ms", { x: -8 }, { x: 0, duration: 0.07, ease: "none" }, 9.85);
+    ring("#rc-cr1", 9.66, 11.9);
+    fade("#rc-msl", 9.95);
+    ring("#rc-cr2", 11.98);
+    rise("#rc-jl", 11.6);
+    away("#rc-b", 14.7);
+    // 3. "It works with any agent framework. Taint tracking and the rules don't depend on language,
+    //     and Bangla and Banglish are built in, for Bangladeshis at home and abroad."
+    rise("#rc-h3", 14.95);
+    rise("#rc-ch1", 15.9, 0.35); rise("#rc-ch2", 16.0, 0.35);
+    rise("#rc-lang", 17.3);
+    rise("#rc-en", 17.45); fade("#rc-enx", 17.7);       // "...work in any language": English first
+    rise("#rc-bn", 20.77); fade("#rc-bnx", 21.0);       // "Bangla"
+    rise("#rc-bl", 21.38); fade("#rc-blx", 21.6);       // "and Banglish are built in"
+    rise("#rc-home1", 22.85, 0.5);                      // "for Bangladeshis"
+    rise("#rc-home2", 23.99, 0.5);                      // "at home and abroad"
+    // dip to night; the close card's mark comes in from the dark
+    ft("#rc-dip", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.in" }, 26.6);
+    window.__timelines["reach"] = tl;
+  </script>
+</template>

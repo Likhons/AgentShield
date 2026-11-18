@@ -1,8 +1,11 @@
 # REVIEW: AgentShield film v2 (18 Nov 2026)
 
-Render: `renders/agentshield_film2_v3.mp4` (146.5 s = 2:26, 1920x1080, 30 fps, `-q delivery`, about 6 min to render).
+Render: `renders/agentshield_film2_v4.mp4` (173.5 s = 2:53, 1920x1080, 30 fps, `-q delivery`, about 7 min to render).
 History: v1 had the two P1 issues fixed in v2 (below); v2 (134.5 s) was watched by the user, who asked to add the
-ASK case; v3 adds the `ask` scene. Not in git: renders, 12 unused captures in `assets/ui/` (arch_final, bm_text,
+ASK case; v3 adds the `ask` scene (uploaded to YouTube); v4 adds the `reach` scene (who it is for, how it scales)
+after the portal's video guidance, which asks for "AI approach" and "Impact & next step" segments. The user ruled out
+plans in the film ("not built yet"), so reach states only what exists. Measured on v4 (snapshot, check): no craft
+warnings after two fixes (the judge line was on screen too briefly; a 3.75 s static end, now two lines on their words). Not in git: renders, 12 unused captures in `assets/ui/` (arch_final, bm_text,
 dev_terminal, net_ring1, net_s1-3, pg_banner, pg_runcard, pg_step_stolen, pg_top, pg_with), the voice auditions in
 `video/samples/`.
 

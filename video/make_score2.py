@@ -6,9 +6,10 @@ Same instruments as make_score.py; the sections follow film2's scenes (seconds =
 the phone, minor tension through the inbox and the stolen money, a held breath for the reveal, a driving
 arpeggio through the four checks, silence for the BLOCK hit, a lift into the principle and the payoff,
 confident numbers, a held question while a big transfer waits for the user's yes, a short return to tension
-for the second act, and the resolved chord on the mark.
+for the second act, a warm build for who it is for and how it scales, and the resolved chord on the mark.
 The music ducks under the narration (clip times read from film2/index.html).
-The ask scene (18 Nov) was inserted at 99.6 s: everything written for 99.6 s or later plays ASK_LEN later.
+Two scenes were inserted on 18 Nov (INSERTS): ask at 99.6 s and reach before the close card. The sections below
+keep their original times and place() moves them; the inserted sections play at their final film times.
 """
 import json
 import re
@@ -19,8 +20,12 @@ from pathlib import Path
 import numpy as np
 
 SR = 44100
-ASK0, ASK_LEN = 99.6, 12.0   # the ask scene: sections written for t >= ASK0 are placed ASK_LEN later
-DUR = 134.5 + ASK_LEN
+# (original time, seconds inserted there): a section written for t >= that time plays that much later
+INSERTS = [(99.6, 12.0), (126.0, 27.0)]       # ask (12 s), reach (27 s, where the close card started)
+ASK0, ASK_LEN = INSERTS[0]                    # the ask section plays at 99.6-111.6 film time
+REACH_AT, REACH_LEN = 126.0 + 12.0, 27.0      # the reach section plays at 138.0-165.0 film time
+DUR = 134.5 + sum(n for _, n in INSERTS)
+SHIFT_ON = True                               # off while the inserted sections are written
 N = int(SR * DUR)
 BEAT = 60 / 90          # 90 BPM
 BAR = 4 * BEAT
@@ -37,11 +42,11 @@ def hz(m):
     return 440.0 * 2 ** ((m - 69) / 12)
 
 
-def place(sig, t0, gain=1.0, pan=0.0, rev=0.3, shift=True):
-    """Mix a mono signal at film time t0; pan -1..1 (equal power). Times from ASK0 on move ASK_LEN later
-    (the sections below keep their pre-insert times); the ask section itself passes shift=False."""
-    if shift and t0 >= ASK0 - 1e-9:
-        t0 += ASK_LEN
+def place(sig, t0, gain=1.0, pan=0.0, rev=0.3, shift=None):
+    """Mix a mono signal at film time t0; pan -1..1 (equal power). Original section times move by the scenes
+    inserted before them (INSERTS); the inserted sections are written in final film time (shift off)."""
+    if SHIFT_ON if shift is None else shift:
+        t0 += sum(n for at, n in INSERTS if t0 >= at - 1e-9)
     i = int(t0 * SR)
     if i >= N:
         return
@@ -283,6 +288,22 @@ for k, t in enumerate(grid(A0 + 0.33, A0 + ASK_LEN - 0.5, BEAT)):
     place(tick(), t, 0.14 if k % 2 else 0.08, 0.3 if k % 2 else -0.3, rev=0.15, shift=False)
 for j, m in enumerate([57, 62, 64]):
     place(piano(m + 12, 3.5), A0 + 9.82 + j * 0.06, 0.24, -0.3 + j * 0.3, rev=0.6, shift=False)
+rng = _rng_main
+
+# 10b REACH 138.0-165.0 (real film time): who it is for and how it scales. Warm and building: pads and an
+# eighth-note pluck that grows, a soft kick from the second act of the scene; it ends on C so the close card's
+# F chord resolves it. Own random generator, as above.
+_rng_main, rng = rng, np.random.default_rng(9)
+SHIFT_ON = False
+R0, REACH_PROG, REACH_BARS = REACH_AT, [BBMAJ7, CADD9, DM9, CADD9], 2.5
+chords(R0, R0 + REACH_LEN - 0.3, REACH_PROG, REACH_BARS, 0.42, bright=1.2)
+for t in grid(R0 + 0.3, R0 + REACH_LEN - 0.6, BEAT / 2):
+    c = chord_at(t, R0, REACH_PROG, REACH_BARS)
+    k = round((t - R0) / (BEAT / 2))
+    place(pluck(c[k % len(c)] + 12, 1.1), t, 0.09 + 0.06 * (t - R0) / REACH_LEN, 0.45 if k % 2 else -0.45, rev=0.45)
+    if k % 8 == 0 and t > R0 + 6.0:
+        place(kick(), t, 0.22, 0, rev=0.05)
+SHIFT_ON = True
 rng = _rng_main
 
 
