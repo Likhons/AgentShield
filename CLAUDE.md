@@ -79,7 +79,7 @@ GitHub: `origin` = https://github.com/Likhons/AgentShield (private; `main` track
 ## Commands
 ```powershell
 .\.venv\Scripts\Activate.ps1
-pytest                                          # 283 tests
+pytest                                          # 288 tests
 python -m demo_agent.run --compare --all        # all scenarios, without vs with AgentShield (mock unless --provider groq)
 streamlit run dashboard/app.py                  # side-by-side demo + audit log
 python -m benchmark.dataset                     # validate dataset, show balance
