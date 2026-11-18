@@ -1,0 +1,107 @@
+<!doctype html>
+<!-- YouTube thumbnail for film v2 (1280x720). Built from the film's own pieces: the opening phone (fake Bangla bill,
+     the agent's "Bill paid" receipt) and the end card (mark, wordmark, tagline). Render: video/thumbnail/render.cjs -->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  @font-face { font-family: "Bricolage"; src: url("../film2/assets/fonts/bricolage.woff2") format("woff2"); font-weight: 200 800; }
+  @font-face { font-family: "Fraunces"; font-style: italic; src: url("../film2/assets/fonts/fraunces-italic.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "Jakarta"; src: url("../film2/assets/fonts/jakarta.woff2") format("woff2"); font-weight: 200 800; }
+  @font-face { font-family: "JBMono"; src: url("../film2/assets/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; }
+  @font-face { font-family: "Anek"; src: url("../film2/assets/fonts/anek-bangla.woff2") format("woff2"); font-weight: 100 800; }
+  @font-face { font-family: "Baloo"; src: url("../film2/assets/fonts/baloo-da-2.woff2") format("woff2"); font-weight: 400 800; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #0A0B09; }
+  #root { position: relative; width: 1280px; height: 720px; overflow: hidden; background: #0A0B09; color: #F4F2EA; font-family: "Jakarta", "Baloo", sans-serif; }
+  #grid { position: absolute; inset: 0; background: radial-gradient(rgba(236,234,226,.06) 1px, transparent 1.4px) 0 0 / 16px 16px; }
+
+  /* the opening phone, film CSS at 1.0, placed with one transform */
+  #ph { position: absolute; left: 0; top: 0; width: 500px; height: 1000px; transform-origin: 0 0; transform: translate(64px, -30px); }
+  #device { position: absolute; inset: 0; border-radius: 64px; background: #050505; box-shadow: 0 0 0 2px #2a2c27, 0 40px 90px rgba(0,0,0,.7); }
+  #screen { position: absolute; inset: 14px; border-radius: 52px; overflow: hidden; background: linear-gradient(180deg, #1B1E18 0%, #10120E 55%, #0B0C09 100%); }
+  #island { position: absolute; left: 50%; top: 18px; width: 126px; height: 36px; margin-left: -63px; border-radius: 20px; background: #000; }
+  #time { position: absolute; left: 0; right: 0; top: 96px; text-align: center; font-family: "Bricolage", sans-serif; font-weight: 700;
+    font-size: 112px; letter-spacing: -0.04em; color: #F4F2EA; line-height: 1; }
+  #date { position: absolute; left: 0; right: 0; top: 76px; text-align: center; font-weight: 600; font-size: 24px; color: rgba(244,242,234,.78); }
+  .note { position: absolute; left: 16px; width: 440px; border-radius: 28px; padding: 18px 20px 20px; background: rgba(52,55,48,.86);
+    box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+  .head { display: flex; align-items: center; gap: 10px; font-size: 23px; font-weight: 600; color: rgba(244,242,234,.82); }
+  .now { margin-left: auto; font-weight: 500; color: rgba(244,242,234,.55); }
+  .app { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; }
+  #mail { top: 236px; }
+  #mail .app { background: #3B82F6; }
+  .from { margin-top: 12px; font-size: 23px; font-weight: 600; color: rgba(244,242,234,.7); }
+  .subj { margin-top: 6px; font-family: "Anek", sans-serif; font-weight: 700; font-size: 31px; line-height: 1.22; color: #F4F2EA; }
+  .body { margin-top: 6px; font-family: "Baloo", sans-serif; font-weight: 500; font-size: 25px; line-height: 1.45; color: rgba(244,242,234,.72); }
+  #fake { position: absolute; right: 18px; top: 16px; padding: 4px 12px 3px; border-radius: 8px; background: #FF7A6B; color: #1A0805;
+    font-family: "JBMono", monospace; font-weight: 800; font-size: 23px; letter-spacing: .12em; }
+  #edge { position: absolute; inset: 0; border-radius: 28px; box-shadow: inset 0 0 0 3px #FF7A6B; }
+  #agent { top: 556px; }
+  #agent .app { background: #C2EF6A; color: #0D1406; font-family: "JBMono", monospace; font-weight: 800; font-size: 22px; }
+  .title { margin-top: 12px; font-size: 29px; font-weight: 700; color: #F4F2EA; }
+  #amount { margin-top: 6px; font-family: "JBMono", monospace; font-weight: 600; font-size: 27px; color: #F4F2EA; }
+  #amount b { font-weight: 700; }
+  #num { color: #FF7A6B; }
+
+  /* the end card: mark, wordmark, the line */
+  #brand { position: absolute; left: 624px; top: 100px; display: flex; align-items: center; gap: 20px; }
+  #brand svg { width: 86px; height: 86px; }
+  #word { font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 76px; letter-spacing: -0.05em; line-height: 1; }
+  #word span { color: #C2EF6A; }
+  #line { position: absolute; left: 624px; top: 252px; width: 640px; }
+  #l1 { font-family: "Bricolage", sans-serif; font-weight: 800; font-size: 82px; letter-spacing: -0.045em; line-height: 1.0; color: #F4F2EA; }
+  #l2 { margin-top: 18px; font-family: "Fraunces", serif; font-style: italic; font-weight: 500; font-size: 78px; letter-spacing: -0.02em; line-height: 1.0; color: #C2EF6A; white-space: nowrap; }
+  #tag { position: absolute; left: 624px; top: 566px; display: flex; gap: 12px; }
+  #tag span { padding: 8px 16px 9px; border-radius: 999px; font-weight: 600; font-size: 24px; color: #D8D6CE; background: rgba(236,234,226,.06);
+    box-shadow: inset 0 0 0 1.5px rgba(236,234,226,.16); }
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="grid"></div>
+  <div id="ph">
+    <div id="device">
+      <div id="screen">
+        <div id="island"></div>
+        <div id="date">Monday, 17 November</div>
+        <div id="time">23:47</div>
+        <div id="mail" class="note">
+          <div class="head">
+            <span class="app"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+            Mail
+          </div>
+          <div class="from">billing@dhaka-power-bill.example</div>
+          <div class="subj">বকেয়া বিদ্যুৎ বিল: সংযোগ বিচ্ছিন্ন হওয়ার আগে পরিশোধ করুন</div>
+          <div class="body">আপনার সেপ্টেম্বর মাসের বিদ্যুৎ বিল ৪,৫০০ টাকা এখনো বকেয়া…</div>
+          <div id="edge"></div>
+          <div id="fake">FAKE</div>
+        </div>
+        <div id="agent" class="note">
+          <div class="head"><span class="app">AI</span> Your AI agent <span class="now">now</span></div>
+          <div class="title">Bill paid</div>
+          <div id="amount"><b>৳ 4,500</b> → <span id="num">01000000666</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <defs><mask id="m"><rect x="-40" y="-10" width="112" height="52" fill="#fff" /><circle cx="16" cy="15.2" r="4.9" fill="#000" /></mask></defs>
+      <g mask="url(#m)">
+        <path d="M14.7 2.6 L4.6 6.4 V14.6 C4.6 21.6 8.9 26.6 14.7 29.3 Z" fill="#F4F2EA" />
+        <path d="M17.3 2.6 L27.4 6.4 V14.6 C27.4 21.6 23.1 26.6 17.3 29.3 Z" fill="#F4F2EA" />
+      </g>
+      <circle cx="16" cy="15.2" r="3.3" fill="#C2EF6A" />
+    </svg>
+    <div id="word">Agent<span>Shield</span></div>
+  </div>
+  <div id="line">
+    <div id="l1">The agent may<br />be fooled.</div>
+    <div id="l2">The money is not.</div>
+  </div>
+  <div id="tag"><span>Bangla</span><span>Banglish</span><span>English</span></div>
+</div>
+</body>
+</html>

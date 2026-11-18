@@ -115,7 +115,55 @@ AgentShield itself does not use or expose MCP: it calls LLMs over plain HTTPS an
 6. Benign payment requests (`datasets/benign_payreq.jsonl`, written by Claude on 11 Nov): prompt not saved; `datasets/README.md` records who wrote the file and why (the benign twin of a subtle fake bill).
 
 ### YouTube video
-TBD: 2–3 minute walkthrough of the working software (script in `docs/pitch.md` §5, to be updated).
+Link: **TBD** (upload as Unlisted). File: `video/film2/renders/agentshield_film2_v3.mp4` (2:26, 1080p; git-ignored, rebuild
+with `npx hyperframes render` in `video/film2`). Thumbnail: `video/thumbnail/agentshield_thumbnail.png` (1280x720).
+
+Title:
+> AgentShield: Stopping AI Agents From Paying Fake Bills (Bangla Prompt Injection) | Demo
+
+Description (paste as is; add a `Code: <link>` line if the repo becomes public):
+```
+We asked an AI agent to pay our bills. It paid one that was never real.
+
+AgentShield is a security gate between an AI agent and its tools. It checks every tool call before it runs and stops payments the user never asked for, including attacks hidden in Bangla, Banglish and English emails, web pages and files (indirect prompt injection).
+
+▶ Live demo: https://agent-shield-demo.vercel.app
+(The demo's API runs on a free server: the first request after a quiet spell can take up to a minute.)
+
+CHAPTERS
+0:00 A bill that was never real
+0:25 A real model pays the attacker
+0:35 How AgentShield checks every tool call
+1:15 Same inbox, now protected
+1:28 Results with a real model
+1:40 Big payments: it asks you first
+1:52 Scams across users (simulated)
+2:09 For developers
+
+HOW IT WORKS
+Before any tool call runs, four checks look at it:
+1. Taint tracking: did each value (number, amount) come from the user or from untrusted text?
+2. Injection classifier: is untrusted text trying to give the AI orders?
+3. Intent judge (an LLM, only when needed): did the user ask for this action?
+4. Policy rules: fixed rules, e.g. money to a stranger found only in untrusted text is blocked.
+The answer is ALLOW, ASK (the user decides) or BLOCK, with a reason in Bangla and English. Every decision is logged.
+AI where judgment is needed. Rules where certainty is needed.
+
+RESULTS (our own tests)
+• Meta Prompt Guard 2 flagged 0 of our 24 Bangla and Banglish attacks.
+• Real model (qwen3.8-27b), 20 attacks and 20 real bill payments: attacks moved money 4 times without AgentShield and 0 times with it. The real rent was paid 16 of 20 times either way.
+• Recorded run (13 Nov 2026, one run): without protection the model paid a fake Bangla electricity bill (4,500 BDT). With AgentShield the fake bill was blocked in 0.8 s and the 8,000 BDT rent still went through.
+• Network check (simulated wallet week, 600 users): the phone-scam ring's numbers were flagged after 12, then 4, then 1 victim. 0 of 1,109 legitimate accounts were flagged.
+
+NOTES
+All data is fake: a mock wallet (MockPay), phone numbers starting with 010, .example email addresses. The network result is a simulation, not real traffic. The narration is neural text-to-speech; the music was synthesized from code.
+
+Built with Python, FastAPI, React and the Groq API (qwen3.8-27b agent, gpt-oss-120b judge). Video made with HyperFrames.
+
+এজেন্ট ধোঁকা খেতে পারে, কিন্তু টাকা নিরাপদ।
+
+#AgentShield #AISecurity #PromptInjection
+```
 
 ### Demo / live links
 - Live demo, web dashboard: https://agent-shield-demo.vercel.app (Playground with offline, recorded and live real-model runs, Benchmarks, Audit Log, Policies, Datasets, Network; the API runs on Render's free tier, so the first request after 15 idle minutes can take about 50 s)
