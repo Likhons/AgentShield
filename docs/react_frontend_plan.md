@@ -1,7 +1,6 @@
 # React frontend: plan (branch `react-frontend`)
 
-> Experiment. `main` keeps the Streamlit dashboard and the live demo (Streamlit Cloud deploys `main`).
-> If the React version is not ready in time, this branch is simply not merged.
+> Done: the React site has been the live demo since mid-November (https://agent-shield-demo.vercel.app), and on 19 Nov `main` was brought up to date with this branch. The plan below is kept as it was written.
 
 ## Goal
 Same five pages as the Streamlit dashboard (Playground, Benchmarks, Audit Log, Policies, Datasets),

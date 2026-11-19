@@ -1,7 +1,7 @@
 # Putting the dashboard online (free)
 
-> Status (16 Nov 2026): the Streamlit dashboard is live at https://agentshield-demo.streamlit.app (from `main`).
-> React frontend (branch `react-frontend`): live at https://agent-shield-demo.vercel.app (Vercel) with the API at https://agentshield-api-k60w.onrender.com (Render, free, Singapore), since 16 Nov. See "React frontend" below.
+> Status (19 Nov 2026): the live demo is the React site https://agent-shield-demo.vercel.app (Vercel) with its API at https://agentshield-api-k60w.onrender.com (Render, free, Singapore), live since 16 Nov. See "React frontend" below.
+> The first version, in Streamlit, still deploys from `main` to Streamlit Community Cloud as a backup.
 > Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
 
 ## Before you publish
@@ -56,7 +56,7 @@ Check each platform's current free-tier terms when you sign up (limits, and whet
 1. The branch must be on GitHub first (`git push -u origin react-frontend`).
 2. Sign in at https://render.com with GitHub and allow access to the `AgentShield` repository.
 3. *New* → *Blueprint* → pick the repository. Render reads `render.yaml`; confirm with *Apply*.
-4. Wait for the first build (a few minutes). Then open `https://agentshield-api.onrender.com/health`: it must show `{"status":"ok"}`.
+4. Wait for the first build (a few minutes). Then open `https://agentshield-api-k60w.onrender.com/health` (Render adds a suffix such as `-k60w` when the plain name is taken): it must show `{"status":"ok"}`.
    - If Render gave the service a different address (the name was taken), copy that address into both lines of `web/vercel.json`, commit and push.
    - If the build stops at the Python version, change `PYTHON_VERSION` in Render → *Environment* to a 3.13 version Render lists, then *Manual Deploy*.
 5. Open `…/api/overview`: it should list 104 attack samples and the real-LLM result (0/20 with, 4/20 without).
@@ -78,5 +78,5 @@ Check each platform's current free-tier terms when you sign up (limits, and whet
 - **Sleep:** the free Render service sleeps after 15 minutes without requests; the next request waits about a minute, and the first page load may show an error until it is awake. Before a demo, open the site (or `/health`) two minutes early.
 - **Audit log resets** when Render restarts or redeploys (no disk on the free plan), like Streamlit Cloud.
 - **Live (Groq)** turns on when `GROQ_API_KEY` is set in Render → *Environment* (the key never goes into a file; `render.yaml` sets the models). Visitors then spend the account's free-tier quota, so the API allows one live run at a time and `LIVE_RUNS_PER_HOUR` (20) per hour; above that it asks for Recorded Run. A real-model run can take up to a minute.
-- **Raw gateway:** `/v1/check`, `/v1/audit`, `/v1/stats` need the `X-API-Key` header; the key is under Render → *Environment*. Interactive API docs: `https://agentshield-api.onrender.com/docs`.
-- **Rollback:** the Streamlit demo on `main` stays online and unchanged; deleting the two projects removes the React version.
+- **Raw gateway:** `/v1/check`, `/v1/audit`, `/v1/stats` need the `X-API-Key` header; the key is under Render → *Environment*. Interactive API docs: `https://agentshield-api-k60w.onrender.com/docs`.
+- **Rollback:** revert the commit on `react-frontend` and push; Vercel and Render redeploy the previous code.
