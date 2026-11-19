@@ -90,7 +90,7 @@
 
 ## Phase 5: Dashboard + demo (by ~16 Nov)
 - [x] Streamlit skeleton: tabs, live demo of the unprotected agent (mock + groq), dashboard tests
-- [x] Streamlit side-by-side demo, redesigned dark UI (12 Nov), deployed on Streamlit Community Cloud (the React site later replaced it as the live demo)
+- [x] Streamlit side-by-side demo, redesigned dark UI (12 Nov), deployed on Streamlit Community Cloud (the React site later replaced it as the live demo; the Streamlit app was deleted on 19 Nov)
 - [x] Live audit log view
 - [x] Metrics page with benchmark charts
 - [x] Works fully with mock LLM (offline-safe)

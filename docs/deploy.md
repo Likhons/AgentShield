@@ -1,7 +1,7 @@
 # Putting the dashboard online (free)
 
 > Status (19 Nov 2026): the live demo is the React site https://agent-shield-demo.vercel.app (Vercel) with its API at https://agentshield-api-k60w.onrender.com (Render, free, Singapore), live since 16 Nov. See "React frontend" below.
-> The first version, in Streamlit, still deploys from `main` to Streamlit Community Cloud as a backup.
+> The first version, in Streamlit, is no longer online (removed 19 Nov); it runs locally with `streamlit run dashboard/app.py`, and Option 1 below shows how to put it online again.
 > Publishing makes the demo reachable by anyone with the link: decide first what may be public (see "Before you publish").
 
 ## Before you publish

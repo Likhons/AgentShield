@@ -93,5 +93,5 @@ Design principle: **"AI where judgment is needed, deterministic rules where cert
 ## 6. Deployment
 
 - **Laptop / demo:** `streamlit run dashboard/app.py`, works fully offline with the mock provider.
-- **Cloud (live demo):** web dashboard on Vercel, its API on Render (free tier, Singapore), the first Streamlit version on Streamlit Community Cloud. Steps in `docs/deploy.md`.
+- **Cloud (live demo):** web dashboard on Vercel, its API on Render (free tier, Singapore). Steps in `docs/deploy.md`.
 - **On-prem (planned):** the same services inside an institution's network, with a local or private LLM endpoint.
