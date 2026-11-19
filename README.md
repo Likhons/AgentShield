@@ -19,7 +19,7 @@ python -m demo_agent.run --compare --all    # all 14 scenarios (6 benign, 8 atta
 By default this runs on the offline mock LLM, which simulates a naive agent that obeys instructions found in tool output. Add `--provider groq` to use the real model configured in `.env`.
 
 ## Dashboard
-Web dashboard (React, branch `react-frontend`): the API and the site run separately.
+Web dashboard (React): the API and the site run separately.
 ```powershell
 uvicorn webapi.app:build_app --factory --port 8000   # dashboard API
 cd web; npm install; npm run dev                      # site on http://localhost:5173

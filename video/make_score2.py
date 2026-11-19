@@ -2,7 +2,7 @@
 
     python video/make_score2.py     # writes video/film2/assets/music/score.mp3
 
-Same instruments as make_score.py; the sections follow film2's scenes (seconds = film time): a dark pulse under
+Same instruments as the first film's score script (make_score.py, now only in git history); the sections follow film2's scenes (seconds = film time): a dark pulse under
 the phone, minor tension through the inbox and the stolen money, a held breath for the reveal, a driving
 arpeggio through the four checks, silence for the BLOCK hit, a lift into the principle and the payoff,
 confident numbers, a held question while a big transfer waits for the user's yes, a short return to tension

@@ -1,6 +1,6 @@
 # AgentShield demo film v2 (new web UI): three storylines
 
-Why v2: the first film (`STORYLINES.md`, `SPEC.md`) was built on the old Streamlit dashboard (navy and violet). The product now
+Why v2: the first film (`STORYLINES.md`, `SPEC.md`, now only in git history) was built on the old Streamlit dashboard (navy and violet). The product now
 lives at https://agent-shield-demo.vercel.app with a new look (warm black #0a0b09 / cream #f2f0e8, pastel lime #c2ef6a,
 Bricolage Grotesque, Fraunces italic accent, JetBrains Mono, Anek Bangla / Baloo Da 2), a live architecture map and a
 Network page. Every product shot is captured from that site.

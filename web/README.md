@@ -1,7 +1,7 @@
 # AgentShield web (React)
 
-React frontend for the AgentShield dashboard (branch `react-frontend`, plan in `../docs/react_frontend_plan.md`).
-The Streamlit dashboard in `../dashboard/` stays the live demo until this is ready.
+React frontend for the AgentShield dashboard, live at https://agent-shield-demo.vercel.app (plan and breakpoints in `../docs/react_frontend_plan.md`).
+The first version of the dashboard, in Streamlit, is in `../dashboard/`.
 
 Stack: React 19 + Vite + TypeScript, Tailwind CSS 4, React Router, TanStack Query, Recharts, Lucide icons.
 

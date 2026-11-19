@@ -36,3 +36,6 @@ benchmark/results/agent_checkpoint_*.jsonl
 # Local tool state and voice auditions
 .impeccable/
 video/samples/
+
+# First demo film (v1), removed from the repo on 19 Nov 2026; local renders stay here
+video/film/
