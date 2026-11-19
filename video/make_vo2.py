@@ -41,7 +41,7 @@ BEATS = {
                    "number after twelve people, and the next ones after four, then one."),
     "10_dev": ("A few lines of code put AgentShield in front of an agent's tools, "
                "and every decision is logged with its reason."),
-    # who it is for, cost at scale, reach; only what is built (no plans): docs/business_model.md §2-3, docs/submission_form.md
+    # who it is for, cost at scale, reach; only what is built (no plans): docs/business_model.md §2-3 and the team's portal answers
     "10b_reach": ("Who is it for? Wallets, banks and fintech apps that let AI agents move money. "
                   "It stays cheap as they grow: most calls are decided in under a millisecond, and the AI judge runs "
                   "only when something looks wrong. It works with any agent framework. Taint tracking and the rules "

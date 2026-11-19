@@ -39,3 +39,6 @@ video/samples/
 
 # First demo film (v1), removed from the repo on 19 Nov 2026; local renders stay here
 video/film/
+
+# Portal answers draft: kept on the PC only since 19 Nov 2026 (earlier versions are in git history)
+docs/submission_form.md
